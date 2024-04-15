@@ -1,1 +1,3 @@
-spring.application.name=capstone
+spring:
+  profiles:
+    active: ${profile}
