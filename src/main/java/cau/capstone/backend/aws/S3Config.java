@@ -1,4 +1,4 @@
-package cau.capstone.helpclosing.aws;
+package cau.capstone.backend.aws;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;

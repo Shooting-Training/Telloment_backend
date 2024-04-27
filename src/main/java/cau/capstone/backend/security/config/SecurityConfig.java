@@ -1,223 +1,182 @@
 package cau.capstone.backend.security.config;
 
-import cau.capstone.backend.security.CustomAccessDeniedHandler;
-import cau.capstone.backend.security.CustomAuthenticationEntryPoint;
-import cau.capstone.backend.security.entity.JwtProvider;
-import cau.capstone.backend.security.filter.JwtAuthenticationFilter;
 
-import cau.capstone.backend.security.service.CustomUserDetailService;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import cau.capstone.backend.security.filter.CustomAuthenticationFilter;
+
+
+import cau.capstone.backend.security.filter.JwtAuthorizationFilter;
+import cau.capstone.backend.security.handler.CustomAuthFailureHandler;
+import cau.capstone.backend.security.handler.CustomAuthSuccessHandler;
+import cau.capstone.backend.security.handler.CustomAuthenticationProvider;
+
+import cau.capstone.backend.security.service.CustomUserDetailsService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.access.intercept.RequestAuthorizationContext;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+
+import java.util.Collections;
+import java.util.function.Supplier;
 
 
-
-import java.io.IOException;
-import java.util.List;
-
-
+@Slf4j
 @Configuration
-@EnableWebSecurity
-@EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
-@AllArgsConstructor
 public class SecurityConfig {
-
-    private final CustomUserDetailService customUserDetailService;
-    private final CustomAuthenticationEntryPoint authenticationEntryPoint;
-    private final CustomAccessDeniedHandler accessDeniedHandler;
-    private JwtProvider jwtProvider;
-
-    private static final String[] AUTH_WHITELIST = {
-            "/api/v1/user/**", "/swagger-ui/**", "/api-docs", "/api/v1/auth/**",
-            "/swagger-ui-custom.html", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**",
-    };
-
+    /**
+     * 이 메서드는 정적 자원에 대해 보안을 적용하지 않도록 설정한다.
+     * 정적 자원은 보통 HTML, CSS, JavaScript, 이미지 파일 등을 의미하며, 이들에 대해 보안을 적용하지 않음으로써 성능을 향상시킬 수 있다.
+     */
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-
-        http.csrf((csrf) -> csrf.disable());
-        http.cors(Customizer.withDefaults());
-
-        //세션 관리 상태 없음으로 구성, Spring Security는 세션을 생성하지 않음
-        http.sessionManagement(sessionManagement -> sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-
-        //Form 로그인 방식 사용하지 않음, Basic Http 인증 사용하지 않음
-        http.formLogin((form)->form.disable());
-        http.httpBasic(AbstractHttpConfigurer::disable);
-
-        //jwtAuthFilter를 UsernamePasswordAuthenticationFilter 전에 넣어줌
-        http.addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class);
-
-        http.exceptionHandling((exceptionHandling) -> exceptionHandling
-                .authenticationEntryPoint(authenticationEntryPoint)
-                        .accessDeniedHandler(accessDeniedHandler)
-        );
-
-        //권한 규칙 설정
-        http.authorizeRequests(authorize -> authorize
-                .requestMatchers(AUTH_WHITELIST).permitAll()
-                .anyRequest().permitAll());
-
-
-        return http.build();
-
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return web -> web.ignoring()
+                .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
     }
 
-//    @Bean
-//    public PasswordEncoder passwordEncoder() {
-//        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
-//    }
-//
-//
-//
-//
-//
-//        http
-//                // ID, Password 문자열을 Base64로 인코딩하여 전달하는 구조
-//                .httpBasic().disable()
-//    // 쿠키 기반이 아닌 JWT 기반이므로 사용하지 않음
-//                .csrf().disable()
-//    // CORS 설정
-//                .cors(c -> {
-//        CorsConfigurationSource source = request -> {
-//            // Cors 허용 패턴
-//            CorsConfiguration config = new CorsConfiguration();
-//            config.setAllowedOrigins(
-//                    List.of("*")
-//            );
-//            config.setAllowedMethods(
-//                    List.of("*")
-//            );
-//            return config;
-//        };
-//        c.configurationSource(source);
-//    }
-//                )
-//                        // Spring Security 세션 정책 : 세션을 생성 및 사용하지 않음
-//                        .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-//                .and()
-//    // 조건별로 요청 허용/제한 설정
-//                .authorizeRequests()
-//    // 회원가입과 로그인은 모두 승인
-//                .antMatchers("/register/**", "/login/**","/swagger-ui/**","/swagger-resources",
-//                                     "/swagger-resources/**", "/swagger-ui.html", "/v3/api-docs/**", "index.html", "/s3/**").permitAll()
-//    // /admin으로 시작하는 요청은 ADMIN 권한이 있는 유저에게만 허용
-//                .antMatchers("/admin/**").hasRole("ADMIN")
-//                .antMatchers("/**").hasRole("USER")
-//                .anyRequest().denyAll()
-//                .and()
-//    // JWT 인증 필터 적용
-//                .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class)
-//            // 에러 핸들링
-//            .exceptionHandling()
-//                .accessDeniedHandler(new AccessDeniedHandler() {
-//        @Override
-//        public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
-//            // 권한 문제가 발생했을 때 이 부분을 호출한다.
-//            response.setStatus(403);
-//            response.setCharacterEncoding("utf-8");
-//            response.setContentType("text/html; charset=UTF-8");
-//            response.getWriter().write("권한이 없는 사용자입니다.");
-//        }
-//    })
-//            .authenticationEntryPoint(new AuthenticationEntryPoint() {
-//        @Override
-//        public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
-//            // 인증문제가 발생했을 때 이 부분을 호출한다.
-//            response.setStatus(401);
-//            response.setCharacterEncoding("utf-8");
-//            response.setContentType("text/html; charset=UTF-8");
-//            response.getWriter().write("인증되지 않은 사용자입니다.");
-//        }
-//    });
-//
-//        return http.build();
+    /**
+     * Spring Security 설정을 정의하는 메서드.
+     * <ul>
+     *     <li>CSRF 방지 기능 비활성화</li>
+     *     <li>CORS 설정 적용</li>
+     *     <li>`/resources/**`, `/main/rootPage` 경로 접근 허용</li>
+     *     <li>나머지 요청은 인증된 사용자만 접근 허용</li>
+     *     <li>헤더의 JWT 토큰을 추출하고 검증하는 `JwtAuthorizationFilter` 적용</li>
+     *     <li>세션을 상태 없이 관리</li>
+     *     <li>로그인 페이지 설정 및 로그인 성공 시 리다이렉트 경로 설정</li>
+     *     <li>사용자 이름과 비밀번호 인증을 위한 `CustomAuthenticationFilter` 적용</li>
+     * </ul>
+     *
+     * @param http Spring Security의 HttpSecurity 객체
+     * @param customAuthenticationFilter 사용자 정의 인증 필터
+     * @param jwtAuthorizationFilter JWT 인증 필터
+     * @return 구성된 SecurityFilterChain 객체
+     * @throws Exception 설정 중 발생할 수 있는 예외
+     */
+    @Bean
+    public SecurityFilterChain filterChain(
+            HttpSecurity http,
+            CustomAuthenticationFilter customAuthenticationFilter,
+            JwtAuthorizationFilter jwtAuthorizationFilter
+    ) throws Exception {
+        log.debug("[+] WebSecurityConfig Start !!! ");
+        return http
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/resources/**", "/static/**").permitAll()
+                        .requestMatchers("/css/**").permitAll()
+                        .requestMatchers("/main/rootPage").permitAll()
+                        .requestMatchers("/error.html").permitAll()
+                        .anyRequest().authenticated()
+                )
+                .addFilterBefore(jwtAuthorizationFilter, BasicAuthenticationFilter.class)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .formLogin(login -> login
+                        .loginPage("/login")
+                        .successHandler(new SimpleUrlAuthenticationSuccessHandler("/main/rootPage"))
+                        .permitAll()
+                )
+                .addFilterBefore(customAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .build();
+    }
 
 
+    /**
+     * 1. 커스텀을 수행한 '인증' 필터로 접근 URL, 데이터 전달방식(form) 등 인증 과정 및 인증 후 처리에 대한 설정을 구성하는 메서드다.
+     * 이 메서드는 사용자 정의 인증 필터를 생성한다. 이 필터는 로그인 요청을 처리하고, 인증 성공/실패 핸들러를 설정한다.
+     *
+     * @return CustomAuthenticationFilter
+     */
+    @Bean
+    public CustomAuthenticationFilter customAuthenticationFilter(
+            AuthenticationManager authenticationManager,
+            CustomAuthSuccessHandler customAuthSuccessHandler,
+            CustomAuthFailureHandler customAuthFailureHandler
+    ) {
+        CustomAuthenticationFilter customAuthenticationFilter = new CustomAuthenticationFilter(authenticationManager);
+        // "/user/login" 엔드포인트로 들어오는 요청을 CustomAuthenticationFilter에서 처리하도록 지정한다.
+        customAuthenticationFilter.setFilterProcessesUrl("/user/login");
+        customAuthenticationFilter.setAuthenticationSuccessHandler(customAuthSuccessHandler);    // '인증' 성공 시 해당 핸들러로 처리를 전가한다.
+        customAuthenticationFilter.setAuthenticationFailureHandler(customAuthFailureHandler);    // '인증' 실패 시 해당 핸들러로 처리를 전가한다.
+        customAuthenticationFilter.afterPropertiesSet();
+        return customAuthenticationFilter;
+    }
 
 
-//    @Autowired
-//    private JwtFilter jwtFilter;
+    /**
+     * 2. authenticate 의 인증 메서드를 제공하는 매니져로'Provider'의 인터페이스를 의미한다.
+     * 이 메서드는 인증 매니저를 생성한다. 인증 매니저는 인증 과정을 처리하는 역할을 한다.
+     * 과정: CustomAuthenticationFilter → AuthenticationManager(interface) → CustomAuthenticationProvider(implements)CustomAuthen
+     */
+    @Bean
+    public AuthenticationManager authenticationManager(CustomAuthenticationProvider customAuthenticationProvider) {
+        return new ProviderManager(Collections.singletonList(customAuthenticationProvider));
+    }
 
-//    @Value("${jwt.secret}")
-//    private String secret;
-//
-//    @Override
-//    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-//        auth.userDetailsService(customUserDetailService);
-//    }
-//
-//    @Bean(name = BeanIds.AUTHENTICATION_MANAGER)
-//    @Override
-//    protected AuthenticationManager authenticationManager() throws Exception {
-//        return super.authenticationManager();
-//    }
-//
-//    @Override
-//    protected void configure(HttpSecurity http) throws Exception {
-//        http
-//                .csrf().disable()   // 보안에 관한 것
-//                .authorizeRequests() //HttpServletRequest를 사용한 요정들에 대한 접근제한
-//                .antMatchers("/authenticate",
-//                "/fb/**",
-//                "/register/**",
-//                "/matching/**",
-//                "/hello",
-//                "/v3/api-docs/**",
-//                "/swagger-ui/**",
-//                "/v2/api-docs",
-//                "/swagger-resources",
-//                "/swagger-resources/**",
-//                "/configuration/ui",
-//                "/configuration/security",
-//                "swagger-ui.html",
-//                "/login",
-//                "/email",
-//                "/verify",
-//                "/register",
-//                "/delete/**",
-//                "/upload",
-//                "/accept",
-//                "/reject",
-//                "/profile/**"
-//                ,"/ws-stomp/**"
-//                ).permitAll()  //해당 url은 인증없이 접근 허용
-//                .anyRequest().authenticated() //나머지 요청들은 인증되어야 한다.
-//                .and()
-//                .exceptionHandling()
-//                .and()
-//                .sessionManagement()    // 세션에 대해 관리
-//                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-//        http.addFilterBefore(jwtFilter(), UsernamePasswordAuthenticationFilter.class);
-//    }
-//
-//    @Bean
-//    public PasswordEncoder passwordEncoder() {
-//        return new BCryptPasswordEncoder();
-//    }
-//    @Bean
-//    public JwtUtil jwtUtil() {
-//        return new JwtUtil(secret);
-//    }
+    /**
+     * 3. '인증' 제공자로 사용자의 이름과 비밀번호가 요구된다.
+     * 이 메서드는 사용자 정의 인증 제공자를 생성한다. 인증 제공자는 사용자 이름과 비밀번호를 사용하여 인증을 수행한다.
+     * 과정: CustomAuthenticationFilter → AuthenticationManager(interface) → CustomAuthenticationProvider(implements)
+     */
+    @Bean
+    public CustomAuthenticationProvider customAuthenticationProvider(UserDetailsService userDetailsService) {
+        return new CustomAuthenticationProvider(
+                userDetailsService
+        );
+    }
 
+    /**
+     * 4. Spring Security 기반의 사용자의 정보가 맞을 경우 수행이 되며 결과값을 리턴해주는 Handler
+     * customLoginSuccessHandler: 이 메서드는 인증 성공 핸들러를 생성한다. 인증 성공 핸들러는 인증 성공시 수행할 작업을 정의한다.
+     */
+    @Bean
+    public CustomAuthSuccessHandler customLoginSuccessHandler() {
+        return new CustomAuthSuccessHandler();
+    }
+
+    /**
+     * 5. Spring Security 기반의 사용자의 정보가 맞지 않을 경우 수행이 되며 결과값을 리턴해주는 Handler
+     * customLoginFailureHandler: 이 메서드는 인증 실패 핸들러를 생성한다. 인증 실패 핸들러는 인증 실패시 수행할 작업을 정의한다.
+     */
+    @Bean
+    public CustomAuthFailureHandler customLoginFailureHandler() {
+        return new CustomAuthFailureHandler();
+    }
+
+    /**
+     * "JWT 토큰을 통하여서 사용자를 인증한다." -> 이 메서드는 JWT 인증 필터를 생성한다.
+     * JWT 인증 필터는 요청 헤더의 JWT 토큰을 검증하고, 토큰이 유효하면 토큰에서 사용자의 정보와 권한을 추출하여 SecurityContext에 저장한다.
+     */
+    @Bean
+    public JwtAuthorizationFilter jwtAuthorizationFilter(CustomUserDetailsService userDetailsService) {
+        return new JwtAuthorizationFilter(userDetailsService);
+    }
+
+    /**
+     * isAdmin 메소드는 Supplier<Authentication>와 RequestAuthorizationContext를 인자로 받아서 "ADMIN" 역할을 가진 사용자인지 확인한다.
+     * 만약 사용자가 "ADMIN" 역할을 가지고 있다면, AuthorizationDecision 객체는 true를 반환하고, 그렇지 않다면 false를 반환한다.
+     */
+    private AuthorizationDecision isAdmin(
+            Supplier<Authentication> authenticationSupplier,
+            RequestAuthorizationContext requestAuthorizationContext
+    ) {
+        return new AuthorizationDecision(
+                authenticationSupplier.get()
+                        .getAuthorities()
+                        .contains(new SimpleGrantedAuthority("ADMIN"))
+        );
+    }
 }
