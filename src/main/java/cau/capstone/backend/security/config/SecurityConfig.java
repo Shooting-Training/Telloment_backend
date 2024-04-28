@@ -132,7 +132,7 @@ public class SecurityConfig {
      * 과정: CustomAuthenticationFilter → AuthenticationManager(interface) → CustomAuthenticationProvider(implements)
      */
     @Bean
-    public CustomAuthenticationProvider customAuthenticationProvider(UserDetailsService userDetailsService) {
+    public CustomAuthenticationProvider customAuthenticationProvider(CustomUserDetailsService userDetailsService) {
         return new CustomAuthenticationProvider(
                 userDetailsService
         );

@@ -22,10 +22,10 @@ public class User extends AuditingFields {
     @Column(name = "user_id")
     private Long userId;
 
-    @Column(name = "loging_id", nullable = false)
+    @Column(name = "login_id", nullable = false)
     private String loginId;
 
-    @Column(name = "email", nullable = false)
+    @Column(name = "password", nullable = false)
     private String password;
 
     @Column(name = "username", nullable = false)
