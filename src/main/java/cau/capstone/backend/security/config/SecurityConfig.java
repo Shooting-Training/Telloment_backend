@@ -80,6 +80,8 @@ public class SecurityConfig {
                         .requestMatchers("/css/**").permitAll()
                         .requestMatchers("/main/rootPage").permitAll()
                         .requestMatchers("/error.html").permitAll()
+                        .requestMatchers("/health").permitAll()
+                        .requestMatchers("/swagger-ui/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthorizationFilter, BasicAuthenticationFilter.class)
