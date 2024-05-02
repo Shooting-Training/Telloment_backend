@@ -23,8 +23,10 @@ repositories {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
 
@@ -34,33 +36,25 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
 
-
-    runtimeOnly 'com.mysql:mysql-connector-j'
-
-
-    implementation 'org.springframework.boot:spring-boot-starter-security' // security
     implementation 'org.springframework.boot:spring-boot-starter-validation:2.7.4'  // Spring Boot validation
 
-    // Jwt dependency
-    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.2.2'      // Spring Boot MyBatis
-    implementation "io.jsonwebtoken:jjwt:0.9.1"
+    runtimeOnly 'com.mysql:mysql-connector-j'
+    implementation 'com.mysql:mysql-connector-j'
+//    implementation 'mysql:mysql-connector-java:8.0.32' // mysql
 
-    // Redis dependency
-    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    // Jwt dependency
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.2'
+    implementation 'io.jsonwebtoken:jjwt-impl:0.11.2'
+    implementation 'io.jsonwebtoken:jjwt-jackson:0.11.2'
 
     //swagger
     implementation 'io.springfox:springfox-boot-starter:3.0.0'
     implementation 'io.springfox:springfox-swagger-ui:3.0.0'
-
+//
+//    implementation 'org.hibernate:hibernate-spatial:6.4.1.Final'
+//    implementation 'org.hibernate:hibernate-core:6.4.1.Final'
 
     implementation 'io.netty:netty-resolver-dns-native-macos:4.1.68.Final:osx-aarch_64'
-
-    // Webclient dependency
-    implementation platform('org.springframework.boot:spring-boot-dependencies:2.7.15')
-    implementation 'org.springframework.boot:spring-boot-starter-webflux'
-
-    implementation 'org.hibernate:hibernate-spatial:6.4.1.Final'
-    implementation 'org.hibernate:hibernate-core:6.4.1.Final'
 
 
 }

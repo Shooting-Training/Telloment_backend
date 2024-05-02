@@ -18,12 +18,15 @@ import cau.capstone.backend.global.util.exception.LikeException;
 import cau.capstone.backend.global.util.exception.MomentException;
 import cau.capstone.backend.global.util.exception.ScrapException;
 import cau.capstone.backend.global.util.exception.UserException;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -47,16 +50,18 @@ public class MomentService {
     }
 
     @Transactional
-    public long saveMoment(CreateMomentDto createMomentDto) {
+    public long createMoment(CreateMomentDto createMomentDto) {
         User user = getUserById(createMomentDto.getUserId());
-        Moment moment = Moment.createMoment(createMomentDto.getTitle(), createMomentDto.getContent(), user, null, createMomentDto.getDate(), createMomentDto.getRootId(), createMomentDto.getPrevId(), createMomentDto.getNextId());
+        Page page = pageRepository.findById(createMomentDto.getPageId())
+                .orElseThrow(() -> new MomentException(ResponseCode.PAGE_NOT_FOUND));
+        Moment moment = Moment.createMoment(user, createMomentDto.getTitle(), createMomentDto.getContent(), page);
         log.info("new moment saved: " + moment.getTitle());
         return momentRepository.save(moment).getId();
     }
 
     //모먼트 정보 수정
     @Transactional
-    public void updateMoment(UpdateMomentDto updateMomentDto, LocalDate date){
+    public void updateMoment(UpdateMomentDto updateMomentDto, LocalDateTime date){
         Moment moment = getMomentById(updateMomentDto.getMomentId());
         moment.updateMoment(updateMomentDto.getTitle(), updateMomentDto.getContent(), date);
         log.info("moment updated: " + moment.getTitle());
@@ -65,11 +70,18 @@ public class MomentService {
 
     //모먼트 삭제
     @Transactional
-    public void deleteMoment(Long momentId, UUID userId, LocalDate date){
+    public void deleteMoment(Long momentId, Long userId, LocalDateTime date){
         validateMoment(momentId, userId);
         momentRepository.deleteById(momentId);
         log.info("moment deleted: " + momentId);
     }
+    @Transactional
+    public void deleteMoment(Long momentId, Long userId){
+        validateMoment(momentId, userId);
+        momentRepository.deleteById(momentId);
+        log.info("moment deleted: " + momentId);
+    }
+
 
     //모먼트 스크랩
     @Transactional
@@ -80,16 +92,24 @@ public class MomentService {
 
         if (isScrapped){
             throw new ScrapException(ResponseCode.SCRAP_ALREADY_EXIST);
-            return null;
         } else{
+            User user = getUserById(createScrapDto.getUserId());
             //createScrap
+            Scrap scrap = Scrap.createScrap(user , moment);
             return scrapRepository.save(scrap).getId();
         }
     }
 
+    @Transactional
+    public List<Moment> getMomentListByDate(Long userId, LocalDate date){
+        List<Moment> momentList = momentRepository.findAllByUserIdAndCreatedAt(userId, date);
+        log.info("moment list returned: " + momentList.size());
+        return momentList;
+    }
+
     //스크랩 리스트 반환
     @Transactional(readOnly = true)
-    public List<ResponseScrapDto> getScrapList(UUID userId){
+    public List<ResponseScrapDto> getScrapList(Long userId){
         validateUser(userId);
         List<Scrap> scrapList = scrapRepository.findAllByUserId(userId);
         log.info("scrap list returned: " + scrapList.size());
@@ -101,7 +121,7 @@ public class MomentService {
 
     //스크랩 해제
     @Transactional
-    public void deleteScrap(Long scrapId, UUID userId){
+    public void deleteScrap(Long scrapId, Long userId){
         validateScrap(scrapId, userId);
         Scrap scrap = getScrapById(scrapId);
 
@@ -132,7 +152,7 @@ public class MomentService {
         validateMoment(linkedMoment.getId(), linkedMoment.getUser().getId());
 
         //첫 모먼트 바로 다음에 연결
-        if (prevMoment.getRootId() == 0){
+        if (prevMoment.getRootId() == -1){
             linkedMoment.setRootId(prevMoment);
             linkedMoment.setPrevId(prevMoment);
             prevMoment.setNextId(linkedMoment);
@@ -142,7 +162,7 @@ public class MomentService {
         }
 
         //모먼트 연결 순서가 세 번째 이상
-        else if(prevMoment.getRootId() != 0){
+        else if(prevMoment.getRootId() != -1){
             Moment rootMoment = momentRepository.findById(prevMoment.getRootId())
                     .orElseThrow(() -> new MomentException(ResponseCode.MOMENT_NOT_FOUND));
 
@@ -156,10 +176,8 @@ public class MomentService {
         }
     }
 
-
-
     @Transactional
-    public void likeMoment(Long momentId, UUID userId){
+    public void likeMoment(Long momentId, Long userId){
         Moment moment = getMomentById(momentId);
         User user = getUserById(userId);
 
@@ -174,7 +192,7 @@ public class MomentService {
     }
 
     @Transactional
-    public void dislikeMoment(Long momentId, UUID userId){
+    public void dislikeMoment(Long momentId, Long userId){
         Moment moment = getMomentById(momentId);
         User user = getUserById(userId);
 
@@ -194,40 +212,72 @@ public class MomentService {
     }
 
     @Transactional
-    public List<Moment> getUserMomentList(UUID userId){
-        return momentRepository.findAllByUserId(userId);
-    }
+    public Long addMomentToPage(AddMomentToPageDto addMomentToPageDto) {
+        Moment moment = getMomentById(addMomentToPageDto.getMomentId());
+        Page page = pageRepository.findById(addMomentToPageDto.getPageId())
+                .orElseThrow(() -> new MomentException(ResponseCode.PAGE_NOT_FOUND));
 
-    @Transactional
-    public List<Like> getUserLikeList(UUID userId){
-        return likeRepository.findAllByUserId(userId);
-    }
+        moment.setPage(page);
+        page.addMoment(moment);
 
-    @Transactional
-    public List<Scrap> getUserScrapList(UUID userId){
-        return scrapRepository.findAllByUserId(userId);
-    }
-
-    @Transactional
-    public List<Page> getUserPageList(UUID userId){
-        return pageRepository.findAllByUserId(userId);
-    }
-
-    @Transactional
-    public Long createMomentFromScrap(CreateMomentFromScrapDto createMomentFromScrapDto){
-        validateScrap(createMomentFromScrapDto.getScrapId(), createMomentFromScrapDto.getUserId());
-        Scrap scrap = getScrapById(createMomentFromScrapDto.getScrapId());
-        Moment moment = scrap.createMomentFromScrap(createMomentFromScrapDto.getTitle(), createMomentFromScrapDto.getContent(),
-                createMomentFromScrapDto.getDate(), createMomentFromScrapDto.getRootId(), createMomentFromScrapDto.getPrevId(), createMomentFromScrapDto.getNextId());
-        moment.setScrap(scrap);
-
-
+        pageRepository.save(page);
         return momentRepository.save(moment).getId();
     }
 
 
+    @Transactional
+    public void deleteMomentFromPage(DeleteMomentFromPageDto deleteMomentFromPageDto){
+        Moment moment = getMomentById(deleteMomentFromPageDto.getMomentId());
+        Page page = pageRepository.findById(deleteMomentFromPageDto.getPageId())
+                .orElseThrow(() -> new MomentException(ResponseCode.PAGE_NOT_FOUND));
 
-    private User getUserById(UUID userId){
+        moment.setPage(null);
+        page.getMoments().remove(moment);
+
+        pageRepository.save(page);
+        momentRepository.save(moment);
+    }
+
+
+    @Transactional
+    public Long createMomentFromScrap(CreateMomentFromScrapDto createMomentFromScrapDto){
+        validateScrap(createMomentFromScrapDto.getScrapId(), createMomentFromScrapDto.getUserId());
+
+
+        Scrap scrap = getScrapById(createMomentFromScrapDto.getScrapId());
+        User user = getUserById(createMomentFromScrapDto.getUserId());
+        Page page = pageRepository.findById(createMomentFromScrapDto.getPageId())
+                .orElseThrow(() -> new MomentException(ResponseCode.PAGE_NOT_FOUND));
+
+        Moment moment = scrap.createMomentFromScrap(user, scrap, page);
+
+        return momentRepository.save(moment).getId();
+    }
+
+    @Transactional
+    public List<Moment> getUserMomentList(Long userId){
+        return momentRepository.findAllByUserId(userId);
+    }
+
+    @Transactional
+    public List<Like> getUserLikeList(Long userId){
+        return likeRepository.findAllByUserId(userId);
+    }
+
+    @Transactional
+    public List<Scrap> getUserScrapList(Long userId){
+        return scrapRepository.findAllByUserId(userId);
+    }
+
+    @Transactional
+    public List<Page> getUserPageList(Long userId){
+        return pageRepository.findAllByUserId(userId);
+    }
+
+
+
+
+    private User getUserById(Long userId){
         return userRepository.findById(userId)
                 .orElseThrow(() -> new UserException(ResponseCode.USER_NOT_FOUND));
     }
@@ -243,13 +293,13 @@ public class MomentService {
     }
 
 
-    private void validateUser(UUID userId){
+    private void validateUser(Long userId){
         if(!userRepository.existsById(userId)){
             throw new UserException(ResponseCode.USER_NOT_FOUND);
         }
     }
 
-    private void validateMoment(Long momentId, UUID userId){
+    private void validateMoment(Long momentId, Long userId){
         if(!momentRepository.existsById(momentId)){
             throw new MomentException(ResponseCode.MOMENT_NOT_FOUND);
         }
@@ -258,7 +308,7 @@ public class MomentService {
         }
     }
 
-    private void validateScrap(Long scrapId, UUID userId){
+    private void validateScrap(Long scrapId, Long userId){
         if(!scrapRepository.existsById(scrapId)){
             throw new ScrapException(ResponseCode.SCRAP_NOT_FOUND);
         }

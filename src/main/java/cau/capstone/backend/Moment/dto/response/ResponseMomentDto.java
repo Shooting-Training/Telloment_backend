@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+
+
 @Getter
 @Builder
 @AllArgsConstructor
@@ -17,15 +19,14 @@ public class ResponseMomentDto {
     private Long userId;
     private String title;
     private String content;
-    private boolean isScrapped;
 
-    public static ResponseMomentDto of(Long momentId, Long userId, String title, String content, boolean isScrapped) {
+
+    public static ResponseMomentDto of(Moment moment) {
         return ResponseMomentDto.builder()
-                .momentId(momentId)
-                .userId(userId)
-                .title(title)
-                .content(content)
-                .isScrapped(isScrapped)
+                .momentId(moment.getId())
+                .userId(moment.getUser().getId())
+                .title(moment.getTitle())
+                .content(moment.getContent())
                 .build();
     }
 
@@ -35,7 +36,6 @@ public class ResponseMomentDto {
                 .userId(moment.getUser().getId())
                 .title(moment.getTitle())
                 .content(moment.getContent())
-                .isScrapped(moment.isScrapped())
                 .build();
     }
 

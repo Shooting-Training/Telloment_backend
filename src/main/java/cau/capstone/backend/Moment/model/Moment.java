@@ -60,6 +60,8 @@ public class Moment extends BaseEntity {
     private List<Like> likes = new ArrayList<>();
 
 
+    @Column(name = "is_scrapped")
+    private boolean isScrapped = false;
 
 
     //생성메서드
@@ -72,16 +74,22 @@ public class Moment extends BaseEntity {
         return moment;
     }
 
-    public void updateMoment(String title, String content){
+    public void updateMoment(String title, String content, LocalDateTime modifiedAt){
         this.title = title;
         this.content = content;
+        super.updatedAt = modifiedAt;
         this.modified = true;
     }
 
+    public void setCreatedDate(LocalDateTime date) { super.createdAt = date; }
+
     public void setRootId(Moment moment) { this.rootId = moment.getRootId();}
+    public void setRootId(long rootId) { this.rootId = rootId;}
 
     public void setPrevId(Moment moment) {this.prevId  = moment.getId();}
+    public void setPrevId(long prevId) {this.prevId = prevId;}
 
     public void setNextId(Moment moment) {this.nextId = moment.getId();}
+    public void setNextId(long nextId) {this.nextId = nextId;}
 
 }

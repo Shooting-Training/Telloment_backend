@@ -24,6 +24,8 @@ public enum ResponseCode {
     FAVORITE_NOT_FOUND(HttpStatus.NOT_FOUND, false, "즐겨찾기를 찾을 수 없습니다."),
     MOMENT_NOT_FOUND(HttpStatus.NOT_FOUND, false, "모먼트를 찾을 수 없습니다."),
     SCRAP_NOT_FOUND(HttpStatus.NOT_FOUND, false, "스크랩을 찾을 수 없습니다."),
+    PAGE_NOT_FOUND(HttpStatus.NOT_FOUND, false, "페이지를 찾을 수 없습니다."),
+    LIKE_NOT_FOUND(HttpStatus.NOT_FOUND, false, "좋아요를 찾을 수 없습니다."),
 
 
     // 405 Method Not Allowed
@@ -33,10 +35,13 @@ public enum ResponseCode {
 
     // 409 Conflict
     USER_ALREADY_EXIST(HttpStatus.CONFLICT, false, "이미 가입한 사용자입니다."),
+    USER_EMAIL_ALREADY_EXIST(HttpStatus.CONFLICT, false, "이미 존재하는 이메일입니다."),
     USER_NAME_ALREADY_EXIST(HttpStatus.CONFLICT, false, "이미 존재하는 닉네임입니다."),
+    SCRAP_ALREADY_EXIST(HttpStatus.CONFLICT, false, "이미 존재하는 스크랩입니다."),
     FOLLOWED_ALREADY(HttpStatus.CONFLICT, false, "이미 팔로우한 사용자입니다."),
     UNFOLLOWED_ALREADY(HttpStatus.CONFLICT, false, "이미 언팔로우한 사용자입니다."),
     SCRAP_ALREADY_SCRAPPED(HttpStatus.CONFLICT, false, "이미 스크랩된 모먼트입니다."),
+
 
     // 500 Internal Server Error
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, false, "서버에 오류가 발생하였습니다."),
@@ -66,7 +71,7 @@ public enum ResponseCode {
 
     // 201 Created
     USER_CREATE_SUCCESS(HttpStatus.CREATED, true, "사용자 생성 성공"),
-    MOMENT_CREATE_SUCCESS(HttpStatus.CREATED, true, "모먼트 생성 성공"),
+    MOMENT_CREATE_SUCCESS(HttpStatus.CREATED, true, "모먼트 생성 성공");
 
 
 

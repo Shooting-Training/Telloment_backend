@@ -8,8 +8,10 @@ import javax.persistence.*;
 import java.io.Serializable;
 
 
+
 @Entity
-@Table(name = "user_follower")
+@NoArgsConstructor
+@Table(name = "follow")
 public class Follow extends BaseImmutableEntity {
 
     @Id
@@ -17,19 +19,29 @@ public class Follow extends BaseImmutableEntity {
     @Column(name = "follow_id")
     private Long id;
 
-    @Id
-    @Column(name = "to_user", insertable = false, updatable = false)
-    private Long followee;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "followee_user_id")
+    private User followee;
 
-    @Id
-    @Column(name = "from_user", insertable = false, updatable = false)
-    private Long follower;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "follower_user_id")
+    private User follower;
 
-    public Follow createFollow(Long followee, Long follower) {
+    public static Follow createFollow(User followee, User follower) {
         Follow follow = new Follow();
-        follow.followee = followee;
-        follow.follower = follower;
+        follow.setFollowee(followee);
+        follow.setFollower(follower);
+
         return follow;
+    }
+
+
+
+    public void setFollowee(User followee) {
+        this.followee = followee;
+    }
+    public void setFollower(User follower) {
+        this.follower = follower;
     }
 
 }

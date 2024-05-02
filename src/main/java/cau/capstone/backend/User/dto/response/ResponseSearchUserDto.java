@@ -7,6 +7,7 @@ import lombok.Getter;
 
 import java.io.Serializable;
 
+
 @Getter
 @Builder
 @JsonSerialize

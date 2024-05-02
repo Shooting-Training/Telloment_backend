@@ -11,22 +11,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ResponseScrapDto {
+
     private Long scrapId;
-    private int count;
 
-    public static ResponseScrapDto of(Long scrapId, int count) {
-        return ResponseScrapDto.builder()
-                .scrapId(scrapId)
-                .count(count)
-                .build();
-    }
 
-    public static ResponseScrapDto from(Scrap scrap) {
-        return ResponseScrapDto.builder()
-                .scrapId(scrap.getId())
-                .count(scrap.getCount())
-                .build();
-    }
 
 
 }

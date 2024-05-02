@@ -72,7 +72,7 @@ public class SwaggerConfig {
 //                .securityContexts(Arrays.asList(securityContext()))
                 .securitySchemes(Arrays.asList(apiKey()))
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("cau.capstone.helpclosing"))
+                .apis(RequestHandlerSelectors.basePackage("cau.capstone.Telloment"))
                 .paths(PathSelectors.any())
                 .build()
                 .apiInfo(apiInfo());
@@ -81,7 +81,7 @@ public class SwaggerConfig {
     public ApiInfo apiInfo() {
         return new ApiInfoBuilder()
                 .title("SpringBoot Rest API Documentation")
-                .description("capstone project team 3")
+                .description("capstone project team 5")
                 .version("0.1")
                 .build();
     }

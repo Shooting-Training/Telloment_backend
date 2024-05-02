@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 @Service
 public class ImageServiceIml implements ImageService{
 
-    private final ImageService imageService;
-
     @Override
     public void uploadImage() {
         log.info("uploadImage");

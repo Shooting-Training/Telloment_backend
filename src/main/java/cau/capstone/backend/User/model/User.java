@@ -7,14 +7,11 @@ import cau.capstone.backend.Moment.model.Scrap;
 import cau.capstone.backend.global.Authority;
 import cau.capstone.backend.global.BaseEntity;
 import cau.capstone.backend.global.Provider;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.JdbcTypeCode;
+
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import reactor.util.annotation.Nullable;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -28,10 +25,8 @@ import java.util.stream.Collectors;
 public class User extends BaseEntity implements UserDetails  {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @GenericGenerator(name="uuid2", strategy="uuid2")
-    @JdbcTypeCode(java.sql.Types.VARCHAR)
     @Column(name = "user_id")
-    private UUID id = UUID.randomUUID();
+    private Long id;
 
 
     @Column(name="user_email")
@@ -49,10 +44,10 @@ public class User extends BaseEntity implements UserDetails  {
     @Column(name = "user_role")
     @Enumerated(EnumType.STRING)
     private Authority role = Authority.ROLE_USER; //권한
-
-    @Column(name="provider", columnDefinition = "varchar(10) default 'EMAIL'")
-    @Enumerated(EnumType.STRING)
-    private Provider provider = Provider.EMAIL; //로그인 제공자
+//
+//    @Column(name="provider", columnDefinition = "varchar(10) default 'EMAIL'")
+//    @Enumerated(EnumType.STRING)
+//    private Provider provider = Provider.EMAIL; //로그인 제공자
 
     @Column
     private LocalDateTime lastLoginAt; //마지막 로그인 시간
@@ -75,6 +70,13 @@ public class User extends BaseEntity implements UserDetails  {
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Page> pages = new ArrayList<>();
+
+    @Builder
+    public User(String email, String passwd,Authority role) {
+        this.email = email;
+        this.passwd = passwd;
+        this.role = role;
+    }
 
 
     // Jwt 전용 설정 (UserDetails 인터페이스 구현)
@@ -119,24 +121,21 @@ public class User extends BaseEntity implements UserDetails  {
     // Jwt 전용 설정 종료
 
     //생성 메서드
-    public static User createUser(String email, String passwd, String name, String nickname, Authority role, Provider provider) {
+    public static User createUser(String email, String passwd, String name, String nickname) {
         User user = new User();
         user.email = email;
         user.passwd = passwd;
         user.name = name;
         user.nickname = nickname;
-        user.role = role;
-        user.provider = provider;
         return user;
     }
 
-    public static void updateUser(User user, String email, String passwd, String name, String nickname, Authority role, Provider provider) {
+    public static void updateUser(User user, String email, String passwd, String name, String nickname, Authority role) {
         user.email = email;
         user.passwd = passwd;
         user.name = name;
         user.nickname = nickname;
         user.role = role;
-        user.provider = provider;
     }
 
 

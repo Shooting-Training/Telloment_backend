@@ -1,5 +1,6 @@
 package cau.capstone.backend.global;
 
+
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 

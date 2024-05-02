@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -25,8 +26,27 @@ public class Scrap extends BaseImmutableEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "moment_id", nullable = false)
-    private Moment moments;
+    private Moment moment;
 
+    public static Scrap createScrap(User user, Moment moment) {
+        Scrap scrap = new Scrap();
+        scrap.user = user;
+        scrap.moment = moment;
+        return scrap;
+    }
+
+
+    public static Moment createMomentFromScrap(User user, Scrap scrap, Page page) {
+        LocalDateTime createdDate = LocalDateTime.now();
+        Moment originalMoment = scrap.getMoment();
+        Moment moment = Moment.createMoment(user, originalMoment.getTitle(), originalMoment.getContent(), page);
+
+        moment.setScrapped(true);
+        moment.setRootId(originalMoment.getId());
+        moment.setCreatedDate(createdDate);
+
+        return moment;
+    }
 //
 //
 //    private int count = 0; // 즐겨찾기 선택

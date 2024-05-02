@@ -22,9 +22,20 @@ public class Page {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToMany(fetch = FetchType.LAZY ,cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "page_id")
     private List<Moment> moments;
 
+
+    public static Page createPage(User user) {
+        Page page = new Page();
+        page.user = user;
+        return page;
+    }
+
+    public void addMoment(Moment moment) {
+        moments.add(moment);
+    }
 
 
 
