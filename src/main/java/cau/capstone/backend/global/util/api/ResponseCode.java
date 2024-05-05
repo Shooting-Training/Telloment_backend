@@ -22,16 +22,16 @@ public enum ResponseCode {
     // 404 Not Found
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, false, "사용자를 찾을 수 없습니다."),
     FAVORITE_NOT_FOUND(HttpStatus.NOT_FOUND, false, "즐겨찾기를 찾을 수 없습니다."),
-    MOMENT_NOT_FOUND(HttpStatus.NOT_FOUND, false, "모먼트를 찾을 수 없습니다."),
+    PAGE_NOT_FOUND(HttpStatus.NOT_FOUND, false, "모먼트를 찾을 수 없습니다."),
     SCRAP_NOT_FOUND(HttpStatus.NOT_FOUND, false, "스크랩을 찾을 수 없습니다."),
-    PAGE_NOT_FOUND(HttpStatus.NOT_FOUND, false, "페이지를 찾을 수 없습니다."),
+    BOOK_NOT_FOUND(HttpStatus.NOT_FOUND, false, "페이지를 찾을 수 없습니다."),
     LIKE_NOT_FOUND(HttpStatus.NOT_FOUND, false, "좋아요를 찾을 수 없습니다."),
 
 
     // 405 Method Not Allowed
     METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, false, "허용되지 않은 메소드입니다."),
     SCARP_NOT_OWNED(HttpStatus.METHOD_NOT_ALLOWED, false, "스크랩한 사용자가 아닙니다."),
-    MOMENT_NOT_OWNED(HttpStatus.METHOD_NOT_ALLOWED, false, "작성한 사용자가 아닙니다."),
+    PAGE_NOT_OWNED(HttpStatus.METHOD_NOT_ALLOWED, false, "작성한 사용자가 아닙니다."),
 
     // 409 Conflict
     USER_ALREADY_EXIST(HttpStatus.CONFLICT, false, "이미 가입한 사용자입니다."),
@@ -54,10 +54,10 @@ public enum ResponseCode {
     USER_UNFOLLOW_SUCCESS(HttpStatus.OK, true, "사용자 언팔로우 성공"),
     USER_LOGIN_SUCCESS(HttpStatus.OK, true, "사용자 로그인 성공"),
 
-    MOMENT_READ_SUCCESS(HttpStatus.OK, true, "모먼트 조회 성공"),
-    MOMENT_UPDATE_SUCCESS(HttpStatus.OK, true, "모먼트 수정 성공"),
-    MOMENT_DELETE_SUCCESS(HttpStatus.OK, true, "모먼트 삭제 성공"),
-    MOMENT_LINK_SUCCESS(HttpStatus.OK, true, "모먼트 연결 성공"),
+    PAGE_READ_SUCCESS(HttpStatus.OK, true, "모먼트 조회 성공"),
+    PAGE_UPDATE_SUCCESS(HttpStatus.OK, true, "모먼트 수정 성공"),
+    PAGE_DELETE_SUCCESS(HttpStatus.OK, true, "모먼트 삭제 성공"),
+    PAGE_LINK_SUCCESS(HttpStatus.OK, true, "모먼트 연결 성공"),
 
     SCRAP_CREATE_SUCCESS(HttpStatus.CREATED, true, "스크랩 생성 성공"),
     SCRAP_READ_SUCCESS(HttpStatus.OK, true, "스크랩 읽기 성공"),
@@ -71,7 +71,7 @@ public enum ResponseCode {
 
     // 201 Created
     USER_CREATE_SUCCESS(HttpStatus.CREATED, true, "사용자 생성 성공"),
-    MOMENT_CREATE_SUCCESS(HttpStatus.CREATED, true, "모먼트 생성 성공");
+    PAGE_CREATE_SUCCESS(HttpStatus.CREATED, true, "모먼트 생성 성공");
 
 
 

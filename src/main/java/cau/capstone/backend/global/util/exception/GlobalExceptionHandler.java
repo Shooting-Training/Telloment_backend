@@ -22,9 +22,9 @@ public class GlobalExceptionHandler {
         return ApiResponse.fail(e.getResponseCode(), null);
     }
 
-    @ExceptionHandler(MomentException.class)
-    public ApiResponse<Void> handleMomentException(MomentException e) {
-        log.info("MomentException: {}", e.getMessage());
+    @ExceptionHandler(PageException.class)
+    public ApiResponse<Void> handlePageException(PageException e) {
+        log.info("PageException: {}", e.getMessage());
         return ApiResponse.fail(e.getResponseCode(), null);
     }
 

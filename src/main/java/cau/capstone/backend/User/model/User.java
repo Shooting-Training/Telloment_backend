@@ -1,12 +1,11 @@
 package cau.capstone.backend.User.model;
 
-import cau.capstone.backend.Moment.model.Like;
-import cau.capstone.backend.Moment.model.Moment;
-import cau.capstone.backend.Moment.model.Page;
-import cau.capstone.backend.Moment.model.Scrap;
+import cau.capstone.backend.page.model.Like;
+import cau.capstone.backend.page.model.Page;
+import cau.capstone.backend.page.model.Book;
+import cau.capstone.backend.page.model.Scrap;
 import cau.capstone.backend.global.Authority;
 import cau.capstone.backend.global.BaseEntity;
-import cau.capstone.backend.global.Provider;
 import lombok.*;
 
 import org.springframework.security.core.GrantedAuthority;
@@ -54,7 +53,7 @@ public class User extends BaseEntity implements UserDetails  {
 
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    private List<Moment> moments = new ArrayList<>();
+    private List<Page> pages = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Scrap> scraps = new ArrayList<>();
@@ -69,7 +68,7 @@ public class User extends BaseEntity implements UserDetails  {
     private List<Follow> following = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    private List<Page> pages = new ArrayList<>();
+    private List<Book> books = new ArrayList<>();
 
     @Builder
     public User(String email, String passwd,Authority role) {
