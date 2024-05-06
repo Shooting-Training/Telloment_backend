@@ -34,6 +34,9 @@ public class User extends BaseEntity implements UserDetails  {
     @Column(name="user_passwd")
     private String passwd; //비밀번호
 
+    @Column(name="user_image")
+    private String image; //프로필 이미지
+
     @Column(name="user_name")
     private String name; //이름
 
@@ -129,12 +132,11 @@ public class User extends BaseEntity implements UserDetails  {
         return user;
     }
 
-    public static void updateUser(User user, String email, String passwd, String name, String nickname, Authority role) {
-        user.email = email;
-        user.passwd = passwd;
-        user.name = name;
-        user.nickname = nickname;
-        user.role = role;
+    public void updateUser(String email, String image, String name, String nickname) {
+        this.email = email;
+        this.name = name;
+        this.image = image;
+        this.nickname = nickname;
     }
 
 

@@ -18,13 +18,10 @@ public class LikePageDto {
     @NotNull(message = MessageUtil.NOT_NULL)
     private Long pageId;
 
-    @NotNull(message = MessageUtil.NOT_NULL)
-    private Long userId;
 
-    public static LikePageDto of(Long pageId, Long userId) {
+    public static LikePageDto of(Long pageId) {
         return LikePageDto.builder()
                 .pageId(pageId)
-                .userId(userId)
                 .build();
     }
 

@@ -1,7 +1,9 @@
 package cau.capstone.backend.page.service;
 
 
+import cau.capstone.backend.global.security.Entity.JwtTokenProvider;
 import cau.capstone.backend.page.dto.request.*;
+import cau.capstone.backend.page.dto.response.ResponsePageDto;
 import cau.capstone.backend.page.model.Like;
 import cau.capstone.backend.page.model.Page;
 import cau.capstone.backend.page.model.Book;
@@ -37,90 +39,110 @@ public class PageService {
 
     private final PageRepository pageRepository; //
     private final ScrapRepository scrapRepository;
-    private final FollowRepository followRepository;
     private final UserRepository userRepository;
     private final LikeRepository likeRepository;
     private final BookRepository bookRepository;
 
+    private final JwtTokenProvider jwtTokenProvider;
+
+
 
     @Transactional
-    public Page readPage(Long pageId){
+    public ResponsePageDto getPage(Long pageId){
+
         Page page = getPageById(pageId);
-        return page;
+
+        return ResponsePageDto.from(page);
     }
 
     @Transactional
-    public long createPage(CreatePageDto createPageDto) {
-        User user = getUserById(createPageDto.getUserId());
-        Book book = bookRepository.findById(createPageDto.getBookId())
-                .orElseThrow(() -> new PageException(ResponseCode.BOOK_NOT_FOUND));
-        Page page = Page.createPage(user, createPageDto.getTitle(), createPageDto.getContent(), book);
+    public long createPage(CreatePageDto createPageDto, String accessToken) {
+        Long userId = jwtTokenProvider.getUserPk(accessToken);
+        User user = getUserById(userId);
+        Book book = getBookById(createPageDto.getBookId());
+
+        Page page = Page.createPage(user, book,  createPageDto.getTitle(), createPageDto.getContent());
         log.info("new Page saved: " + page.getTitle());
         return pageRepository.save(page).getId();
     }
 
     @Transactional
-    public List<Page> getPageList(Long userId){
+    public List<ResponsePageDto> getPageList(Long userId){
         validateUser(userId);
         List<Page> pageList = pageRepository.findAllByUserId(userId);
         log.info("Page list returned: " + pageList.size());
-        return pageList;
+
+        List<ResponsePageDto> responsePageDtoList = pageList.stream()
+                .map(ResponsePageDto::from)
+                .collect(Collectors.toList());
+
+        return responsePageDtoList;
     }
 
     //모먼트 정보 수정
     @Transactional
-    public void updatePage(UpdatePageDto updatePageDto, LocalDateTime date){
+    public long updatePage(UpdatePageDto updatePageDto){
         Page page = getPageById(updatePageDto.getPageId());
-        page.updatePage(updatePageDto.getTitle(), updatePageDto.getContent(), date);
+        page.updatePage(updatePageDto.getTitle(), updatePageDto.getContent());
         log.info("Page updated: " + page.getTitle());
-        pageRepository.save(page);
+
+        return pageRepository.save(page).getId();
     }
 
     //모먼트 삭제
     @Transactional
-    public void deletePage(Long pageId, Long userId, LocalDateTime date){
+    public long deletePage(Long pageId, Long userId, LocalDateTime date){
         validatePage(pageId, userId);
         pageRepository.deleteById(pageId);
         log.info("Page deleted: " + pageId);
+
+        return pageId;
     }
 
     @Transactional
-    public void deletePage(Long pageId, Long userId){
+    public long deletePage(Long pageId, Long userId){
         validatePage(pageId, userId);
         pageRepository.deleteById(pageId);
         log.info("Page deleted: " + pageId);
+
+        return pageId;
     }
 
 
 
 
     @Transactional
-    public List<Page> getPageListByDate(Long userId, LocalDate date){
+    public List<ResponsePageDto> getPageListByDate(Long userId, LocalDate date){
         List<Page> pageList = pageRepository.findAllByUserIdAndCreatedAt(userId, date);
+
+        List<ResponsePageDto> responsePageDtoList = pageList.stream()
+                .map(ResponsePageDto::from)
+                .collect(Collectors.toList());
+
         log.info("Page list returned: " + pageList.size());
-        return pageList;
+        return responsePageDtoList;
     }
 
 
     //모먼트 연결하기
     @Transactional
-    public void linkPage(LinkPageDto linkPageDto){
+    public long linkPage(LinkPageDto linkPageDto){
 
         Long prevPageId = linkPageDto.getPrevPageId();
         Long nextPageId = linkPageDto.getNextPageId();
 
+
         Page prevPage = getPageById(prevPageId);
         Page linkedPage = getPageById(nextPageId);
-
 
         validatePage(prevPage.getId(), prevPage.getUser().getId()) ;
         validatePage(linkedPage.getId(), linkedPage.getUser().getId());
 
         //첫 모먼트 바로 다음에 연결
         if (prevPage.getRootId() == -1){
+            prevPage.setNextId(linkedPage);
             linkedPage.setRootId(prevPage);
             linkedPage.setPrevId(prevPage);
-            prevPage.setNextId(linkedPage);
 
             pageRepository.save(prevPage);
             pageRepository.save(linkedPage);
@@ -137,17 +159,20 @@ public class PageService {
 
             pageRepository.save(prevPage);
             pageRepository.save(linkedPage);
-
         }
+
+        return linkedPage.getId();
     }
 
     
     //페이지 좋아요
     @Transactional
-    public void likePage(LikePageDto likePageDto){
+    public long likePage(LikePageDto likePageDto, String accessToken){
+
+        Long userId = jwtTokenProvider.getUserPk(accessToken);
 
         Page page = getPageById(likePageDto.getPageId());
-        User user = getUserById(likePageDto.getUserId());
+        User user = getUserById(userId);
 
         Like like = Like.createLike(user, page);
 
@@ -157,16 +182,21 @@ public class PageService {
 
         likeRepository.save(like);
         pageRepository.save(page);
+
+        return page.getId();
     }
 
     //좋아요 해제
     @Transactional
-    public void dislikePage(LikePageDto likePageDto){
+    public long dislikePage(LikePageDto likePageDto, String accessToken){
+
+
+        Long userId = jwtTokenProvider.getUserPk(accessToken);
 
         Page page = getPageById(likePageDto.getPageId());
-        User user = getUserById(likePageDto.getUserId());
 
-        Like like = likeRepository.findByUserIdAndPageId(likePageDto.getUserId(), likePageDto.getPageId());
+
+        Like like = likeRepository.findByUserIdAndPageId(userId, likePageDto.getPageId());
 
         if(like == null){
             throw new LikeException(ResponseCode.LIKE_NOT_FOUND);
@@ -178,7 +208,11 @@ public class PageService {
 
             likeRepository.delete(like);
             pageRepository.save(page);
+
+            return page.getId();
         }
+
+
     }
 
 
@@ -220,6 +254,11 @@ public class PageService {
                 .orElseThrow(() -> new PageException(ResponseCode.PAGE_NOT_FOUND));
     }
 
+    private Book getBookById(Long bookId){
+        return bookRepository.findById(bookId)
+                .orElseThrow(() -> new PageException(ResponseCode.BOOK_NOT_FOUND));
+    }
+
     private Scrap getScrapById(Long scrapId){
         return scrapRepository.findById(scrapId)
                 .orElseThrow(() -> new ScrapException(ResponseCode.SCRAP_NOT_FOUND));
@@ -230,6 +269,13 @@ public class PageService {
         if(!userRepository.existsById(userId)){
             throw new UserException(ResponseCode.USER_NOT_FOUND);
         }
+    }
+
+    private void validatePage(Long pageId){
+        if(!pageRepository.existsById(pageId)){
+            throw new PageException(ResponseCode.PAGE_NOT_FOUND);
+        }
+
     }
 
     private void validatePage(Long pageId, Long userId){

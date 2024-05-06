@@ -33,23 +33,30 @@ public class PageController {
 
 
 
-    //페이지 관련 기본 동작: 저장, 유저의 페이지 정보 반환, 수정, 삭제
-    //모먼트 정보 저장
+    //페이지 관련 기본 동작: 읽기 ,저장, 유저의 페이지 정보 반환, 수정, 삭제
+
+    //페이지 읽기
+    @Operation(summary = "페이지 읽기")
+    @GetMapping("/{pageId}")
+    public ApiResponse<ResponsePageDto> getPage(@PathVariable Long pageId){
+
+        return ApiResponse.success(pageService.getPage(pageId), ResponseCode.PAGE_READ_SUCCESS.getMessage());
+    }
+
+
+    //페이지 정보 저장
     @Operation(summary = "페이지 정보 저장")
     @PostMapping("/save")
-    public ApiResponse<Long> savePage(@RequestBody @Valid CreatePageDto createPageDto, @RequestParam @JsonFormat LocalDateTime createdAt){
-        return ApiResponse.success(pageService.createPage(createPageDto), ResponseCode.PAGE_CREATE_SUCCESS.getMessage());
+    public ApiResponse<Long> savePage(@RequestBody @Valid CreatePageDto createPageDto,
+                                      @RequestHeader String accessToken){
+        return ApiResponse.success(pageService.createPage(createPageDto, accessToken), ResponseCode.PAGE_CREATE_SUCCESS.getMessage());
     }
 
     @Operation(summary = "유저가 작성한 페이지 정보 반환")
-    @GetMapping("/list/{userId}")
+    @GetMapping("/list")
     public ApiResponse<List<ResponsePageDto>> getPageList(@RequestHeader String accessToken){
         Long userId = jwtTokenProvider.getUserPk(accessToken);
-        List<Page> pageList = pageService.getPageList(userId);
-
-        List<ResponsePageDto> responsePageDtoList = pageList.stream()
-                .map(ResponsePageDto::from)
-                .collect(Collectors.toList());
+        List<ResponsePageDto> responsePageDtoList = pageService.getPageList(userId);
 
         return ApiResponse.success(responsePageDtoList, ResponseCode.PAGE_READ_SUCCESS.getMessage());
     }
@@ -58,11 +65,9 @@ public class PageController {
     //페이지 정보 수정
     @Operation(summary = "페이지 정보 수정")
     @PutMapping("/update")
-    public ApiResponse<Void> updatePage(@RequestBody @Valid UpdatePageDto updatePageDto,
-                                          @RequestParam @JsonFormat LocalDateTime updatedAt){
+    public ApiResponse<Long> updatePage(@RequestBody @Valid UpdatePageDto updatePageDto){
 
-        pageService.updatePage(updatePageDto, updatedAt);
-        return ApiResponse.success(null, ResponseCode.PAGE_UPDATE_SUCCESS.getMessage());
+        return ApiResponse.success(pageService.updatePage(updatePageDto), ResponseCode.PAGE_UPDATE_SUCCESS.getMessage());
     }
 
 //    //모먼트 삭제
@@ -75,11 +80,11 @@ public class PageController {
     //모먼트 삭제
     @Operation(summary = "페이지 삭제")
     @DeleteMapping("/delete/{pageId}")
-    public ApiResponse<Void> deletePage(@PathVariable Long pageId, @RequestHeader String accessToken){
+    public ApiResponse<Long> deletePage(@PathVariable Long pageId, @RequestHeader String accessToken){
         Long userId = jwtTokenProvider.getUserPk(accessToken);
 
-            pageService.deletePage(pageId, userId);
-            return ApiResponse.success(null, ResponseCode.PAGE_DELETE_SUCCESS.getMessage());
+
+            return ApiResponse.success(pageService.deletePage(pageId, userId), ResponseCode.PAGE_DELETE_SUCCESS.getMessage());
         }
 
 
@@ -87,26 +92,26 @@ public class PageController {
     //페이지 링크
     @Operation(summary = "페이지 링크")
     @PutMapping("/link")
-    public ApiResponse<Void> getPageLink(@RequestBody @Valid LinkPageDto linkPageDto){
-        pageService.linkPage(linkPageDto);
-        return ApiResponse.success(null, ResponseCode.PAGE_LINK_SUCCESS.getMessage());
+    public ApiResponse<Long> getPageLink(@RequestBody @Valid LinkPageDto linkPageDto){
+
+        return ApiResponse.success(pageService.linkPage(linkPageDto), ResponseCode.PAGE_LINK_SUCCESS.getMessage());
     }
 
     //페이지 좋아요
     @Operation(summary = "페이지 좋아요")
     @PostMapping("/like")
-    public ApiResponse<Void> likePage(@RequestBody @Valid LikePageDto likePageDto){
-        pageService.likePage(likePageDto);
-        return ApiResponse.success(null, ResponseCode.PAGE_LIKE_SUCCESS.getMessage());
+    public ApiResponse<Long> likePage(@RequestBody @Valid LikePageDto likePageDto, @RequestHeader String accessToken){
+
+        return ApiResponse.success(pageService.likePage(likePageDto, accessToken), ResponseCode.PAGE_LIKE_SUCCESS.getMessage());
     }
 
     //페이지 좋아요 취소
 
     @Operation(summary = "페이지 좋아요 취소")
     @DeleteMapping("/dislike")
-    public ApiResponse<Void> unlikePage(@RequestBody @Valid LikePageDto likePageDto){
-        pageService.dislikePage(likePageDto);
-        return ApiResponse.success(null, ResponseCode.PAGE_DISLIKE_SUCCESS.getMessage());
+    public ApiResponse<Long> dislikePage(@RequestBody @Valid LikePageDto likePageDto, @RequestHeader String accessToken){
+
+        return ApiResponse.success(pageService.dislikePage(likePageDto, accessToken), ResponseCode.PAGE_DISLIKE_SUCCESS.getMessage());
     }
 
 
@@ -118,13 +123,9 @@ public class PageController {
                                                                 @RequestParam int mm,
                                                                 @RequestParam int dd){
         LocalDate date = LocalDate.of(yy, mm, dd);
-        List<Page> pageList = pageService.getPageListByDate(userId, date);
 
-        List<ResponsePageDto> responsePageDtoList = pageList.stream()
-                .map(ResponsePageDto::from)
-                .collect(Collectors.toList());
 
-        return ApiResponse.success(responsePageDtoList, ResponseCode.PAGE_READ_SUCCESS.getMessage());
+        return ApiResponse.success(pageService.getPageListByDate(userId, date), ResponseCode.PAGE_READ_SUCCESS.getMessage());
     }
 
 

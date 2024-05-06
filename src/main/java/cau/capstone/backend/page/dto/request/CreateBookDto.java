@@ -13,7 +13,6 @@ public class CreateBookDto {
 
     private String bookName;
 
-
     public static CreateBookDto of(String bookName) {
         return new CreateBookDto(bookName);
     }

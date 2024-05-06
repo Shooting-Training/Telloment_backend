@@ -1,6 +1,7 @@
 package cau.capstone.backend.page.dto.response;
 
 
+import cau.capstone.backend.page.model.Book;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,10 +23,10 @@ public class ResponseBookDto {
                 .build();
     }
 
-    public static ResponseBookDto from(Long bookId, String bookName) {
+    public static ResponseBookDto from(Book book) {
         return ResponseBookDto.builder()
-                .bookId(bookId)
-                .bookName(bookName)
+                .bookId(book.getId())
+                .bookName(book.getBookName())
                 .build();
     }
 

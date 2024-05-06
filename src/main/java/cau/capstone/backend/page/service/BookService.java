@@ -2,6 +2,7 @@ package cau.capstone.backend.page.service;
 
 import cau.capstone.backend.User.model.User;
 import cau.capstone.backend.User.model.repository.UserRepository;
+import cau.capstone.backend.global.security.Entity.JwtTokenProvider;
 import cau.capstone.backend.global.util.api.ResponseCode;
 import cau.capstone.backend.global.util.exception.BookException;
 import cau.capstone.backend.global.util.exception.PageException;
@@ -9,6 +10,8 @@ import cau.capstone.backend.global.util.exception.UserException;
 import cau.capstone.backend.page.dto.request.AddPageToBookDto;
 import cau.capstone.backend.page.dto.request.CreateBookDto;
 import cau.capstone.backend.page.dto.request.DeletePageFromBookDto;
+import cau.capstone.backend.page.dto.response.ResponseBookDto;
+import cau.capstone.backend.page.dto.response.ResponsePageDto;
 import cau.capstone.backend.page.model.Book;
 import cau.capstone.backend.page.model.Page;
 import cau.capstone.backend.page.model.repository.BookRepository;
@@ -19,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -30,65 +34,92 @@ public class BookService {
     private final BookRepository bookRepository;
     private final PageRepository pageRepository;
 
+    private final JwtTokenProvider jwtTokenProvider;
 
 
     @Transactional
-    public List<Book> BookList(Long userId){
-        User user = getUserById(userId);
-
-        return user.getBooks();
-    }
-
-    @Transactional
-    public long createBook(CreateBookDto createBookDto, Long userId) {
+    public long createBook(CreateBookDto createBookDto, String accessToken) {
+        Long userId = jwtTokenProvider.getUserPk(accessToken);
         User user = getUserById(userId);
         Book book = Book.createBook(user, createBookDto.getBookName());
 
         return bookRepository.save(book).getId();
     }
 
+
+    @Transactional
+    public List<ResponseBookDto> getBookList(String accessToken){
+        Long userId = jwtTokenProvider.getUserPk(accessToken);
+
+        List<Book> bookList = bookRepository.findAllByUserId(userId);
+
+        List<ResponseBookDto> responseBookDtoList = bookList.stream()
+                .map(ResponseBookDto::from)
+                .collect(Collectors.toList());
+
+
+        return responseBookDtoList;
+    }
+
+
+
+    @Transactional
+    public long deleteBook(Long bookId, String accessToken){
+        Long userId = jwtTokenProvider.getUserPk(accessToken);
+        validateBook(bookId, userId);
+
+        Book book = getBookById(bookId);
+        bookRepository.delete(book);
+
+        return bookId;
+    }
+
+
+
     //페이지를 북에 추가
     @Transactional
-    public Long addPageToBook(AddPageToBookDto addPageToBookDto) {
+    public long addPageToBook(AddPageToBookDto addPageToBookDto) {
         Page page = getPageById(addPageToBookDto.getPageId());
-        Book book = bookRepository.findById(addPageToBookDto.getBookId())
-                .orElseThrow(() -> new PageException(ResponseCode.BOOK_NOT_FOUND));
+        Book book = getBookById(addPageToBookDto.getBookId());
 
         page.setBook(book);
         book.addPage(page);
 
-        bookRepository.save(book);
-        return pageRepository.save(page).getId();
+        pageRepository.save(page);
+        return bookRepository.save(book).getId();
     }
 
 
     //페이지를 북에서 삭제
     @Transactional
-    public void deletePageFromBook(Long bookId, Long pageId, Long userId){
+    public long deletePageFromBook(DeletePageFromBookDto deletePageFromBookDto, String accessToken){
+        Long pageId = deletePageFromBookDto.getPageId();
+        Long bookId = deletePageFromBookDto.getBookId();
+
+        validatePageInBook(pageId, bookId, jwtTokenProvider.getUserPk(accessToken));
+
         Page page = getPageById(pageId);
         Book book = getBookById(bookId);
 
-
         page.setBook(null);
-        book.getPages().remove(page);
+        book.removePage(page);
 
         bookRepository.save(book);
         pageRepository.save(page);
-    }
 
-    @Transactional
-    public void deleteBook(Long bookId, Long userId){
-        validateBook(bookId, userId);
-
-        Book book = getBookById(bookId);
-        bookRepository.delete(book);
+        return bookId;
     }
 
 
     @Transactional
-    public List<Page> getPageListFromBook(Long bookId){
+    public List<ResponsePageDto> getPageListFromBook(Long bookId){
         Book book = getBookById(bookId);
-        return book.getPages();
+
+        List<ResponsePageDto> responsePageDtoList = book.getPages().stream()
+                .map(ResponsePageDto::from)
+                .collect(Collectors.toList());
+
+        return responsePageDtoList;
     }
 
 

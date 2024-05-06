@@ -16,20 +16,21 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateUserDto {
-    @NotNull(message = MessageUtil.NOT_NULL)
-    private Long userId;
+
 
     @NotBlank(message = MessageUtil.NOT_BLANK)
     private String name;
 
+    private String nickname;
+
     @Nullable
     private String image;
 
-    @Range(min = 5, max = 100, message = MessageUtil.AGE_RANGE)
-    private int age;
 
-    public static UpdateUserDto of(Long userId, String name, String image, int age) {
-        return new UpdateUserDto(userId, name, image,  age);
+
+
+    public static UpdateUserDto of(String name, String nickname, String image) {
+        return new UpdateUserDto(name, nickname, image);
     }
 
 }

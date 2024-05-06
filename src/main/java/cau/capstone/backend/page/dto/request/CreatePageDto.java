@@ -16,8 +16,6 @@ import javax.validation.constraints.NotNull;
 @Builder
 public class CreatePageDto {
 
-    @NotNull(message = MessageUtil.NOT_NULL)
-    private Long userId;
 
     @NotNull(message = MessageUtil.NOT_NULL)
     private Long bookId;
@@ -28,9 +26,8 @@ public class CreatePageDto {
     @NotBlank(message = MessageUtil.NOT_BLANK)
     private String content;
 
-    public static CreatePageDto of(Long userId, String title, String content, Long bookId) {
+    public static CreatePageDto of( String title, String content, Long bookId) {
         return CreatePageDto.builder()
-                .userId(userId)
                 .title(title)
                 .content(content)
                 .bookId(bookId)

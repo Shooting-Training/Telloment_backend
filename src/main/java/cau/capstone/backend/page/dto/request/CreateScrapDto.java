@@ -16,14 +16,11 @@ public class CreateScrapDto {
     @NotNull(message = MessageUtil.NOT_NULL)
     private Long pageId;
 
-    @NotNull(message = MessageUtil.NOT_NULL)
-    private Long userId;
+//    @NotBlank(message = MessageUtil.NOT_BLANK)
+//    private String title;
 
-    @NotBlank(message = MessageUtil.NOT_BLANK)
-    private String title;
-
-    public static CreateScrapDto of(Long pageId, Long userId, String title) {
-        return new CreateScrapDto(pageId, userId, title);
+    public static CreateScrapDto of(Long pageId) {
+        return new CreateScrapDto(pageId);
     }
 
 }

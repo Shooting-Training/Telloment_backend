@@ -18,9 +18,6 @@ public class UpdatePageDto {
     @NotNull(message = MessageUtil.NOT_NULL)
     private Long pageId;
 
-    @NotNull(message = MessageUtil.NOT_NULL)
-    private Long userId;
-
     @NotBlank(message = MessageUtil.NOT_BLANK)
     private String title;
 
@@ -28,10 +25,10 @@ public class UpdatePageDto {
     private String content;
 
 
-    public static UpdatePageDto of(Long pageId, Long userId, String title, String content) {
+
+    public static UpdatePageDto of(Long pageId, String title, String content) {
         return UpdatePageDto.builder()
                 .pageId(pageId)
-                .userId(userId)
                 .title(title)
                 .content(content)
                 .build();

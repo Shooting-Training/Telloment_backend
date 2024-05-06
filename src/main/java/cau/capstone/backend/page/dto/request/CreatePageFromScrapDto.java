@@ -13,8 +13,6 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 public class CreatePageFromScrapDto {
 
-    @NotNull(message = MessageUtil.NOT_NULL)
-    private Long userId;
 
     @NotNull(message = MessageUtil.NOT_NULL)
     private Long scrapId;
@@ -22,7 +20,8 @@ public class CreatePageFromScrapDto {
     @NotNull(message = MessageUtil.NOT_NULL)
     private Long bookId;
 
-    public static CreatePageFromScrapDto of(Long userId, Long scrapId, Long bookId) {
-        return new CreatePageFromScrapDto(userId, scrapId, bookId);
+
+    public static CreatePageFromScrapDto of(Long scrapId, Long bookId) {
+        return new CreatePageFromScrapDto(scrapId, bookId);
     }
 }

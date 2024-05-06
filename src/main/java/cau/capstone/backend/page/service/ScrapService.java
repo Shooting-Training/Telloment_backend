@@ -3,6 +3,7 @@ package cau.capstone.backend.page.service;
 import cau.capstone.backend.User.model.User;
 import cau.capstone.backend.User.model.repository.FollowRepository;
 import cau.capstone.backend.User.model.repository.UserRepository;
+import cau.capstone.backend.global.security.Entity.JwtTokenProvider;
 import cau.capstone.backend.global.util.api.ResponseCode;
 import cau.capstone.backend.global.util.exception.PageException;
 import cau.capstone.backend.global.util.exception.ScrapException;
@@ -38,50 +39,60 @@ public class ScrapService {
     private final UserRepository userRepository;
     private final BookRepository bookRepository;
 
+    private final JwtTokenProvider jwtTokenProvider;
+
 
 
     //모먼트 스크랩
     @Transactional
-    public Long saveScrap(CreateScrapDto createScrapDto){
+    public long saveScrap(CreateScrapDto createScrapDto, String accessToken){
+        Long userId = jwtTokenProvider.getUserPk(accessToken);
         Page page = getPageById(createScrapDto.getPageId());
 
-        boolean isScrapped = scrapRepository.existsByUserIdAndPageId(createScrapDto.getUserId(), createScrapDto.getPageId());
+
+        //ScrapRepository로 검색 가능 == 해당 스크랩은 유저가 스크랩한 페이지다
+        boolean isScrapped = scrapRepository.existsByUserIdAndPageId(userId, createScrapDto.getPageId());
 
         if (isScrapped){
             throw new ScrapException(ResponseCode.SCRAP_ALREADY_EXIST);
         } else{
-            User user = getUserById(createScrapDto.getUserId());
+            User user = getUserById(userId);
             //createScrap
             Scrap scrap = Scrap.createScrap(user, page);
             return scrapRepository.save(scrap).getId();
+
+
         }
     }
 
 
     //스크랩 리스트 반환
     @Transactional(readOnly = true)
-    public List<ResponseScrapDto> getScrapList(Long userId){
+    public List<ResponseScrapDto> getScrapList(String accessToken){
+        Long userId = jwtTokenProvider.getUserPk(accessToken);
+
         validateUser(userId);
         List<Scrap> scrapList = scrapRepository.findAllByUserId(userId);
         log.info("scrap list returned: " + scrapList.size());
-        return scrapList.stream().map(scrap -> ResponseScrapDto.builder()
-                        .scrapId(scrap.getId())
-                        .build())
+
+        List<ResponseScrapDto> responseScrapDtoList = scrapList.stream()
+                .map(ResponseScrapDto::from)
                 .collect(Collectors.toList());
+
+        return responseScrapDtoList;
     }
 
 
     //스크랩 해제
     @Transactional
-    public void deleteScrap(Long scrapId, Long userId){
+    public long deleteScrap(Long scrapId, String accessToken){
 
+        Long userId = jwtTokenProvider.getUserPk(accessToken);
 
         validateScrap(scrapId, userId);
         Scrap scrap = getScrapById(scrapId);
+        Page page = scrap.getPage();
 
-        //스크랩으로 모먼트를 찾아 모먼트의 정보도 변경
-        Page page = pageRepository.findById(scrap.getPage().getId())
-                .orElseThrow(() -> new PageException(ResponseCode.PAGE_NOT_FOUND));
         page.getScraps().remove(scrap);
 
         scrapRepository.deleteById(scrapId);
@@ -89,19 +100,21 @@ public class ScrapService {
 
         log.info("scrap deleted: " + scrapId);
 
+        return scrapId;
     }
 
 
     //스크랩을 통해 페이지를 생성. 스크랩시 원하면 같은 내용의 페이지를 생성한다.
     @Transactional
-    public Long createPageFromScrap(CreatePageFromScrapDto createPageFromScrapDto){
-        validateScrap(createPageFromScrapDto.getScrapId(), createPageFromScrapDto.getUserId());
+    public Long createPageFromScrap(CreatePageFromScrapDto createPageFromScrapDto, String accessToken){
+        Long userId = jwtTokenProvider.getUserPk(accessToken);
 
+        validateScrap(createPageFromScrapDto.getScrapId(), userId);
+        validateBook(createPageFromScrapDto.getBookId(), userId);
 
+        User user = getUserById(userId);
         Scrap scrap = getScrapById(createPageFromScrapDto.getScrapId());
-        User user = getUserById(createPageFromScrapDto.getUserId());
-        Book book = bookRepository.findById(createPageFromScrapDto.getBookId())
-                .orElseThrow(() -> new PageException(ResponseCode.BOOK_NOT_FOUND));
+        Book book = getBookById(createPageFromScrapDto.getBookId());
 
         Page page = scrap.createPageFromScrap(user, scrap, book);
 
@@ -127,10 +140,24 @@ public class ScrapService {
                 .orElseThrow(() -> new ScrapException(ResponseCode.SCRAP_NOT_FOUND));
     }
 
+    private Book getBookById(Long bookId){
+        return bookRepository.findById(bookId)
+                .orElseThrow(() -> new PageException(ResponseCode.BOOK_NOT_FOUND));
+    }
+
 
     private void validateUser(Long userId){
         if(!userRepository.existsById(userId)){
             throw new UserException(ResponseCode.USER_NOT_FOUND);
+        }
+    }
+
+    private void validateBook(Long bookId, Long userId){
+        if(!bookRepository.existsById(bookId)){
+            throw new PageException(ResponseCode.BOOK_NOT_FOUND);
+        }
+        if(!bookRepository.existsByIdAndUserId(bookId, userId)){
+            throw new PageException(ResponseCode.BOOK_NOT_OWNED);
         }
     }
 

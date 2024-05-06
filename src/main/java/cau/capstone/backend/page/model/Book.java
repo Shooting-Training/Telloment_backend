@@ -2,17 +2,19 @@ package cau.capstone.backend.page.model;
 
 
 import cau.capstone.backend.User.model.User;
+import cau.capstone.backend.global.BaseEntity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-public class Book {
+public class Book extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "Book_id")
@@ -33,11 +35,19 @@ public class Book {
         Book book = new Book();
         book.user = user;
         book.bookName = bookName;
+
         return book;
     }
 
     public void addPage(Page page) {
         this.pages.add(page);
+
+        setUpdatedAt(LocalDateTime.now());
+    }
+
+    public void removePage(Page page){
+        this.pages.remove(page);
+        setUpdatedAt(LocalDateTime.now());
     }
 
 

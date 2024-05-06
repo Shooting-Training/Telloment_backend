@@ -1,5 +1,6 @@
 package cau.capstone.backend.User.dto.response;
 
+import cau.capstone.backend.User.model.User;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Builder;
@@ -16,6 +17,16 @@ public class ResponseSearchUserDto implements Serializable {
 
     private Long userId;
     private String name;
+    private String nickName;
     private String image;
-    private boolean follow; // 유저가 이미 팔로우한 유저인지 확인
+    private boolean isFollow;
+
+    public static ResponseSearchUserDto of(User user){
+        return ResponseSearchUserDto.builder()
+                .userId(user.getId())
+                .name(user.getName())
+                .name(user.getNickname())
+                .image(user.getImage())
+                .build();
+    }
 }

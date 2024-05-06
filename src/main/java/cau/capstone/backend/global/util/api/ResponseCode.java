@@ -32,6 +32,7 @@ public enum ResponseCode {
     METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, false, "허용되지 않은 메소드입니다."),
     SCARP_NOT_OWNED(HttpStatus.METHOD_NOT_ALLOWED, false, "스크랩한 사용자가 아닙니다."),
     PAGE_NOT_OWNED(HttpStatus.METHOD_NOT_ALLOWED, false, "작성한 사용자가 아닙니다."),
+    BOOK_NOT_OWNED(HttpStatus.METHOD_NOT_ALLOWED, false, "작성한 사용자가 아닙니다."),
 
     // 409 Conflict
     USER_ALREADY_EXIST(HttpStatus.CONFLICT, false, "이미 가입한 사용자입니다."),
@@ -53,16 +54,26 @@ public enum ResponseCode {
     USER_FOLLOW_SUCCESS(HttpStatus.OK, true, "사용자 팔로우 성공"),
     USER_UNFOLLOW_SUCCESS(HttpStatus.OK, true, "사용자 언팔로우 성공"),
     USER_LOGIN_SUCCESS(HttpStatus.OK, true, "사용자 로그인 성공"),
+    USER_DELETE_SUCCESS(HttpStatus.OK, true, "사용자 삭제 성공"),
 
-    PAGE_READ_SUCCESS(HttpStatus.OK, true, "모먼트 조회 성공"),
-    PAGE_UPDATE_SUCCESS(HttpStatus.OK, true, "모먼트 수정 성공"),
-    PAGE_DELETE_SUCCESS(HttpStatus.OK, true, "모먼트 삭제 성공"),
-    PAGE_LINK_SUCCESS(HttpStatus.OK, true, "모먼트 연결 성공"),
+    PAGE_READ_SUCCESS(HttpStatus.OK, true, "페이지 조회 성공"),
+    PAGE_UPDATE_SUCCESS(HttpStatus.OK, true, "페이지 수정 성공"),
+    PAGE_DELETE_SUCCESS(HttpStatus.OK, true, "페이지 삭제 성공"),
+    PAGE_LINK_SUCCESS(HttpStatus.OK, true, "페이지 연결 성공"),
+    PAGE_LIKE_SUCCESS(HttpStatus.OK, true, "페이지 좋아요 성공"),
+    PAGE_DISLIKE_SUCCESS(HttpStatus.OK, true, "페이지 좋아요 취소 성공"),
+    PAGE_NOT_IN_BOOK(HttpStatus.OK, true, "북에 속한 페이지가 아닙니다."),
+
 
     SCRAP_CREATE_SUCCESS(HttpStatus.CREATED, true, "스크랩 생성 성공"),
     SCRAP_READ_SUCCESS(HttpStatus.OK, true, "스크랩 읽기 성공"),
     SCRAP_DELETE_SUCCESS(HttpStatus.OK, true, "스크랩 삭제 성공"),
     SCRAP_UPDATE_SUCCESS(HttpStatus.OK, true, "스크랩 수정 성공"),
+
+    BOOK_CREATE_SUCCESS(HttpStatus.CREATED, true, "북 생성 성공"),
+    BOOK_READ_SUCCESS(HttpStatus.OK, true, "북 읽기 성공"),
+    BOOK_UPDATE_SUCCESS(HttpStatus.OK, true, "북 수정 성공"),
+    BOOK_DELETE_SUCCESS(HttpStatus.OK, true, "북 삭제 성공"),
 
 
 

@@ -36,13 +36,14 @@ public class Scrap extends BaseImmutableEntity {
 
 
     public static Page createPageFromScrap(User user, Scrap scrap, Book book) {
-        LocalDateTime createdDate = LocalDateTime.now();
-        Page originalPage = scrap.getPage();
-        Page page = Page.createPage(user, originalPage.getTitle(), originalPage.getContent(), book);
 
+
+        Page originalPage = scrap.getPage();
+
+        Page page = originalPage.copyPage(user, book);
         page.setScrapped(true);
         page.setRootId(originalPage.getId());
-        page.setCreatedDate(createdDate);
+        page.setPrevId(originalPage.getPrevId());
 
         return page;
     }

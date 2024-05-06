@@ -62,23 +62,35 @@ public class Page extends BaseEntity {
 
 
     //생성메서드
-    public static Page createPage(User user, String title, String content, Book book){
+    public static Page createPage(User user,Book book, String title, String content){
         Page page = new Page();
         page.user = user;
         page.title = title;
         page.content = content;
         page.book = book;
+
         return page;
     }
 
-    public void updatePage(String title, String content, LocalDateTime modifiedAt){
+    public void updatePage(String title, String content){
         this.title = title;
         this.content = content;
-        super.updatedAt = modifiedAt;
+
+        LocalDateTime modifiedAt = LocalDateTime.now();
+        setUpdatedAt(modifiedAt);
+
         this.modified = true;
     }
 
-    public void setCreatedDate(LocalDateTime date) { super.createdAt = date; }
+    public Page copyPage(User user, Book book){
+        Page page = new Page();
+        page.user = user;
+        page.title = this.title;
+        page.content = this.content;
+        page.book = book;
+
+        return page;
+    }
 
     public void setRootId(Page page) { this.rootId = page.getRootId();}
     public void setRootId(long rootId) { this.rootId = rootId;}
@@ -88,5 +100,11 @@ public class Page extends BaseEntity {
 
     public void setNextId(Page page) {this.nextId = page.getId();}
     public void setNextId(long nextId) {this.nextId = nextId;}
+
+
+    public int getScrapCount() { return scraps.size(); }
+    public int getLikeCount() { return likes.size(); }
+    public boolean isScrapped() { return isScrapped; }
+
 
 }
