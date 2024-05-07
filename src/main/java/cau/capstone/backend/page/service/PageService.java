@@ -79,7 +79,7 @@ public class PageService {
         return responsePageDtoList;
     }
 
-    //모먼트 정보 수정
+    //페이지 정보 수정
     @Transactional
     public long updatePage(UpdatePageDto updatePageDto){
         Page page = getPageById(updatePageDto.getPageId());
@@ -89,7 +89,7 @@ public class PageService {
         return pageRepository.save(page).getId();
     }
 
-    //모먼트 삭제
+    //페이지 삭제
     @Transactional
     public long deletePage(Long pageId, Long userId, LocalDateTime date){
         validatePage(pageId, userId);
@@ -124,7 +124,7 @@ public class PageService {
     }
 
 
-    //모먼트 연결하기
+    //페이지 연결하기
     @Transactional
     public long linkPage(LinkPageDto linkPageDto){
 
@@ -138,7 +138,7 @@ public class PageService {
         validatePage(prevPage.getId(), prevPage.getUser().getId()) ;
         validatePage(linkedPage.getId(), linkedPage.getUser().getId());
 
-        //첫 모먼트 바로 다음에 연결
+        //첫 페이지 바로 다음에 연결
         if (prevPage.getRootId() == -1){
             prevPage.setNextId(linkedPage);
             linkedPage.setRootId(prevPage);
@@ -148,7 +148,7 @@ public class PageService {
             pageRepository.save(linkedPage);
         }
 
-        //모먼트 연결 순서가 세 번째 이상
+        //페이지 연결 순서가 세 번째 이상
         else if(prevPage.getRootId() != -1){
             Page rootPage = pageRepository.findById(prevPage.getRootId())
                     .orElseThrow(() -> new PageException(ResponseCode.PAGE_NOT_FOUND));
@@ -282,7 +282,7 @@ public class PageService {
         if(!pageRepository.existsById(pageId)){
             throw new PageException(ResponseCode.PAGE_NOT_FOUND);
         }
-        if (!pageRepository.existsByIdAndUserId(pageId, userId)){ //모먼트의 주인이 아닌지 확인
+        if (!pageRepository.existsByIdAndUserId(pageId, userId)){ //페이지의 주인이 아닌지 확인
             throw new PageException(ResponseCode.PAGE_NOT_OWNED);
         }
     }

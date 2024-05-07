@@ -26,8 +26,8 @@ public class ScrapController {
 
 
     //스크랩 관련 기본 동작: 스크랩, 스크랩 한 페이지 리스트 반환, 스크랩 해제, 스크랩 하면서 페이지 생성
-    //모먼트 스크랩
-    @Operation(summary = "모먼트 스크랩")
+    //페이지 스크랩
+    @Operation(summary = "페이지 스크랩")
     @PostMapping("/create")
     public ApiResponse<Long> saveScrap(@RequestBody @Valid CreateScrapDto createScrapDto, @RequestHeader String accessToken){
         return ApiResponse.success(scrapService.saveScrap(createScrapDto, accessToken), ResponseCode.SCRAP_CREATE_SUCCESS.getMessage());
@@ -50,7 +50,7 @@ public class ScrapController {
         return ApiResponse.success(scrapService.deleteScrap(scrapId, accessToken), ResponseCode.SCRAP_DELETE_SUCCESS.getMessage());
     }
 
-    //스크랩으로 모먼트를 생성
+    //스크랩으로 페이지를 생성
     @Operation(summary = "스크랩으로 페이지를 생성")
     @PostMapping("/createPage")
     public ApiResponse<Long> createFromScrap(@RequestBody @Valid CreatePageFromScrapDto createScrapDto, @RequestHeader String accessToken){

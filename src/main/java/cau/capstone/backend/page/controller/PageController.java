@@ -31,8 +31,6 @@ public class PageController {
     private final PageService pageService;
     private final JwtTokenProvider jwtTokenProvider;
 
-
-
     //페이지 관련 기본 동작: 읽기 ,저장, 유저의 페이지 정보 반환, 수정, 삭제
 
     //페이지 읽기
@@ -70,14 +68,14 @@ public class PageController {
         return ApiResponse.success(pageService.updatePage(updatePageDto), ResponseCode.PAGE_UPDATE_SUCCESS.getMessage());
     }
 
-//    //모먼트 삭제
-//    @Operation(summary = "모먼트 삭제")
+//    //페이지 삭제
+//    @Operation(summary = "페이지 삭제")
 //    @DeleteMapping("/{PageId}/delete")
 //    public ApiResponse<Void> deletePage(@PathVariable Long PageId, @RequestHeader Long userId,
 //                                          @RequestParam @JsonFormat LocalDateTime deletedAt){
 //LocalDate date = LocalDate.of(yy, mm, dd);
 
-    //모먼트 삭제
+    //페이지 삭제
     @Operation(summary = "페이지 삭제")
     @DeleteMapping("/delete/{pageId}")
     public ApiResponse<Long> deletePage(@PathVariable Long pageId, @RequestHeader String accessToken){
@@ -115,8 +113,8 @@ public class PageController {
     }
 
 
-    //특정 날짜에 적은 모먼트 정보 반환
-    @Operation(summary = "특정 날짜에 적은 모먼트 정보 반환")
+    //특정 날짜에 적은 페이지 정보 반환
+    @Operation(summary = "특정 날짜에 적은 페이지 정보 반환")
     @GetMapping("/{userId}")
     public ApiResponse<List<ResponsePageDto>> getPageListByDate(@PathVariable Long userId,
                                                                 @RequestParam int yy,

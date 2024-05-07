@@ -58,10 +58,10 @@ public class UserController {
 
 
     // 회원 검색 결과 조회
-    @Operation(summary = "회원의 친구 검색 결과 조회", description = "회원 검색 결과를 조회합니다.")
+    @Operation(summary = "회원 검색 결과 조회", description = "회원 검색 결과를 조회합니다.")
     @GetMapping("/search")
-    public ApiResponse<List<ResponseSearchUserDto>> searchUser(@RequestParam String keyword) {
-        return ApiResponse.success(userService.searchUser(keyword), ResponseCode.USER_SEARCH_SUCCESS.getMessage());
+    public ApiResponse<List<ResponseSearchUserDto>> searchUser(@RequestParam String keyword, @RequestHeader String accessToken) {
+        return ApiResponse.success(userService.searchUser(accessToken, keyword), ResponseCode.USER_SEARCH_SUCCESS.getMessage());
     }
 
     // 회원이 특정 회원 팔로우
@@ -75,7 +75,7 @@ public class UserController {
 
     // 회원이 특정 회원 팔로우 취소
     @Operation(summary = " 회원이 특정 회원 팔로우 취소", description = "회원이 특정 회원을 팔로우 취소합니다.")
-    @DeleteMapping("/follow/{followeeId}")
+    @DeleteMapping("/unfollow/{followeeId}")
     public ApiResponse<Void> unfollowUser(@RequestHeader String accessToken, @PathVariable Long followeeId) {
 
         userService.unfollowUser(accessToken, followeeId);

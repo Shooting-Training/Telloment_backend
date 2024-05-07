@@ -20,9 +20,7 @@ public class UpdateUserDto {
 
     @NotBlank(message = MessageUtil.NOT_BLANK)
     private String name;
-
     private String nickname;
-
     @Nullable
     private String image;
 

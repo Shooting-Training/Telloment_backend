@@ -151,7 +151,7 @@ public class BookService {
         if(!pageRepository.existsById(pageId)){
             throw new PageException(ResponseCode.PAGE_NOT_FOUND);
         }
-        if (!pageRepository.existsByIdAndUserId(pageId, userId)){ //모먼트의 주인이 아닌지 확인
+        if (!pageRepository.existsByIdAndUserId(pageId, userId)){ //페이지의 주인이 아닌지 확인
             throw new PageException(ResponseCode.PAGE_NOT_OWNED);
         }
     }

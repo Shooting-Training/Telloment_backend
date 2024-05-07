@@ -18,6 +18,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Getter
+
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "user")
@@ -129,6 +130,7 @@ public class User extends BaseEntity implements UserDetails  {
         user.passwd = passwd;
         user.name = name;
         user.nickname = nickname;
+        user.role = Authority.ROLE_USER;
         return user;
     }
 
@@ -137,6 +139,11 @@ public class User extends BaseEntity implements UserDetails  {
         this.name = name;
         this.image = image;
         this.nickname = nickname;
+    }
+
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
 

@@ -6,10 +6,7 @@ import cau.capstone.backend.User.model.User;
 import cau.capstone.backend.User.model.repository.UserRepository;
 import cau.capstone.backend.global.security.Entity.JwtTokenProvider;
 import cau.capstone.backend.global.security.Entity.RefreshToken;
-import cau.capstone.backend.global.security.dto.RequestTokenDto;
-import cau.capstone.backend.global.security.dto.RequestUserDto;
-import cau.capstone.backend.global.security.dto.ResponseUserDto;
-import cau.capstone.backend.global.security.dto.TokenDto;
+import cau.capstone.backend.global.security.dto.*;
 import cau.capstone.backend.global.security.repository.RefreshTokenRepository;
 import cau.capstone.backend.global.util.api.ResponseCode;
 import cau.capstone.backend.global.util.exception.UserException;
@@ -32,21 +29,21 @@ public class AuthService {
     private final RefreshTokenRepository refreshTokenRepository;
 
 
+
     @Transactional
-    public ResponseUserDto signUp (RequestUserDto RequestUserDto) {
-        if (userRepository.existsByEmail(RequestUserDto.getEmail())) {
+    public ResponseUserDto signUp (CreateUserDto createUserDto) {
+        if (userRepository.existsByEmail(createUserDto.getEmail())) {
             throw new UserException(ResponseCode.USER_EMAIL_ALREADY_EXIST);
         }
-        User user = RequestUserDto.toUser(passwordEncoder);
+        User user = createUserDto.toUser(passwordEncoder);
         return ResponseUserDto.of(userRepository.save(user));
 
     }
 
-
     @Transactional
-    public TokenDto login(RequestUserDto RequestUserDto) {
+    public TokenDto login(JoinUserDto joinUserDto) {
         // 1. Login ID/PW 를 기반으로 AuthenticationToken 생성
-        UsernamePasswordAuthenticationToken authenticationToken = RequestUserDto.toAuthentication();
+        UsernamePasswordAuthenticationToken authenticationToken = joinUserDto.toAuthentication();
 
         // 2. 실제로 검증 (사용자 비밀번호 체크) 이 이루어지는 부분
         //    authenticate 메서드가 실행이 될 때 CustomUserDetailsService 에서 만들었던 loadUserByUsername 메서드가 실행됨
@@ -74,10 +71,10 @@ public class AuthService {
             throw new RuntimeException("Refresh Token 이 유효하지 않습니다.");
         }
 
-        // 2. Access Token 에서 Member ID 가져오기
+        // 2. Access Token 에서 User ID 가져오기
         Authentication authentication = jwtTokenProvider.getAuthentication(requestTokenDto.getAccessToken());
 
-        // 3. 저장소에서 Member ID 를 기반으로 Refresh Token 값 가져옴
+        // 3. 저장소에서 user ID 를 기반으로 Refresh Token 값 가져옴
         RefreshToken refreshToken = refreshTokenRepository.findByKey(authentication.getName())
                 .orElseThrow(() -> new RuntimeException("로그아웃 된 사용자입니다."));
 

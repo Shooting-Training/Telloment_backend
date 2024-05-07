@@ -42,8 +42,7 @@ public class ScrapService {
     private final JwtTokenProvider jwtTokenProvider;
 
 
-
-    //모먼트 스크랩
+    //페이지 스크랩
     @Transactional
     public long saveScrap(CreateScrapDto createScrapDto, String accessToken){
         Long userId = jwtTokenProvider.getUserPk(accessToken);
@@ -165,7 +164,7 @@ public class ScrapService {
         if(!pageRepository.existsById(pageId)){
             throw new PageException(ResponseCode.PAGE_NOT_FOUND);
         }
-        if (!pageRepository.existsByIdAndUserId(pageId, userId)){ //모먼트의 주인이 아닌지 확인
+        if (!pageRepository.existsByIdAndUserId(pageId, userId)){ //페이지의 주인이 아닌지 확인
             throw new PageException(ResponseCode.PAGE_NOT_OWNED);
         }
     }
