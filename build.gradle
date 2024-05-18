@@ -58,7 +58,7 @@ dependencies {
 //    implementation 'org.hibernate:hibernate-core:6.4.1.Final'
 
     implementation 'io.netty:netty-resolver-dns-native-macos:4.1.68.Final:osx-aarch_64'
-
+    implementation 'org.liquibase:liquibase-core:4.4.1'
 
 }
 
