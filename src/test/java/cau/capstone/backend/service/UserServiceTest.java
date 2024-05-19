@@ -60,7 +60,7 @@ public class UserServiceTest {
 
     @DisplayName("회원정보 저장 닉네임 중복")
     @Test
-    void saveUserDupliacedName() {
+    void saveUserDupliactedName() {
         // Given
         CreateUserDto createUserDto = CreateUserDto.of("test", "testNickname", "testEmail", "testPassword");
         User user = User.createUser(createUserDto.getEmail(), createUserDto.getPassword(), createUserDto.getName(), createUserDto.getNickname());

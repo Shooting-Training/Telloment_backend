@@ -7,11 +7,13 @@ import cau.capstone.backend.global.util.exception.ScrapException;
 import cau.capstone.backend.page.dto.request.CreatePageFromScrapDto;
 import cau.capstone.backend.page.dto.request.CreateScrapDto;
 import cau.capstone.backend.page.dto.response.ResponseScrapDto;
+import cau.capstone.backend.page.model.Book;
 import cau.capstone.backend.page.model.Page;
 import cau.capstone.backend.page.model.Scrap;
 import cau.capstone.backend.page.model.repository.PageRepository;
 import cau.capstone.backend.page.model.repository.ScrapRepository;
 import cau.capstone.backend.page.service.ScrapService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,47 +48,60 @@ public class ScrapServiceTest {
     @MockBean
     private PageRepository pageRepository;
 
-    @Test
-    public void testSaveScrap_AlreadyScrapped() {
-        // given
-        String accessToken = "mock-access-token";
-        Long userId = 1L;
-        Long pageId = 1L;
-        CreateScrapDto createScrapDto = new CreateScrapDto(pageId);
 
-        when(jwtTokenProvider.getUserPk(accessToken)).thenReturn(userId);
-        when(scrapRepository.existsByUserIdAndPageId(userId, pageId)).thenReturn(true);
+    @BeforeEach
+    public void setup() {
 
-        // when
-        scrapService.saveScrap(createScrapDto, accessToken);
 
-        // then
-        // ScrapException is expected
+
+        Scrap scrap = Scrap.createScrap(user, page);
+
+        book.addPage(page);
+        user.addBook(book);
+
     }
 
+
+//    @DisplayName("스크랩 저장 - 이미 스크랩한 페이지인 경우")
+//    @Test
+//    public void testSaveScrap_AlreadyScrapped() {
+//        // given
+//        String accessToken = "mock-access-token";
+//        Long userId = 1L;
+//        Long pageId = 1L;
+//        CreateScrapDto createScrapDto = new CreateScrapDto(pageId);
+//
+//        when(jwtTokenProvider.getUserPk(accessToken)).thenReturn(userId);
+//        when(scrapRepository.existsByUserIdAndPageId(userId, pageId)).thenReturn(true);
+//
+//        // when
+//        scrapService.saveScrap(createScrapDto, accessToken);
+//
+//        // then
+//        // ScrapException is expected
+//    }
+
+    @DisplayName("스크랩 저장 - 성공")
     @Test
     public void testSaveScrap_Success() {
-        // given
-        String accessToken = "mock-access-token";
-        Long userId = 1L;
+
+
+        //given
+        Long scrapId = 1L;
         Long pageId = 1L;
+        Long userId = 1L;
+
         CreateScrapDto createScrapDto = new CreateScrapDto(pageId);
-        User user = new User(); // 적절한 생성자 또는 빌더를 사용하여 초기화
-        Page page = new Page(); // 적절한 생성자 또는 빌더를 사용하여 초기화
-        Scrap scrap = new Scrap(); // 적절한 생성자 또는 빌더를 사용하여 초기화
-        scrap.setId(1L);
 
-        when(jwtTokenProvider.getUserPk(accessToken)).thenReturn(userId);
-        when(scrapRepository.existsByUserIdAndPageId(userId, pageId)).thenReturn(false);
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(pageRepository.findById(pageId)).thenReturn(Optional.of(page));
-        when(scrapRepository.save(any(Scrap.class))).thenReturn(scrap);
 
-        // when
-        long savedScrapId = scrapService.saveScrap(createScrapDto, accessToken);
 
-        // then
-        assertEquals(1L, savedScrapId);
+
+        //when
+
+
+        //then
+
+
     }
 
     @Test

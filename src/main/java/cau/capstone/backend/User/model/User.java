@@ -141,6 +141,9 @@ public class User extends BaseEntity implements UserDetails  {
         this.nickname = nickname;
     }
 
+    public void addBook(Book book) {
+        this.books.add(book);
+    }
 
     public void setId(Long id) {
         this.id = id;
