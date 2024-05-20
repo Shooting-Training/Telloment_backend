@@ -1,6 +1,7 @@
 package cau.capstone.backend.page.service;
 
 
+import cau.capstone.backend.User.service.ScoreService;
 import cau.capstone.backend.global.security.Entity.JwtTokenProvider;
 import cau.capstone.backend.page.dto.request.*;
 import cau.capstone.backend.page.dto.response.ResponsePageDto;
@@ -45,6 +46,8 @@ public class PageService {
 
     private final JwtTokenProvider jwtTokenProvider;
 
+    private final ScoreService scoreService;
+
 
 
     @Transactional
@@ -61,7 +64,7 @@ public class PageService {
         User user = getUserById(userId);
         Book book = getBookById(createPageDto.getBookId());
 
-        Page page = Page.createPage(user, book,  createPageDto.getTitle(), createPageDto.getContent());
+        Page page = Page.createPage(user, book,  createPageDto.getTitle(), createPageDto.getContent(), createPageDto.getCode());
         log.info("new Page saved: " + page.getTitle());
         return pageRepository.save(page).getId();
     }
@@ -179,6 +182,8 @@ public class PageService {
         List<Like> likes = page.getLikes();
         likes.add(like);
         page.setLikes(likes);
+
+        scoreService.plusScore(userId, page);
 
         likeRepository.save(like);
         pageRepository.save(page);

@@ -74,6 +74,9 @@ public class User extends BaseEntity implements UserDetails  {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Book> books = new ArrayList<>();
 
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
+    private Score score;
+
     @Builder
     public User(String email, String passwd,Authority role) {
         this.email = email;

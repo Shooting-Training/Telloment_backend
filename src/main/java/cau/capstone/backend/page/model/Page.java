@@ -1,6 +1,7 @@
 package cau.capstone.backend.page.model;
 
 
+import cau.capstone.backend.User.model.Category;
 import cau.capstone.backend.User.model.User;
 import cau.capstone.backend.global.BaseEntity;
 import lombok.AccessLevel;
@@ -56,18 +57,23 @@ public class Page extends BaseEntity {
     @OneToMany(mappedBy = "page", fetch = FetchType.LAZY)
     private List<Like> likes = new ArrayList<>();
 
+    @Column(name = "category")
+    @Enumerated(EnumType.STRING)
+    private Category category;
+
 
     @Column(name = "is_scrapped")
     private boolean isScrapped = false;
 
 
     //생성메서드
-    public static Page createPage(User user,Book book, String title, String content){
+    public static Page createPage(User user,Book book, String title, String content, String code){
         Page page = new Page();
         page.user = user;
         page.title = title;
         page.content = content;
         page.book = book;
+        page.category = Category.getByCode(code);
 
         return page;
     }

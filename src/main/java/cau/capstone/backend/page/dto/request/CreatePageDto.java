@@ -26,6 +26,9 @@ public class CreatePageDto {
     @NotBlank(message = MessageUtil.NOT_BLANK)
     private String content;
 
+    @NotBlank(message = MessageUtil.NOT_BLANK)
+    private String code;
+
     public static CreatePageDto of( String title, String content, Long bookId) {
         return CreatePageDto.builder()
                 .title(title)
