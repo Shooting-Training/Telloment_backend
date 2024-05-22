@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 @Api(tags = "4. Book")
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("api/book")
+@RequestMapping("/api/book")
 public class BookController {
 
     private final BookService bookService;

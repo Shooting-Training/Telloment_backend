@@ -19,7 +19,7 @@ import java.util.List;
 @Api(tags = "3. scrap")
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("api/scrap")
+@RequestMapping("/api/scrap")
 public class ScrapController {
 
     private final ScrapService scrapService;

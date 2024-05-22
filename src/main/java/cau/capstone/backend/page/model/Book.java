@@ -14,10 +14,11 @@ import java.util.List;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
+@Table(name = "book")
 public class Book extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "Book_id")
+    @Column(name = "book_id")
     private Long id;
 
     private String bookName;

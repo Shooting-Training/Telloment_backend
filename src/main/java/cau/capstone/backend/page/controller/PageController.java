@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 @Api(tags = "2. Page")
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("api/page")
+@RequestMapping("/api/page")
 public class PageController {
 
     private final PageService pageService;

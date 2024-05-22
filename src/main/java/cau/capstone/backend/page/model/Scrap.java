@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
+@Table(name = "scrap")
 public class Scrap extends BaseImmutableEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

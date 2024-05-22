@@ -30,7 +30,8 @@ public class SecurityConfig {
     private final JwtTokenProvider jwtTokenProvider;
 
     private static final String[] AUTH_LIST = { // swagger 관련 URl
-            "/v2/api-docs", "/swagger-resources/**", "/swagger-ui.html", "/swagger-ui/**", "/health"
+            "/v2/api-docs", "/swagger-resources/**", "/swagger-ui.html", "/swagger-ui/**", "/health",
+            "/api/health/**"
     };
 
     private static final String[] AUTH_LIST2 = {

@@ -15,5 +15,12 @@
       <jdbc-url>jdbc:mysql://capstone-db.cdio2um6k7u3.ap-northeast-2.rds.amazonaws.com:3306/capstone_db</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
+    <data-source source="LOCAL" name="capstone_db@localhost" uuid="c905296c-fe65-4522-b4d5-b54e3bd86829">
+      <driver-ref>mysql.8</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>com.mysql.cj.jdbc.Driver</jdbc-driver>
+      <jdbc-url>jdbc:mysql://localhost:3307/capstone_db</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
   </component>
 </project>
