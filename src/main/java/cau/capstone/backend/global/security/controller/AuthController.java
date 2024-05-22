@@ -14,7 +14,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-@Api(tags = "2. Auth")
+@Api(tags = "0. Auth")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/auth")

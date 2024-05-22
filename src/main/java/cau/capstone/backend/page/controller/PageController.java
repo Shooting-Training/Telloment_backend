@@ -1,6 +1,8 @@
 package cau.capstone.backend.page.controller;
 
 
+import cau.capstone.backend.global.aiserver.EmotionDto;
+import cau.capstone.backend.global.aiserver.FastAPIService;
 import cau.capstone.backend.global.security.Entity.JwtTokenProvider;
 import cau.capstone.backend.page.dto.request.*;
 import cau.capstone.backend.page.dto.response.ResponsePageDto;
@@ -14,6 +16,7 @@ import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
 import java.time.LocalDate;
@@ -31,14 +34,16 @@ public class PageController {
     private final PageService pageService;
     private final JwtTokenProvider jwtTokenProvider;
 
+    private final FastAPIService fastAPIService;
+
     //페이지 관련 기본 동작: 읽기 ,저장, 유저의 페이지 정보 반환, 수정, 삭제
 
     //페이지 읽기
     @Operation(summary = "페이지 읽기")
     @GetMapping("/{pageId}")
-    public ApiResponse<ResponsePageDto> getPage(@PathVariable Long pageId){
+    public ApiResponse<ResponsePageDto> getPage(@PathVariable Long pageId, @RequestHeader String accessToken){
 
-        return ApiResponse.success(pageService.getPage(pageId), ResponseCode.PAGE_READ_SUCCESS.getMessage());
+        return ApiResponse.success(pageService.getPage(accessToken, pageId), ResponseCode.PAGE_READ_SUCCESS.getMessage());
     }
 
 
@@ -126,6 +131,12 @@ public class PageController {
         return ApiResponse.success(pageService.getPageListByDate(userId, date), ResponseCode.PAGE_READ_SUCCESS.getMessage());
     }
 
+
+    @Operation(summary = "감정 분석")
+    @GetMapping("/emotion")
+    public ApiResponse<Mono<EmotionDto>> getEmotion(Long pageId, @RequestHeader String accessToken){
+        return ApiResponse.success(fastAPIService.getEmotionData(pageId), ResponseCode.PAGE_READ_SUCCESS.getMessage());
+    }
 
 
 }

@@ -65,6 +65,9 @@ public class Page extends BaseEntity {
     @Column(name = "is_scrapped")
     private boolean isScrapped = false;
 
+    @Column(name = "view_count")
+    private int viewCount = 0;
+
 
     //생성메서드
     public static Page createPage(User user,Book book, String title, String content, String code){

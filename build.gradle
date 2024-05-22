@@ -66,6 +66,9 @@ dependencies {
 
     implementation 'org.liquibase:liquibase-core:4.4.1'
 
+    //webflux, webclient
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
 
 
 

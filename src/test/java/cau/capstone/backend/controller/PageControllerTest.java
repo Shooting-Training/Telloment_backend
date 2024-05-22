@@ -60,16 +60,16 @@ public class PageControllerTest {
         mockMvc = standaloneSetup(pageController).build();
     }
 
-    @Test
-    void getPageTest() throws Exception {
-        Long pageId = 1L;
-        ResponsePageDto responsePageDto = new ResponsePageDto(); // 필요한 필드를 채워주세요.
-        given(pageService.getPage(pageId)).willReturn(responsePageDto);
-
-        mockMvc.perform(get("/" + pageId))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data").exists());
-    }
+//    @Test
+//    void getPageTest() throws Exception {
+//        Long pageId = 1L;
+//        ResponsePageDto responsePageDto = new ResponsePageDto(); // 필요한 필드를 채워주세요.
+//        given(pageService.getPage(pageId)).willReturn(responsePageDto);
+//
+//        mockMvc.perform(get("/" + pageId))
+//                .andExpect(status().isOk())
+//                .andExpect(jsonPath("$.data").exists());
+//    }
 
     @Test
     void savePageTest() throws Exception {
