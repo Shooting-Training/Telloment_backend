@@ -2,6 +2,7 @@ package cau.capstone.backend.global.aiserver;
 
 import cau.capstone.backend.page.model.Page;
 import cau.capstone.backend.page.model.repository.PageRepository;
+import com.fasterxml.jackson.core.util.RequestPayload;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
@@ -10,7 +11,9 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
@@ -73,13 +76,6 @@ public class FastAPIService {
         MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
         bodyBuilder.part("audio_file", file.getResource());
 
-//        return this.webClient.post()
-//                .uri((uriBuilder -> uriBuilder
-//                        .path("/v1/voice/{user_id}")
-//                        .queryParam("user_id", userId)
-//                        .b
-//                        .build())
-
         return this.webClient.post()
                 .uri("/v1/voice/{user_id}", userId)
                 .contentType(MediaType.MULTIPART_FORM_DATA)
@@ -96,54 +92,17 @@ public class FastAPIService {
                 });
     }
 
-    public Mono<String> speechVoice(Long userId, String content){
 
-        String filename = "speech_" + userId + ".wav";
+    public Mono<byte[]> processStringAndGetWav(Long userId, String content) {
+//        RequestPayload requestPayload = new RequestPayload(id, content);
 
-        Resource aa = (Resource) this.webClient.get()
+        return this.webClient.get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/v1/void/{user_id}/speech")
-                        .queryParam("user_id", userId)
+                        .path("/v1/voice/{user_id}/speech")
                         .queryParam("text", content)
-                        .build())
+                        .build(userId))
                 .retrieve()
-                .bodyToMono(ByteArrayResource.class)
-                .map(resource -> {
-                    try {
-                        // 다운로드된 파일을 시스템에 저장
-                        Path path = Paths.get("downloaded_" + filename);
-                        Files.write(path, resource.getByteArray());
-                        return resource;
-                    } catch (Exception e) {
-                        throw new RuntimeException("Failed to write file", e);
-                    }
-                });
-
-
+                .bodyToMono(byte[].class);
     }
-//
-//    public Mono<String> transferResource(Resource resource, String filename) {
-//        MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
-//        bodyBuilder.asyncPart("file", resource, DataBufferUtils.read(resource, new DefaultDataBufferFactory(), 4096))
-//                .filename(filename)
-//                .contentType(MediaType.APPLICATION_OCTET_STREAM);
-//
-//        MultiValueMap<String, HttpEntity<?>> multipartBody = bodyBuilder.build();
-//
-//        return webClient.post()
-//                .uri("/target-endpoint") // 목적지 서버의 엔드포인트
-//                .contentType(MediaType.MULTIPART_FORM_DATA)
-//                .body(BodyInserters.fromMultipartData(multipartBody))
-//                .retrieve()
-//                .bodyToMono(String.class);
-//    }
 
-
-    public Mono<String> createData(Object data) {
-        return this.webClient.post()
-                .uri("/api/data")
-                .body(Mono.just(data), Object.class) // 요청 본문 설정
-                .retrieve() // 실제 요청을 전송
-                .bodyToMono(String.class); // 응답 본문을 Mono<String>으로 변환
-    }
 }

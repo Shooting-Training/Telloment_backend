@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-
 @Slf4j
 @RequiredArgsConstructor
 @Service
@@ -24,87 +23,97 @@ public class ScoreService {
     private final ScoreRepository scoreRepository;
 
 
-    private final int upperLimit = 100;
+    private final int upperLimit = 1000;
 
 
     //페이지에 좋아요를 누를 때 카테고리 정보를 받아 유저의 해당 카테고리 점수를 업데이트
-    public void plusScore(Long userId, Page page){
-
-        checkUpper(userId);
-
+    public void plusLikeScore(Long userId, Page page){
         Category category = page.getCategory();
-        Score score = new Score();
+        Score score = scoreRepository.findByUserId(userId);
 //category_code = {TRIP, ITNSCI, MVD, HUMR, MUS, MRG, ROM, COK, HLTH, STD, ART, ANML, HUMN, LIT, FIN}
         switch (category.getCode()){
             case "TRIP" :
-               score =  scoreRepository.findByUserId(userId);
-               score.setTripScore(score.getTripScore() + 1);
-                scoreRepository.save(score);
+                score.setTripScore(score.getTripScore() + 10);
             case "ITNCSI" :
-                score =  scoreRepository.findByUserId(userId);
-                score.setItnscienceScore(score.getItnscienceScore() + 1);
-                scoreRepository.save(score);
+                score.setItnscienceScore(score.getItnscienceScore() + 10);
             case "MVD" :
-                score =  scoreRepository.findByUserId(userId);
-                score.setMoviedramaScore(score.getMoviedramaScore() + 1);
-                scoreRepository.save(score);
+                score.setMoviedramaScore(score.getMoviedramaScore() + 10);
             case "HUMR" :
-                score =  scoreRepository.findByUserId(userId);
-                score.setHumorScore(score.getHumorScore() + 1);
-                scoreRepository.save(score);
+                score.setHumorScore(score.getHumorScore() + 10);
             case "MUS" :
-                score =  scoreRepository.findByUserId(userId);
-                score.setMusicScore(score.getMusicScore() + 1);
-                scoreRepository.save(score);
+                score.setMusicScore(score.getMusicScore() + 10);
             case "MRG" :
-                score =  scoreRepository.findByUserId(userId);
-                score.setMarriageScore(score.getMarriageScore() + 1);
-                scoreRepository.save(score);
+                score.setMarriageScore(score.getMarriageScore() + 10);
             case "ROM" :
-                score =  scoreRepository.findByUserId(userId);
-                score.setRomanceScore(score.getRomanceScore() + 1);
-                scoreRepository.save(score);
+                score.setRomanceScore(score.getRomanceScore() + 10);
             case "COK" :
-                score =  scoreRepository.findByUserId(userId);
-                score.setCookingScore(score.getCookingScore() + 1);
-                scoreRepository.save(score);
+                score.setCookingScore(score.getCookingScore() + 10);
             case "HLTH" :
-                score =  scoreRepository.findByUserId(userId);
-                score.setHealthScore(score.getHealthScore() + 1);
-                scoreRepository.save(score);
+                score.setHealthScore(score.getHealthScore() + 10);
             case "STD" :
-                score =  scoreRepository.findByUserId(userId);
-                score.setStudyingScore(score.getStudyingScore() + 1);
-                scoreRepository.save(score);
+                score.setStudyingScore(score.getStudyingScore() + 10);
             case "ART" :
-                score =  scoreRepository.findByUserId(userId);
-                score.setArtScore(score.getArtScore() + 1);
-                scoreRepository.save(score);
+                score.setArtScore(score.getArtScore() + 10);
             case "ANML" :
-                score =  scoreRepository.findByUserId(userId);
-                score.setAnimalScore(score.getAnimalScore() + 1);
-                scoreRepository.save(score);
+                score.setAnimalScore(score.getAnimalScore() + 10);
             case "HUMN" :
-                score =  scoreRepository.findByUserId(userId);
-                score.setHumanityScore(score.getHumanityScore() + 1);
-                scoreRepository.save(score);
+                score.setHumanityScore(score.getHumanityScore() + 10);
             case "LIT" :
-                score =  scoreRepository.findByUserId(userId);
-                score.setLiteratureScore(score.getLiteratureScore() + 1);
-                scoreRepository.save(score);
+                score.setLiteratureScore(score.getLiteratureScore() + 10);
             case "FIN" :
-                score =  scoreRepository.findByUserId(userId);
-                score.setFinanceScore(score.getFinanceScore() + 1);
-                scoreRepository.save(score);
+                score.setFinanceScore(score.getFinanceScore() + 10);
             default:
                 break;
         }
+        scoreRepository.save(score);
+
+    }
+
+    public void plusViewScore(Long userId, Page page){
+        Category category = page.getCategory();
+        Score score = scoreRepository.findByUserId(userId);
+//category_code = {TRIP, ITNSCI, MVD, HUMR, MUS, MRG, ROM, COK, HLTH, STD, ART, ANML, HUMN, LIT, FIN}
+        switch (category.getCode()){
+            case "TRIP" :
+                score.setTripScore(score.getTripScore() + 1);
+            case "ITNCSI" :
+                score.setItnscienceScore(score.getItnscienceScore() + 1);
+            case "MVD" :
+                score.setMoviedramaScore(score.getMoviedramaScore() + 1);
+            case "HUMR" :
+                score.setHumorScore(score.getHumorScore() + 1);
+            case "MUS" :
+                score.setMusicScore(score.getMusicScore() + 1);
+            case "MRG" :
+                score.setMarriageScore(score.getMarriageScore() + 1);
+            case "ROM" :
+                score.setRomanceScore(score.getRomanceScore() + 1);
+            case "COK" :
+                score.setCookingScore(score.getCookingScore() + 1);
+            case "HLTH" :
+                score.setHealthScore(score.getHealthScore() + 1);
+            case "STD" :
+                score.setStudyingScore(score.getStudyingScore() + 1);
+            case "ART" :
+                score.setArtScore(score.getArtScore() + 1);
+            case "ANML" :
+                score.setAnimalScore(score.getAnimalScore() + 1);
+            case "HUMN" :
+                score.setHumanityScore(score.getHumanityScore() + 1);
+            case "LIT" :
+                score.setLiteratureScore(score.getLiteratureScore() + 1);
+            case "FIN" :
+                score.setFinanceScore(score.getFinanceScore() + 1);
+            default:
+                break;
+        }
+        scoreRepository.save(score);
 
     }
 
 
 
-    //유저 개인의 점수 총합이 상한에 도달하면 전부 1/2로 나누기, 나머지 버림 (상한 = 100점)
+    //유저 개인의 점수 총합이 상한에 도달하면 전부 1/2로 나누기, 나머지 버림 (상한 = 1000점)
     public void checkUpper(Long userId){
         int totalScore = scoreRepository.getTotalScoreByUserId(userId);
 

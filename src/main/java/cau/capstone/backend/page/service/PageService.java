@@ -1,7 +1,9 @@
 package cau.capstone.backend.page.service;
 
 
+import cau.capstone.backend.User.model.Category;
 import cau.capstone.backend.User.service.ScoreService;
+import cau.capstone.backend.global.redis.RankingService;
 import cau.capstone.backend.global.security.Entity.JwtTokenProvider;
 import cau.capstone.backend.page.dto.request.*;
 import cau.capstone.backend.page.dto.response.ResponsePageDto;
@@ -48,12 +50,27 @@ public class PageService {
 
     private final ScoreService scoreService;
 
+    private final RankingService rankingService;
 
 
     @Transactional
-    public ResponsePageDto getPage(Long pageId){
-
+    public ResponsePageDto getPage(String  accessToken, Long pageId) {
+        Long userId = jwtTokenProvider.getUserPk(accessToken);
         Page page = getPageById(pageId);
+        page.setViewCount(page.getViewCount() + 1);
+        pageRepository.save(page);
+
+        rankingService.viewPage(page.getId(), page.getCategory());
+        scoreService.plusViewScore(userId, page);
+
+        return ResponsePageDto.from(page);
+    }
+
+    @Transactional
+    public ResponsePageDto setPageEmotion(Long pageId, String emotion){
+        Page page = getPageById(pageId);
+        page.setEmotion(emotion);
+        pageRepository.save(page);
 
         return ResponsePageDto.from(page);
     }
@@ -167,7 +184,7 @@ public class PageService {
         return linkedPage.getId();
     }
 
-    
+
     //페이지 좋아요
     @Transactional
     public long likePage(LikePageDto likePageDto, String accessToken){
@@ -183,7 +200,9 @@ public class PageService {
         likes.add(like);
         page.setLikes(likes);
 
-        scoreService.plusScore(userId, page);
+        Category category = page.getCategory();
+        scoreService.plusLikeScore(userId, page);
+        rankingService.likePage(page.getId(), category);
 
         likeRepository.save(like);
         pageRepository.save(page);
@@ -210,6 +229,9 @@ public class PageService {
             List<Like> likes = page.getLikes();
             likes.remove(like);
             page.setLikes(likes);
+
+            Category category = page.getCategory();
+            rankingService.unlikePage(page.getId(), category);
 
             likeRepository.delete(like);
             pageRepository.save(page);

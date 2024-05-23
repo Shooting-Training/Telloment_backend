@@ -36,9 +36,9 @@ public class PageController {
     //페이지 읽기
     @Operation(summary = "페이지 읽기")
     @GetMapping("/{pageId}")
-    public ApiResponse<ResponsePageDto> getPage(@PathVariable Long pageId){
+    public ApiResponse<ResponsePageDto> getPage(@RequestHeader String accessToken, @PathVariable Long pageId){
 
-        return ApiResponse.success(pageService.getPage(pageId), ResponseCode.PAGE_READ_SUCCESS.getMessage());
+        return ApiResponse.success(pageService.getPage(accessToken, pageId), ResponseCode.PAGE_READ_SUCCESS.getMessage());
     }
 
 

@@ -24,6 +24,7 @@ public class ResponsePageDto {
     private int likeCount;
     private int scrapCount;
     private boolean isScrapped;
+    private String emotionType;
 
 
     public static ResponsePageDto of(Page page){
@@ -36,6 +37,7 @@ public class ResponsePageDto {
                 .likeCount(page.getLikeCount())
                 .scrapCount(page.getScrapCount())
                 .isScrapped(page.isScrapped())
+                .emotionType(page.getEmotion().getType().getDescription())
                 .build();
     }
 
@@ -50,6 +52,7 @@ public class ResponsePageDto {
                 .likeCount(page.getLikeCount())
                 .scrapCount(page.getScrapCount())
                 .isScrapped(page.isScrapped())
+                .emotionType(page.getEmotion().getType().getDescription())
                 .build();
     }
 }

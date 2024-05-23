@@ -62,6 +62,15 @@ public class Page extends BaseEntity {
     private Category category;
 
 
+    @Column(name = "view_count")
+    private int viewCount = 0;
+
+    @Column(name = "emotion")
+    @OneToOne(cascade = CascadeType.ALL)
+//    @JoinColumn(name = "emotion_id", referencedColumnName = "id")
+    private Emotion emotion;
+
+
     @Column(name = "is_scrapped")
     private boolean isScrapped = false;
 
@@ -106,6 +115,9 @@ public class Page extends BaseEntity {
 
     public void setNextId(Page page) {this.nextId = page.getId();}
     public void setNextId(long nextId) {this.nextId = nextId;}
+
+    public void setEmotion(String emotion) { this.emotion.setTypeFromString(emotion);
+    }
 
 
     public int getScrapCount() { return scraps.size(); }
