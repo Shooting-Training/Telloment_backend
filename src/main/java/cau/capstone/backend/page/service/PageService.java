@@ -57,14 +57,14 @@ public class PageService {
     public ResponsePageDto getPage(String  accessToken, Long pageId) {
         Long userId = jwtTokenProvider.getUserPk(accessToken);
         Page page = getPageById(pageId);
-        page.setViewCount(page.getViewCount() + 1);
+            page.setViewCount(page.getViewCount() + 1);
         pageRepository.save(page);
 
         rankingService.viewPage(page.getId(), page.getCategory());
         scoreService.plusViewScore(userId, page);
 
         return ResponsePageDto.from(page);
-    }
+}
 
     @Transactional
     public ResponsePageDto setPageEmotion(Long pageId, String emotion){

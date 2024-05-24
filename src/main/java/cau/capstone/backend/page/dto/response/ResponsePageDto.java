@@ -25,6 +25,7 @@ public class ResponsePageDto {
     private int scrapCount;
     private boolean isScrapped;
     private String emotionType;
+    private String categoryCode;
 
 
     public static ResponsePageDto of(Page page){

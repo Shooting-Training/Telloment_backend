@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+
+//책이름, 페이지의 전체 하트의 합, 전체 페이지의 수, 유저 이름 제공
 @Getter
 @Builder
 @AllArgsConstructor

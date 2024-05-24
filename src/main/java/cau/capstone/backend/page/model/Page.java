@@ -70,6 +70,9 @@ public class Page extends BaseEntity {
 //    @JoinColumn(name = "emotion_id", referencedColumnName = "id")
     private Emotion emotion;
 
+    @ElementCollection
+    private ArrayList<String> tags;
+
 
     @Column(name = "is_scrapped")
     private boolean isScrapped = false;
