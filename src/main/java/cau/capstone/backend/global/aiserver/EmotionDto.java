@@ -13,6 +13,6 @@ public class EmotionDto {
 
 
     String emotion;
-    double value;
+    int value;
 
 }
