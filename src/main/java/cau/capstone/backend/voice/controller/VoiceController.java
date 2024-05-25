@@ -2,13 +2,16 @@ package cau.capstone.backend.voice.controller;
 
 import cau.capstone.backend.global.aiserver.EmotionDto;
 import cau.capstone.backend.global.aiserver.FastAPIService;
-import cau.capstone.backend.page.model.Page;
 import cau.capstone.backend.page.service.PageService;
 import cau.capstone.backend.voice.dto.response.EmotionResponseDto;
+import cau.capstone.backend.voice.dto.response.VoiceResponseDto;
+import cau.capstone.backend.voice.service.VoiceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 
 @RestController
@@ -18,6 +21,7 @@ public class VoiceController {
 
     private final FastAPIService fastAPIService;
     private final PageService pageService;
+    private final VoiceService voiceService;
 
     @PostMapping("/user/{userId}")
     public String cloneVoice(@RequestPart MultipartFile file, @PathVariable Long userId) {
@@ -26,7 +30,7 @@ public class VoiceController {
     }
 
     @GetMapping("/page/{pageId}")
-    public String getEmotionFromPage(@PathVariable Long pageId, @RequestHeader String accessToken) {
+    public EmotionResponseDto getEmotionFromPage(@PathVariable Long pageId, @RequestHeader String accessToken) {
 
         var page = pageService.getPage(accessToken, pageId);
         Mono<EmotionDto> dto = fastAPIService.getEmotionData(page.getContent());
@@ -34,8 +38,24 @@ public class VoiceController {
         String emotion = res.getEmotion();
         int value = res.getValue();
 
+        return EmotionResponseDto.of(emotion, value);
+    }
 
-        return EmotionResponseDto.of(emotion, value).toString();
+    @GetMapping("/")
+    public List<VoiceResponseDto> getVoiceList() {
+        return voiceService.getAccessableVoiceList();
+    }
+
+    @PostMapping("/{voiceId}/scrap")
+    public String scrapVoice(@RequestHeader String accessToken, @PathVariable Long voiceId) {
+        voiceService.scrapVoiceByUser(accessToken, voiceId);
+        return "Success";
+    }
+
+    @DeleteMapping("/{voiceId}/scrap")
+    public String deleteScrapVoice(@RequestHeader String accessToken, @PathVariable Long voiceId) {
+        voiceService.deleteScrapVoiceByUser(accessToken, voiceId);
+        return "Success";
     }
 
 }

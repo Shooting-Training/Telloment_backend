@@ -2,7 +2,9 @@ package cau.capstone.backend.voice.model;
 
 
 import cau.capstone.backend.User.model.User;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import javax.persistence.*;
 
@@ -10,7 +12,7 @@ import javax.persistence.*;
 @Entity
 @ToString
 @Table(name = "voice")
-public class Voice {
+public class VoiceEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
