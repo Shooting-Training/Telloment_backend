@@ -17,6 +17,7 @@ import cau.capstone.backend.global.util.exception.UserException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +34,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final FollowRepository followRepository;
     private final JwtTokenProvider jwtTokenProvider;
+    private final PasswordEncoder passwordEncoder;
 
 
     @Transactional
@@ -46,7 +48,11 @@ public class UserService {
             throw new UserException(ResponseCode.USER_EMAIL_ALREADY_EXIST);
         }
 
-        User user = User.createUser(createUserDto.getEmail(), createUserDto.getPassword(),createUserDto.getName(), createUserDto.getNickname());
+
+        String encodedPassword = passwordEncoder.encode(createUserDto.getPassword());
+
+        System.out.println("encodedPassword: " + encodedPassword);
+        User user = User.createUser(createUserDto.getEmail(), encodedPassword, createUserDto.getName(), createUserDto.getNickname());
 
         return userRepository.save(user).getId();
     }

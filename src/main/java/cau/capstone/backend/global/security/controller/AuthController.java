@@ -26,13 +26,13 @@ public class AuthController {
 
 
     @PostMapping("/signup")
-    public ApiResponse<TokenDto> signup(@RequestBody JoinUserDto joinUserDto) {
+    public ApiResponse<String> signup(@RequestBody JoinUserDto joinUserDto) {
 
         CreateUserDto createUserDto = joinUserDto.toCreateUserDto();
         userService.saveUser(createUserDto);
-        TokenDto tokenDto = authService.login(joinUserDto);
+//        TokenDto tokenDto = authService.login(joinUserDto);
 
-        return ApiResponse.success(tokenDto, ResponseCode.USER_SIGNUP_SUCCESS.getMessage());
+        return ApiResponse.success("sign up success", ResponseCode.USER_SIGNUP_SUCCESS.getMessage());
 
     }
 

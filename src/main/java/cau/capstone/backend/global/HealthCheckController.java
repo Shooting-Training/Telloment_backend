@@ -3,6 +3,7 @@ package cau.capstone.backend.global;
 import cau.capstone.backend.global.aiserver.EmotionDto;
 import cau.capstone.backend.global.aiserver.FastAPIService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
@@ -32,7 +33,7 @@ public class HealthCheckController {
     }
 
     @PostMapping("/test/clone")
-    public String testClone(@RequestPart MultipartFile file){
+    public String testClone(@RequestPart FilePart file){
         Mono<String> test = fastAPIService.cloneVoice( (long)11111, file);
 
         String result = test.block();

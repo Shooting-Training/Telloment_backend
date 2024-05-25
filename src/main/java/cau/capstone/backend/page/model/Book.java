@@ -6,12 +6,16 @@ import cau.capstone.backend.global.BaseEntity;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "book")
@@ -31,11 +35,21 @@ public class Book extends BaseEntity {
     @JoinColumn(name = "book_id")
     private List<Page> pages;
 
+    @Column(name = "category")
+    @Enumerated(EnumType.STRING)
+    private Category category;
 
-    public static Book createBook(User user, String bookName) {
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinTable(name = "book_hashtags",
+            joinColumns = @JoinColumn(name = "book_id"),
+            inverseJoinColumns = @JoinColumn(name = "hashtag_id"))
+    private Set<Hashtag> hashtags = new HashSet<>();
+
+    public static Book createBook(User user, String bookName, String categoryCode) {
         Book book = new Book();
         book.user = user;
         book.bookName = bookName;
+        book.category = Category.getByCode(categoryCode);
 
 
         return book;

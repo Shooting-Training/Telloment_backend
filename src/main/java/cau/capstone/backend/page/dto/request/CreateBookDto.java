@@ -12,8 +12,9 @@ public class CreateBookDto {
 
 
     private String bookName;
+    private String categoryCode;
 
-    public static CreateBookDto of(String bookName) {
-        return new CreateBookDto(bookName);
+    public static CreateBookDto of(String bookName, String categoryCode) {
+        return new CreateBookDto(bookName, categoryCode);
     }
 }

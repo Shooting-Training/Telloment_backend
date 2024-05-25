@@ -15,10 +15,14 @@ import cau.capstone.backend.page.service.BookService;
 import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Api(tags = "4. Book")
@@ -28,8 +32,6 @@ import java.util.stream.Collectors;
 public class BookController {
 
     private final BookService bookService;
-
-
 
 
     @Operation(summary = "북 생성")
@@ -79,6 +81,17 @@ public class BookController {
         return ApiResponse.success(bookService.getPageListFromBook(bookId), ResponseCode.BOOK_READ_SUCCESS.getMessage());
     }
 
+
+    @GetMapping("/search")
+    public ResponseEntity<org.springframework.data.domain.Page<Book>> searchBooks(
+            @RequestParam("name") String name,
+            @RequestParam("hashtags") Set<String> hashtags,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        org.springframework.data.domain.Page<Book> result = bookService.searchBooksByNameOrHashtags(name, hashtags, pageable);
+        return ResponseEntity.ok(result);
+    }
 
 
 }

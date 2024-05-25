@@ -1,7 +1,7 @@
-package cau.capstone.backend.image.controller;
+package cau.capstone.backend.aws.image.controller;
 
 import cau.capstone.backend.global.repository.ImageRepository;
-import cau.capstone.backend.image.service.ImageService;
+import cau.capstone.backend.aws.image.service.ImageService;
 import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,8 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/image")
 public class ImageController {
-
-
 
     private final ImageRepository imageRepository;
     private final ImageService imageService;

@@ -13,6 +13,9 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.Api;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -126,6 +129,16 @@ public class PageController {
         return ApiResponse.success(pageService.getPageListByDate(userId, date), ResponseCode.PAGE_READ_SUCCESS.getMessage());
     }
 
+
+    @GetMapping("/search")
+    public ResponseEntity<org.springframework.data.domain.Page<Page>> searchPages(
+            @RequestParam("keyword") String keyword,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        org.springframework.data.domain.Page<Page> result = pageService.searchPagesWithKeywordAndPaging(keyword, pageable);
+        return ResponseEntity.ok(result);
+    }
 
 
 }

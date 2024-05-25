@@ -2,7 +2,12 @@ package cau.capstone.backend.page.model.repository;
 
 import cau.capstone.backend.page.model.Page;
 
+import org.springframework.data.domain.Pageable;
+
+
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -23,4 +28,10 @@ public interface PageRepository extends JpaRepository<Page, Long> {
 
     Optional<Page> findPageById(Long pageId); // 해당 게시물 조회
 
+    // JPQL을 사용하여 title 또는 content에 키워드가 포함되거나, 해당 페이지의 해시태그 중 하나가 키워드를 포함하는 Page 검색
+    @Query("SELECT p FROM Page p LEFT JOIN p.hashtags h WHERE LOWER(p.title) LIKE LOWER(concat('%', :keyword, '%')) OR LOWER(p.content) LIKE LOWER(concat('%', :keyword, '%')) OR LOWER(h.tag) LIKE LOWER(concat('%', :keyword, '%'))")
+    List<Page> findByKeyword(@Param("keyword") String keyword);
+
+    @Query("SELECT p FROM Page p LEFT JOIN p.hashtags h WHERE LOWER(p.title) LIKE LOWER(concat('%', :keyword, '%')) OR LOWER(p.content) LIKE LOWER(concat('%', :keyword, '%')) OR LOWER(h.tag) LIKE LOWER(concat('%', :keyword, '%')) GROUP BY p")
+    org.springframework.data.domain.Page<Page> findByKeywordWithPaging(@Param("keyword") String keyword, Pageable pageable);
 }

@@ -1,4 +1,4 @@
-package cau.capstone.backend.global;
+package cau.capstone.backend.aws.image;
 
 import java.util.List;
 import java.util.stream.Collectors;

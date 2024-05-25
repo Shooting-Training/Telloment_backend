@@ -13,15 +13,20 @@ import cau.capstone.backend.page.dto.request.DeletePageFromBookDto;
 import cau.capstone.backend.page.dto.response.ResponseBookDto;
 import cau.capstone.backend.page.dto.response.ResponsePageDto;
 import cau.capstone.backend.page.model.Book;
+import cau.capstone.backend.page.model.Hashtag;
 import cau.capstone.backend.page.model.Page;
 import cau.capstone.backend.page.model.repository.BookRepository;
+import cau.capstone.backend.page.model.repository.HashtagRepository;
 import cau.capstone.backend.page.model.repository.PageRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -33,15 +38,17 @@ public class BookService {
     private final UserRepository userRepository;
     private final BookRepository bookRepository;
     private final PageRepository pageRepository;
+    private final HashtagRepository hashtagRepository;
 
     private final JwtTokenProvider jwtTokenProvider;
+
 
 
     @Transactional
     public long createBook(CreateBookDto createBookDto, String accessToken) {
         Long userId = jwtTokenProvider.getUserPk(accessToken);
         User user = getUserById(userId);
-        Book book = Book.createBook(user, createBookDto.getBookName());
+        Book book = Book.createBook(user, createBookDto.getBookName(), createBookDto.getCategoryCode());
 
         return bookRepository.save(book).getId();
     }
@@ -121,6 +128,46 @@ public class BookService {
 
         return responsePageDtoList;
     }
+
+
+    public List<Book> getBooksByHashtag(String hashtag) {
+        return hashtagRepository.findBooksByHashtag(hashtag);
+    }
+
+    @Transactional
+    public Book createBookWithHashtags(Book book, Set<String> hashtags) {
+        Set<Hashtag> hashtagEntities = new HashSet<>();
+
+        for (String tag : hashtags) {
+            Hashtag hashtag = hashtagRepository.findByTag(tag)
+                    .orElseGet(() -> hashtagRepository.save(new Hashtag(tag)));
+            hashtagEntities.add(hashtag);
+        }
+
+        book.setHashtags(hashtagEntities);
+        return bookRepository.save(book);
+
+    }
+
+    @Transactional
+    public void setHashtagsToBook(Book book, Set<String> hashtags) {
+        Set<Hashtag> existingHashtags = book.getHashtags();
+
+        for (String tag : hashtags) {
+            Hashtag existingHashtag = hashtagRepository.findByTag(tag)
+                    .orElseGet(() -> new Hashtag(tag));
+            existingHashtags.add(existingHashtag);
+        }
+
+        book.setHashtags(existingHashtags);
+        bookRepository.save(book);
+    }
+
+
+    public org.springframework.data.domain.Page<Book> searchBooksByNameOrHashtags(String name, Set<String> hashtags, Pageable pageable) {
+        return bookRepository.findByBookNameContainingOrHashtagsIn(name, hashtags, pageable);
+    }
+
 
 
     private User getUserById(Long userId){

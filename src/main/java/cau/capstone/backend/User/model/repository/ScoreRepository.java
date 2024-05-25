@@ -1,6 +1,5 @@
 package cau.capstone.backend.User.model.repository;
 
-import cau.capstone.backend.User.model.Category;
 import cau.capstone.backend.User.model.Score;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

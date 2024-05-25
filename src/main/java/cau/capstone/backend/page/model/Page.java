@@ -1,7 +1,6 @@
 package cau.capstone.backend.page.model;
 
 
-import cau.capstone.backend.User.model.Category;
 import cau.capstone.backend.User.model.User;
 import cau.capstone.backend.global.BaseEntity;
 import lombok.AccessLevel;
@@ -12,7 +11,9 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -57,21 +58,20 @@ public class Page extends BaseEntity {
     @OneToMany(mappedBy = "page", fetch = FetchType.LAZY)
     private List<Like> likes = new ArrayList<>();
 
-    @Column(name = "category")
-    @Enumerated(EnumType.STRING)
-    private Category category;
-
 
     @Column(name = "view_count")
     private int viewCount = 0;
 
-    @Column(name = "emotion")
+//    @Column(name = "emotion")
     @OneToOne(cascade = CascadeType.ALL)
-//    @JoinColumn(name = "emotion_id", referencedColumnName = "id")
+    @JoinColumn(name = "emotion_id", referencedColumnName = "id")
     private Emotion emotion;
 
-    @ElementCollection
-    private ArrayList<String> tags;
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinTable(name = "page_hashtags",
+            joinColumns = @JoinColumn(name = "page_id"),
+            inverseJoinColumns = @JoinColumn(name = "hashtag_id"))
+    private Set<Hashtag> hashtags = new HashSet<>();
 
 
     @Column(name = "is_scrapped")
@@ -79,13 +79,12 @@ public class Page extends BaseEntity {
 
 
     //생성메서드
-    public static Page createPage(User user,Book book, String title, String content, String code){
+    public static Page createPage(User user,Book book, String title, String content){
         Page page = new Page();
         page.user = user;
         page.title = title;
         page.content = content;
         page.book = book;
-        page.category = Category.getByCode(code);
 
         return page;
     }
@@ -126,6 +125,28 @@ public class Page extends BaseEntity {
     public int getScrapCount() { return scraps.size(); }
     public int getLikeCount() { return likes.size(); }
     public boolean isScrapped() { return isScrapped; }
+
+
+    public boolean containsKeyword(String keyword) {
+        // 제목이나 내용에 키워드가 포함되어 있는지 확인
+        if (title != null && title.contains(keyword)) {
+            return true;
+        }
+
+        if (content != null && content.contains(keyword)) {
+            return true;
+        }
+
+        // 해시태그 목록에서 키워드를 포함하는지 확인
+        for (Hashtag hashtag : hashtags) {
+            if (hashtag.getTag().contains(keyword)) {
+                return true;
+            }
+        }
+
+        // 위 조건들에 해당하지 않으면 false 반환
+        return false;
+    }
 
 
 }
