@@ -1,0 +1,21 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="create_table_voice_scrap" author="your_author_name">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="voice_scrap"/>
+            </not>
+        </preConditions>
+        <createTable tableName="voice_scrap">
+            <column name="user_id" type="BIGINT"/>
+            <column name="voice_id" type="BIGINT"/>
+        </createTable>
+        <addPrimaryKey
+                columnNames="user_id, voice_id"
+                constraintName="PK_VOICE_SCRAP"
+                tableName="voice_scrap"/>
+    </changeSet>
+</databaseChangeLog>
