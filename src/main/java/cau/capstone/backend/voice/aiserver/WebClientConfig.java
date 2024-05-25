@@ -1,4 +1,4 @@
-package cau.capstone.backend.global.aiserver;
+package cau.capstone.backend.voice.aiserver;
 
 
 import org.springframework.beans.factory.annotation.Value;

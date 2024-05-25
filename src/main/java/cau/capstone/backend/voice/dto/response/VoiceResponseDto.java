@@ -1,7 +1,6 @@
 package cau.capstone.backend.voice.dto.response;
 
 
-import cau.capstone.backend.global.aiserver.VoiceDto;
 import cau.capstone.backend.voice.model.VoiceEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

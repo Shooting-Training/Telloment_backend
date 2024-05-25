@@ -46,8 +46,12 @@ public class BookService {
 
     @Transactional
     public long createBook(CreateBookDto createBookDto, String accessToken) {
-        Long userId = jwtTokenProvider.getUserPk(accessToken);
-        User user = getUserById(userId);
+//        Long userId = jwtTokenProvider.getUserPk(accessToken);
+//        User user = getUserById(userId);
+        String email = jwtTokenProvider.getUserEmail(accessToken);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserException(ResponseCode.USER_NOT_FOUND));
+
         Book book = Book.createBook(user, createBookDto.getBookName(), createBookDto.getCategoryCode());
 
         return bookRepository.save(book).getId();

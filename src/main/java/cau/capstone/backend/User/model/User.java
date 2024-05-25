@@ -46,7 +46,7 @@ public class User extends BaseEntity implements UserDetails  {
 
     @Column(name = "user_role")
     @Enumerated(EnumType.STRING)
-    private Authority role = Authority.ROLE_USER; //권한
+    private Authority role = Authority.USER; //권한
 //
 //    @Column(name="provider", columnDefinition = "varchar(10) default 'EMAIL'")
 //    @Enumerated(EnumType.STRING)
@@ -91,7 +91,9 @@ public class User extends BaseEntity implements UserDetails  {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<Authority> auth = Collections.singletonList(this.role);
-        return auth.stream().map(role -> new SimpleGrantedAuthority(role.toString())).collect(Collectors.toSet());
+        return auth.stream()
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.toString())) // 'ROLE_' 접두사 추가
+                .collect(Collectors.toSet());
     }
 
     @Override
@@ -134,7 +136,7 @@ public class User extends BaseEntity implements UserDetails  {
         user.passwd = passwd;
         user.name = name;
         user.nickname = nickname;
-        user.role = Authority.ROLE_USER;
+        user.role = Authority.USER;
         return user;
     }
 

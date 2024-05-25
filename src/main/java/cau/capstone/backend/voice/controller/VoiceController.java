@@ -1,7 +1,7 @@
 package cau.capstone.backend.voice.controller;
 
-import cau.capstone.backend.global.aiserver.EmotionDto;
-import cau.capstone.backend.global.aiserver.FastAPIService;
+import cau.capstone.backend.voice.aiserver.EmotionDto;
+import cau.capstone.backend.voice.aiserver.FastAPIService;
 import cau.capstone.backend.global.security.Entity.JwtTokenProvider;
 import cau.capstone.backend.page.service.PageService;
 import cau.capstone.backend.voice.dto.request.SpeechRequestDto;
@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
@@ -30,7 +31,7 @@ public class VoiceController {
     private final VoiceService voiceService;
 
     @PostMapping("/user/{userId}")
-    public String cloneVoice(@RequestPart MultipartFile file, @PathVariable Long userId) {
+    public String cloneVoice(@RequestPart FilePart file, @PathVariable Long userId) {
         Mono<String> test = fastAPIService.cloneVoice(userId, file);
         return test.block();
     }

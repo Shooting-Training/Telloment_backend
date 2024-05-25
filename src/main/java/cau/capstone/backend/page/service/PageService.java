@@ -74,8 +74,12 @@ public class PageService {
 
     @Transactional
     public long createPage(CreatePageDto createPageDto, String accessToken) {
-        Long userId = jwtTokenProvider.getUserPk(accessToken);
-        User user = getUserById(userId);
+//        Long userId = jwtTokenProvider.getUserPk(accessToken);
+//        User user = getUserById(userId);
+        String userEmail = jwtTokenProvider.getUserEmail(accessToken);
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new UserException(ResponseCode.USER_NOT_FOUND));
+
         Book book = getBookById(createPageDto.getBookId());
 
         Page page = Page.createPage(user, book,  createPageDto.getTitle(), createPageDto.getContent());

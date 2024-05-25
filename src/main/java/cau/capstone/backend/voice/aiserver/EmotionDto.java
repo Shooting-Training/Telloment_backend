@@ -1,4 +1,4 @@
-package cau.capstone.backend.global.aiserver;
+package cau.capstone.backend.voice.aiserver;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

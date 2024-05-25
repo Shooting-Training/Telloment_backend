@@ -145,6 +145,9 @@ public class JwtTokenProvider {
        return Long.parseLong(subject);
     }
 
+    public String getUserEmail(String token) {
+        return Jwts.parser().setSigningKey(key).parseClaimsJws(token).getBody().getSubject();
+    }
 
     //    //토큰 생성
 //    public String createToken(String userPk){

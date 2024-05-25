@@ -29,7 +29,7 @@ public class CreateUserDto {
         return User.builder()
                 .email(email)
                 .passwd(passwordEncoder.encode(password))
-                .role(Authority.ROLE_USER)
+                .role(Authority.USER)
                 .build();
     }
 }

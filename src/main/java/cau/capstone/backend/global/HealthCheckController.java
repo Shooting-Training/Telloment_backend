@@ -1,11 +1,10 @@
 package cau.capstone.backend.global;
 
-import cau.capstone.backend.global.aiserver.EmotionDto;
-import cau.capstone.backend.global.aiserver.FastAPIService;
+import cau.capstone.backend.voice.aiserver.EmotionDto;
+import cau.capstone.backend.voice.aiserver.FastAPIService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
 
 @RestController
