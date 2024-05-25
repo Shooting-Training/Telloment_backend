@@ -84,9 +84,13 @@ public class UserService {
   //   회원정보 수정
     @Transactional
     public ResponseUserDto updateUserInfo(UpdateUserDto updateUserDto, String accessToken) {
-        Long userId = jwtTokenProvider.getUserPk(accessToken);
+//        Long userId = jwtTokenProvider.getUserPk(accessToken);
 
-        User user = getUserById(userId);
+        String email = jwtTokenProvider.getUserEmail(accessToken);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserException(ResponseCode.USER_NOT_FOUND));
+
+//        User user = getUserById(userId);
         log.info("{} 회원정보 조회 완료: ", user.getName());
 
         user.updateUser(updateUserDto.getName(), updateUserDto.getImage(), updateUserDto.getName(), updateUserDto.getNickname() );
@@ -98,21 +102,21 @@ public class UserService {
     }
 
 
-    //for test
-    @Transactional
-    public ResponseUserDto updateUserInfo(UpdateUserDto updateUserDto) {
-        Long userId = 1L;
-
-        User user = getUserById(userId);
-        log.info("{} 회원정보 조회 완료: ", user.getName());
-
-        user.updateUser(updateUserDto.getName(), updateUserDto.getImage(), updateUserDto.getName(), updateUserDto.getNickname() );
-        userRepository.save(user);
-        log.info("{} 회원정보 수정 완료: ", user.getName());
-
-        ResponseUserDto responseUserDto = ResponseUserDto.of(user);
-        return responseUserDto;
-    }
+//    //for test
+//    @Transactional
+//    public ResponseUserDto updateUserInfo(UpdateUserDto updateUserDto) {
+//        Long userId = 1L;
+//
+//        User user = getUserById(userId);
+//        log.info("{} 회원정보 조회 완료: ", user.getName());
+//
+//        user.updateUser(updateUserDto.getName(), updateUserDto.getImage(), updateUserDto.getName(), updateUserDto.getNickname() );
+//        userRepository.save(user);
+//        log.info("{} 회원정보 수정 완료: ", user.getName());
+//
+//        ResponseUserDto responseUserDto = ResponseUserDto.of(user);
+//        return responseUserDto;
+//    }
 
 
 
@@ -122,25 +126,30 @@ public class UserService {
     // @CacheEvict(value = {"ResponseSimpleUserDto", "ResponseUserDto", "ResponseUserNutritionDto"}, key = "#userId", cacheManager = "diareatCacheManager")
     @Transactional
     public long deleteUser(String accessToken) {
-        Long userId = jwtTokenProvider.getUserPk(accessToken);
+//        Long userId = jwtTokenProvider.getUserPk(accessToken);
 
-        validateUser(userId);
+        String email = jwtTokenProvider.getUserEmail(accessToken);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserException(ResponseCode.USER_NOT_FOUND));
+        Long userId = user.getId();
+
+//        validateUser(userId);
         userRepository.deleteById(userId);
         log.info("PK {} 회원 탈퇴 완료: ", userId);
 
         return userId;
     }
-
-    //for test
-    @Transactional
-    public long deleteUser(Long userId) {
-        validateUser(userId);
-        userRepository.deleteById(userId);
-        log.info("PK {} 회원 탈퇴 완료: ", userId);
-
-        return userId;
-    }
-
+//
+//    //for test
+//    @Transactional
+//    public long deleteUser(Long userId) {
+//        validateUser(userId);
+//        userRepository.deleteById(userId);
+//        log.info("PK {} 회원 탈퇴 완료: ", userId);
+//
+//        return userId;
+//    }
+//
 
 
     //팔로우하는 특정 회원 검색

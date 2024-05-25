@@ -60,7 +60,11 @@ public class BookService {
 
     @Transactional
     public List<ResponseBookDto> getBookList(String accessToken){
-        Long userId = jwtTokenProvider.getUserPk(accessToken);
+
+        String email = jwtTokenProvider.getUserEmail(accessToken);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserException(ResponseCode.USER_NOT_FOUND));
+        Long userId = user.getId();
 
         List<Book> bookList = bookRepository.findAllByUserId(userId);
 
@@ -76,7 +80,11 @@ public class BookService {
 
     @Transactional
     public long deleteBook(Long bookId, String accessToken){
-        Long userId = jwtTokenProvider.getUserPk(accessToken);
+        String email = jwtTokenProvider.getUserEmail(accessToken);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserException(ResponseCode.USER_NOT_FOUND));
+        Long userId = user.getId();
+
         validateBook(bookId, userId);
 
         Book book = getBookById(bookId);

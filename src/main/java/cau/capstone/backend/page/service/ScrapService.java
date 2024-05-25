@@ -45,8 +45,15 @@ public class ScrapService {
     //페이지 스크랩
     @Transactional
     public long saveScrap(CreateScrapDto createScrapDto, String accessToken){
-        Long userId = jwtTokenProvider.getUserPk(accessToken);
+//        Long userId = jwtTokenProvider.getUserPk(accessToken);
+
+        String email = jwtTokenProvider.getUserEmail(accessToken);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserException(ResponseCode.USER_NOT_FOUND));
+        Long userId = user.getId();
+
         Page page = getPageById(createScrapDto.getPageId());
+
 
 
         //ScrapRepository로 검색 가능 == 해당 스크랩은 유저가 스크랩한 페이지다
@@ -55,7 +62,7 @@ public class ScrapService {
         if (isScrapped){
             throw new ScrapException(ResponseCode.SCRAP_ALREADY_EXIST);
         } else{
-            User user = getUserById(userId);
+//            User user = getUserById(userId);
             //createScrap
             Scrap scrap = Scrap.createScrap(user, page);
             return scrapRepository.save(scrap).getId();
@@ -68,9 +75,14 @@ public class ScrapService {
     //스크랩 리스트 반환
     @Transactional(readOnly = true)
     public List<ResponseScrapDto> getScrapList(String accessToken){
-        Long userId = jwtTokenProvider.getUserPk(accessToken);
+//        Long userId = jwtTokenProvider.getUserPk(accessToken);
 
-        validateUser(userId);
+        String email = jwtTokenProvider.getUserEmail(accessToken);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserException(ResponseCode.USER_NOT_FOUND));
+        Long userId = user.getId();
+
+//        validateUser(userId);
         List<Scrap> scrapList = scrapRepository.findAllByUserId(userId);
         log.info("scrap list returned: " + scrapList.size());
 
@@ -86,7 +98,11 @@ public class ScrapService {
     @Transactional
     public long deleteScrap(Long scrapId, String accessToken){
 
-        Long userId = jwtTokenProvider.getUserPk(accessToken);
+//        Long userId = jwtTokenProvider.getUserPk(accessToken);
+        String email = jwtTokenProvider.getUserEmail(accessToken);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserException(ResponseCode.USER_NOT_FOUND));
+        Long userId = user.getId();
 
         validateScrap(scrapId, userId);
         Scrap scrap = getScrapById(scrapId);
@@ -106,12 +122,17 @@ public class ScrapService {
     //스크랩을 통해 페이지를 생성. 스크랩시 원하면 같은 내용의 페이지를 생성한다.
     @Transactional
     public Long createPageFromScrap(CreatePageFromScrapDto createPageFromScrapDto, String accessToken){
-        Long userId = jwtTokenProvider.getUserPk(accessToken);
+//        Long userId = jwtTokenProvider.getUserPk(accessToken);
+        String email = jwtTokenProvider.getUserEmail(accessToken);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserException(ResponseCode.USER_NOT_FOUND));
+        Long userId = user.getId();
+
 
         validateScrap(createPageFromScrapDto.getScrapId(), userId);
         validateBook(createPageFromScrapDto.getBookId(), userId);
 
-        User user = getUserById(userId);
+//        User user = getUserById(userId);
         Scrap scrap = getScrapById(createPageFromScrapDto.getScrapId());
         Book book = getBookById(createPageFromScrapDto.getBookId());
 

@@ -48,7 +48,13 @@ public class PageService {
 
     @Transactional
     public ResponsePageDto getPage(String  accessToken, Long pageId) {
-        Long userId = jwtTokenProvider.getUserPk(accessToken);
+//        Long userId = jwtTokenProvider.getUserPk(accessToken);
+
+        String userEmail = jwtTokenProvider.getUserEmail(accessToken);
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new UserException(ResponseCode.USER_NOT_FOUND));
+        Long userId = user.getId();
+
         Page page = getPageById(pageId);
         page.setViewCount(page.getViewCount() + 1);
         pageRepository.save(page);
@@ -182,11 +188,16 @@ public class PageService {
     @Transactional
     public long likePage(LikePageDto likePageDto, String accessToken){
 
-        Long userId = jwtTokenProvider.getUserPk(accessToken);
+//        Long userId = jwtTokenProvider.getUserPk(accessToken);
+
+        String userEmail = jwtTokenProvider.getUserEmail(accessToken);
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new UserException(ResponseCode.USER_NOT_FOUND));
+        Long userId = user.getId();
 
         Page page = getPageById(likePageDto.getPageId());
         Book book = getBookById(page.getBook().getId());
-        User user = getUserById(userId);
+//        User user = getUserById(userId);
 
         Like like = Like.createLike(user, page);
 
@@ -209,7 +220,12 @@ public class PageService {
     public long dislikePage(LikePageDto likePageDto, String accessToken){
 
 
-        Long userId = jwtTokenProvider.getUserPk(accessToken);
+//        Long userId = jwtTokenProvider.getUserPk(accessToken);
+        String userEmail = jwtTokenProvider.getUserEmail(accessToken);
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new UserException(ResponseCode.USER_NOT_FOUND));
+        Long userId = user.getId();
+
 
         Page page = getPageById(likePageDto.getPageId());
         Book book = getBookById(page.getBook().getId());
