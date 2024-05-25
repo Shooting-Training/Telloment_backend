@@ -1,6 +1,5 @@
 package cau.capstone.backend.global.redis;
 
-import cau.capstone.backend.User.model.Category;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

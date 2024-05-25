@@ -1,23 +1,15 @@
 package cau.capstone.backend.page.service;
 
 
-import cau.capstone.backend.User.model.Category;
+import cau.capstone.backend.page.model.Category;
 import cau.capstone.backend.User.service.ScoreService;
 import cau.capstone.backend.global.redis.RankingService;
 import cau.capstone.backend.global.security.Entity.JwtTokenProvider;
 import cau.capstone.backend.page.dto.request.*;
 import cau.capstone.backend.page.dto.response.ResponsePageDto;
-import cau.capstone.backend.page.model.Like;
-import cau.capstone.backend.page.model.Page;
-import cau.capstone.backend.page.model.Book;
-import cau.capstone.backend.page.model.Scrap;
-import cau.capstone.backend.page.model.repository.LikeRepository;
-import cau.capstone.backend.page.model.repository.BookRepository;
+import cau.capstone.backend.page.model.*;
+import cau.capstone.backend.page.model.repository.*;
 import cau.capstone.backend.User.model.User;
-import cau.capstone.backend.page.dto.response.ResponseScrapDto;
-import cau.capstone.backend.User.model.repository.FollowRepository;
-import cau.capstone.backend.page.model.repository.PageRepository;
-import cau.capstone.backend.page.model.repository.ScrapRepository;
 import cau.capstone.backend.User.model.repository.UserRepository;
 import cau.capstone.backend.global.util.api.ResponseCode;
 import cau.capstone.backend.global.util.exception.LikeException;
@@ -26,12 +18,12 @@ import cau.capstone.backend.global.util.exception.ScrapException;
 import cau.capstone.backend.global.util.exception.UserException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -51,20 +43,25 @@ public class PageService {
     private final ScoreService scoreService;
 
     private final RankingService rankingService;
+    private final HashtagRepository hashtagRepository;
 
 
     @Transactional
     public ResponsePageDto getPage(String  accessToken, Long pageId) {
         Long userId = jwtTokenProvider.getUserPk(accessToken);
         Page page = getPageById(pageId);
-            page.setViewCount(page.getViewCount() + 1);
+        page.setViewCount(page.getViewCount() + 1);
         pageRepository.save(page);
 
-        rankingService.viewPage(page.getId(), page.getCategory());
+//        rankingService.viewPage(page.getId(), page.getCategory());
         scoreService.plusViewScore(userId, page);
 
         return ResponsePageDto.from(page);
 }
+
+    public org.springframework.data.domain.Page<Page> searchPagesWithKeywordAndPaging(String keyword, Pageable pageable) {
+        return pageRepository.findByKeywordWithPaging(keyword, pageable);
+    }
 
     @Transactional
     public ResponsePageDto setPageEmotion(Long pageId, String emotion){
@@ -81,7 +78,7 @@ public class PageService {
         User user = getUserById(userId);
         Book book = getBookById(createPageDto.getBookId());
 
-        Page page = Page.createPage(user, book,  createPageDto.getTitle(), createPageDto.getContent(), createPageDto.getCode());
+        Page page = Page.createPage(user, book,  createPageDto.getTitle(), createPageDto.getContent());
         log.info("new Page saved: " + page.getTitle());
         return pageRepository.save(page).getId();
     }
@@ -111,15 +108,6 @@ public class PageService {
 
     //페이지 삭제
     @Transactional
-    public long deletePage(Long pageId, Long userId, LocalDateTime date){
-        validatePage(pageId, userId);
-        pageRepository.deleteById(pageId);
-        log.info("Page deleted: " + pageId);
-
-        return pageId;
-    }
-
-    @Transactional
     public long deletePage(Long pageId, Long userId){
         validatePage(pageId, userId);
         pageRepository.deleteById(pageId);
@@ -127,6 +115,7 @@ public class PageService {
 
         return pageId;
     }
+
 
 
 
@@ -192,6 +181,7 @@ public class PageService {
         Long userId = jwtTokenProvider.getUserPk(accessToken);
 
         Page page = getPageById(likePageDto.getPageId());
+        Book book = getBookById(page.getBook().getId());
         User user = getUserById(userId);
 
         Like like = Like.createLike(user, page);
@@ -200,7 +190,7 @@ public class PageService {
         likes.add(like);
         page.setLikes(likes);
 
-        Category category = page.getCategory();
+        Category category = book.getCategory();
         scoreService.plusLikeScore(userId, page);
         rankingService.likePage(page.getId(), category);
 
@@ -218,7 +208,7 @@ public class PageService {
         Long userId = jwtTokenProvider.getUserPk(accessToken);
 
         Page page = getPageById(likePageDto.getPageId());
-
+        Book book = getBookById(page.getBook().getId());
 
         Like like = likeRepository.findByUserIdAndPageId(userId, likePageDto.getPageId());
 
@@ -230,7 +220,7 @@ public class PageService {
             likes.remove(like);
             page.setLikes(likes);
 
-            Category category = page.getCategory();
+            Category category = book.getCategory();
             rankingService.unlikePage(page.getId(), category);
 
             likeRepository.delete(like);
@@ -240,6 +230,38 @@ public class PageService {
         }
 
 
+    }
+
+    public List<Page> getPagesByHashtag(String hashtag) {
+        return hashtagRepository.findPagesByHashtag(hashtag);
+    }
+
+    @Transactional
+    public Page createPageWithHashtags(Page page, Set<String> hashtags) {
+        Set<Hashtag> hashtagEntities = new HashSet<>();
+
+        for (String tag : hashtags) {
+            Hashtag hashtag = hashtagRepository.findByTag(tag)
+                    .orElseGet(() -> hashtagRepository.save(new Hashtag(tag)));
+            hashtagEntities.add(hashtag);
+        }
+
+        page.setHashtags(hashtagEntities);
+        return pageRepository.save(page);
+    }
+
+    @Transactional
+    public void setHashtagsToPage(Page page, Set<String> hashtags) {
+        Set<Hashtag> existingHashtags = page.getHashtags();
+
+        for (String tag : hashtags) {
+            Hashtag existingHashtag = hashtagRepository.findByTag(tag)
+                    .orElseGet(() -> new Hashtag(tag));
+            existingHashtags.add(existingHashtag);
+        }
+
+        page.setHashtags(existingHashtags);
+        pageRepository.save(page);
     }
 
 

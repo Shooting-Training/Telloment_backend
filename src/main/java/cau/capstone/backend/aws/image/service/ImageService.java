@@ -1,4 +1,4 @@
-package cau.capstone.backend.image.service;
+package cau.capstone.backend.aws.image.service;
 
 import org.springframework.stereotype.Service;
 

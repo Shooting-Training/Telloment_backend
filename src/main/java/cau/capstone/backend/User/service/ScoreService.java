@@ -1,10 +1,10 @@
 package cau.capstone.backend.User.service;
 
-import cau.capstone.backend.User.model.Category;
+import cau.capstone.backend.page.model.Book;
+import cau.capstone.backend.page.model.Category;
 import cau.capstone.backend.User.model.Score;
 import cau.capstone.backend.User.model.repository.ScoreRepository;
 import cau.capstone.backend.page.model.Page;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -28,7 +28,8 @@ public class ScoreService {
 
     //페이지에 좋아요를 누를 때 카테고리 정보를 받아 유저의 해당 카테고리 점수를 업데이트
     public void plusLikeScore(Long userId, Page page){
-        Category category = page.getCategory();
+        Book book = page.getBook();
+        Category category = book.getCategory();
         Score score = scoreRepository.findByUserId(userId);
 //category_code = {TRIP, ITNSCI, MVD, HUMR, MUS, MRG, ROM, COK, HLTH, STD, ART, ANML, HUMN, LIT, FIN}
         switch (category.getCode()){
@@ -70,7 +71,8 @@ public class ScoreService {
     }
 
     public void plusViewScore(Long userId, Page page){
-        Category category = page.getCategory();
+        Book book = page.getBook();
+        Category category = book.getCategory();
         Score score = scoreRepository.findByUserId(userId);
 //category_code = {TRIP, ITNSCI, MVD, HUMR, MUS, MRG, ROM, COK, HLTH, STD, ART, ANML, HUMN, LIT, FIN}
         switch (category.getCode()){

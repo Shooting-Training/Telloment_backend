@@ -19,8 +19,6 @@ import javax.validation.constraints.NotBlank;
 @NoArgsConstructor
 public class JoinUserDto {
 
-
-    @NotBlank(message = MessageUtil.NOT_BLANK)
     private String token;
     private String name;
     private String nickName;

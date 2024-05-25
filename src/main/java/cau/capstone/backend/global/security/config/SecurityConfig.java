@@ -4,11 +4,14 @@ import cau.capstone.backend.global.security.JwtAuthFilter;
 import cau.capstone.backend.global.security.Entity.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
@@ -23,9 +26,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
+@Configuration
 @RequiredArgsConstructor
-@EnableWebSecurity
-public class SecurityConfig {
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final JwtTokenProvider jwtTokenProvider;
 
@@ -39,8 +42,8 @@ public class SecurityConfig {
             "/swagger-resources/**", "/swagger-ui.html", "/v3/api-docs/**", "index.html", "/s3/**"
     };
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
         http
                 .httpBasic().disable() // 기본 인증 사용 안 함
                 .csrf().disable() // CSRF 보호 사용 안 함
@@ -59,7 +62,6 @@ public class SecurityConfig {
                 .exceptionHandling()
                 .accessDeniedHandler(new CustomAccessDeniedHandler()) // 접근 거부 처리
                 .authenticationEntryPoint(new CustomAuthenticationEntryPoint()); // 인증 실패 처리
-        return http.build();
     }
 
     private CorsConfigurationSource corsConfigurationSource() {
@@ -93,22 +95,6 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+        return new BCryptPasswordEncoder();
     }
-
-
-//    @Bean
-//    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-//        http
-//                .csrf().disable()
-//                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-//                .and()
-//                .authorizeRequests()
-//                .antMatchers(AUTH_LIST).permitAll() // swagger 등 기타 URL은 인증 없이 접근 가능
-//                .antMatchers("/api/auth/**").permitAll() // 회원가입/로그인 관련 URL은 인증 없이 접근 가능
-//                .anyRequest().authenticated() // 나머지 모든 URL은 Jwt 인증 필요
-//                .and()
-//                .addFilterBefore(new JwtAuthFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
-//        return http.build();
-//    }
 }

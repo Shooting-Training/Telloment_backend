@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
 import org.springframework.http.HttpEntity;
@@ -15,6 +16,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.MultipartBodyBuilder;
+import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
@@ -70,26 +72,18 @@ public class FastAPIService {
     }
 
 
-    public Mono<String> cloneVoice(Long userId, MultipartFile file) {
-//        FileSystemResource resource = new FileSystemResource(filePath);
-
+    public Mono<String> cloneVoice(Long userId, FilePart file) {
         MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
-        bodyBuilder.part("audio_file", file.getResource());
+        bodyBuilder.asyncPart("audio_file", file.content(), DataBuffer.class);
 
         return this.webClient.post()
                 .uri("/v1/voice/{user_id}", userId)
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
                 .retrieve()
-                .onStatus(status -> status.value() == 422, response -> {
-                    // 로깅 또는 예외 처리
-                    return Mono.error(new RuntimeException("Unprocessable Entity"));
-                })
+                .onStatus(status -> status.value() == 422, response -> Mono.error(new RuntimeException("Unprocessable Entity")))
                 .bodyToMono(String.class)
-                .doOnError(WebClientResponseException.class, ex -> {
-                    // 예외 로깅
-                    System.err.println("Error response: " + ex.getResponseBodyAsString());
-                });
+                .doOnError(WebClientResponseException.class, ex -> System.err.println("Error response: " + ex.getResponseBodyAsString()));
     }
 
 
@@ -104,5 +98,29 @@ public class FastAPIService {
                 .retrieve()
                 .bodyToMono(byte[].class);
     }
+
+
+//    public Mono<String> cloneVoice(Long userId, MultipartFile file) {
+////        FileSystemResource resource = new FileSystemResource(filePath);
+//
+//        MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
+//        bodyBuilder.part("audio_file", file.getResource());
+//
+//        return this.webClient.post()
+//                .uri("/v1/voice/{user_id}", userId)
+//                .contentType(MediaType.MULTIPART_FORM_DATA)
+//                .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
+//                .retrieve()
+//                .onStatus(status -> status.value() == 422, response -> {
+//                    // 로깅 또는 예외 처리
+//                    return Mono.error(new RuntimeException("Unprocessable Entity"));
+//                })
+//                .bodyToMono(String.class)
+//                .doOnError(WebClientResponseException.class, ex -> {
+//                    // 예외 로깅
+//                    System.err.println("Error response: " + ex.getResponseBodyAsString());
+//                });
+//    }
+
 
 }

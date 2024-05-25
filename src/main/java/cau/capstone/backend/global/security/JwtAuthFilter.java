@@ -5,6 +5,7 @@ import cau.capstone.backend.global.security.Entity.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -13,11 +14,20 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
+
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     public static final String AUTHORIZATION_HEADER = "Authorization";
     public static final String BEARER_PREFIX = "Bearer ";
+
+
+    private static final List<String> EXCLUDE_URLS = List.of(
+            "/v2/api-docs", "/swagger-resources/**", "/swagger-ui.html", "/swagger-ui/**", "/health",
+            "/api/health/**",  "/api/auth/**", "/api/auth/signup", "/register/**", "/login/**","/swagger-ui/**","/swagger-resources",
+            "/swagger-resources/**", "/swagger-ui.html", "/v3/api-docs/**", "index.html", "/s3/**"
+    );
 
 
     private final JwtTokenProvider jwtTokenProvider;
@@ -48,5 +58,20 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
         return null;
     }
+
+//    // 현재 요청 URI 가 예외 URL 인지 검사
+//    private boolean isExcludedUrl(String requestUri) {
+//        return EXCLUDE_URLS.stream().anyMatch(requestUri::startsWith);
+//    }
+
+//    private boolean isExcludedUrl(String requestUri) {
+//        return EXCLUDE_URLS.stream().anyMatch(excludeUrl -> {
+//            try {
+//                return new AntPathMatcher().match(excludeUrl, requestUri);
+//            } catch (Exception e) {
+//                return false;
+//            }
+//        });
+//    }
 
 }

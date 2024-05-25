@@ -1,4 +1,4 @@
-package cau.capstone.backend.User.model;
+package cau.capstone.backend.page.model;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,6 +39,15 @@ public enum Category {
         this.name = name;
     }
 
+    public static Category getByCode(String code) {
+        return BY_CODE.get(code);
+    }
+
+    // Static method to get Category by name
+    public static Category getByName(String name) {
+        return BY_NAME.get(name);
+    }
+
     // Getter for code
     public String getCode() {
         return code;
@@ -60,14 +69,7 @@ public enum Category {
     }
 
     // Static method to get Category by code
-    public static Category getByCode(String code) {
-        return BY_CODE.get(code);
-    }
 
-    // Static method to get Category by name
-    public static Category getByName(String name) {
-        return BY_NAME.get(name);
-    }
 
     @Override
     public String toString() {
