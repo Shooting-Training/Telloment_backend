@@ -137,13 +137,13 @@ public class JwtTokenProvider {
     }
 
 
-
-
-    // 토큰에서 회원 정보 추출 - db에 저장된 pk값이 Long인 경우
-    public Long getUserPk(String token) {
-        String subject = Jwts.parser().setSigningKey(key).parseClaimsJws(token).getBody().getSubject();
-       return Long.parseLong(subject);
-    }
+//
+//
+//    // 토큰에서 회원 정보 추출 - db에 저장된 pk값이 Long인 경우
+//    public Long getUserPk(String token) {
+//        String subject = Jwts.parser().setSigningKey(key).parseClaimsJws(token).getBody().getSubject();
+//       return Long.parseLong(subject);
+//    }
 
     public String getUserEmail(String token) {
         return Jwts.parser().setSigningKey(key).parseClaimsJws(token).getBody().getSubject();

@@ -25,15 +25,19 @@ public class Like extends BaseImmutableEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "page_id")
-    private Page page;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "like_type")
+    private LikeType likeType;
+
+    @Column(name = "target_id")
+    private Long targetId;
 
 
-    public static Like createLike(User user, Page page) {
+    public static Like createLike(User user, LikeType likeType, Long targetId) {
         Like like = new Like();
         like.user = user;
-        like.page = page;
+        like.likeType = likeType;
+        like.targetId = targetId;
         return like;
     }
 

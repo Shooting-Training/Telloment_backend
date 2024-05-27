@@ -41,14 +41,13 @@ public class PageService {
     private final JwtTokenProvider jwtTokenProvider;
 
     private final ScoreService scoreService;
-
+    private final LikeService likeService;
     private final RankingService rankingService;
     private final HashtagRepository hashtagRepository;
 
 
     @Transactional
     public ResponsePageDto getPage(String  accessToken, Long pageId) {
-//        Long userId = jwtTokenProvider.getUserPk(accessToken);
 
         String userEmail = jwtTokenProvider.getUserEmail(accessToken);
         User user = userRepository.findByEmail(userEmail)
@@ -59,7 +58,8 @@ public class PageService {
         page.setViewCount(page.getViewCount() + 1);
         pageRepository.save(page);
 
-//        rankingService.viewPage(page.getId(), page.getCategory());
+        rankingService.incrementViewCountPage(page.getId(), page.getEmotion().getType());
+        rankingService.incrementViewCountBook(page.getBook().getId(), page.getBook().getCategory());
         scoreService.plusViewScore(userId, page);
 
         return ResponsePageDto.from(page);
@@ -69,19 +69,10 @@ public class PageService {
         return pageRepository.findByKeywordWithPaging(keyword, pageable);
     }
 
-    @Transactional
-    public ResponsePageDto setPageEmotion(Long pageId, String emotion){
-        Page page = getPageById(pageId);
-        page.setEmotion(emotion);
-        pageRepository.save(page);
 
-        return ResponsePageDto.from(page);
-    }
 
     @Transactional
     public long createPage(CreatePageDto createPageDto, String accessToken) {
-//        Long userId = jwtTokenProvider.getUserPk(accessToken);
-//        User user = getUserById(userId);
         String userEmail = jwtTokenProvider.getUserEmail(accessToken);
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new UserException(ResponseCode.USER_NOT_FOUND));
@@ -89,15 +80,26 @@ public class PageService {
         Book book = getBookById(createPageDto.getBookId());
 
         Page page = Page.createPage(user, book,  createPageDto.getTitle(), createPageDto.getContent());
-        log.info("new Page saved: " + page.getTitle());
+
+        setHashtagsToPage(page, createPageDto.getHashtags());
+
         return pageRepository.save(page).getId();
+    }
+
+    //먼저 페이지를 생성하고, 페이지의 감정을 다시 반환받아 설정한다.
+    @Transactional
+    public ResponsePageDto setPageEmotion(Long pageId, String emotionCode, int emotionIntensity){
+        Page page = getPageById(pageId);
+        page.setEmotion(emotionCode, emotionIntensity);
+        pageRepository.save(page);
+
+        return ResponsePageDto.from(page);
     }
 
     @Transactional
     public List<ResponsePageDto> getPageList(Long userId){
         validateUser(userId);
         List<Page> pageList = pageRepository.findAllByUserId(userId);
-        log.info("Page list returned: " + pageList.size());
 
         List<ResponsePageDto> responsePageDtoList = pageList.stream()
                 .map(ResponsePageDto::from)
@@ -111,7 +113,6 @@ public class PageService {
     public long updatePage(UpdatePageDto updatePageDto){
         Page page = getPageById(updatePageDto.getPageId());
         page.updatePage(updatePageDto.getTitle(), updatePageDto.getContent());
-        log.info("Page updated: " + page.getTitle());
 
         return pageRepository.save(page).getId();
     }
@@ -150,7 +151,6 @@ public class PageService {
         Long prevPageId = linkPageDto.getPrevPageId();
         Long nextPageId = linkPageDto.getNextPageId();
 
-
         Page prevPage = getPageById(prevPageId);
         Page linkedPage = getPageById(nextPageId);
 
@@ -186,9 +186,7 @@ public class PageService {
 
     //페이지 좋아요
     @Transactional
-    public long likePage(LikePageDto likePageDto, String accessToken){
-
-//        Long userId = jwtTokenProvider.getUserPk(accessToken);
+    public ResponsePageDto likePage(LikePageDto likePageDto, String accessToken){
 
         String userEmail = jwtTokenProvider.getUserEmail(accessToken);
         User user = userRepository.findByEmail(userEmail)
@@ -197,56 +195,53 @@ public class PageService {
 
         Page page = getPageById(likePageDto.getPageId());
         Book book = getBookById(page.getBook().getId());
-//        User user = getUserById(userId);
+        Like like = Like.createLike(user, LikeType.PAGE, page.getId());
 
-        Like like = Like.createLike(user, page);
 
-        List<Like> likes = page.getLikes();
-        likes.add(like);
-        page.setLikes(likes);
 
-        Category category = book.getCategory();
+
         scoreService.plusLikeScore(userId, page);
-        rankingService.likePage(page.getId(), category);
+        rankingService.likeBook(book.getId(), book.getCategory());
+        rankingService.likePage(page.getId(), page.getEmotion().getType());
 
         likeRepository.save(like);
         pageRepository.save(page);
 
-        return page.getId();
+        ResponsePageDto dto = ResponsePageDto.from(page);
+        dto.setLikeCount(likeService.countLikesForPage(page.getId()));
+
+        return dto;
     }
 
     //좋아요 해제
     @Transactional
-    public long dislikePage(LikePageDto likePageDto, String accessToken){
+    public ResponsePageDto dislikePage(LikePageDto likePageDto, String accessToken){
 
-
-//        Long userId = jwtTokenProvider.getUserPk(accessToken);
         String userEmail = jwtTokenProvider.getUserEmail(accessToken);
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new UserException(ResponseCode.USER_NOT_FOUND));
         Long userId = user.getId();
 
-
         Page page = getPageById(likePageDto.getPageId());
-        Book book = getBookById(page.getBook().getId());
 
-        Like like = likeRepository.findByUserIdAndPageId(userId, likePageDto.getPageId());
+        Like like = likeRepository.findByLikeTypeAndTargetIdAndUserId(LikeType.PAGE, likePageDto.getPageId(), userId)
+                .orElseThrow(() -> new LikeException(ResponseCode.LIKE_NOT_FOUND));
 
         if(like == null){
             throw new LikeException(ResponseCode.LIKE_NOT_FOUND);
         }
         else{
-            List<Like> likes = page.getLikes();
-            likes.remove(like);
-            page.setLikes(likes);
 
-            Category category = book.getCategory();
-            rankingService.unlikePage(page.getId(), category);
+            rankingService.unlikePage(page.getId(), page.getEmotion().getType());
+            rankingService.unlikeBook(page.getBook().getId(), page.getBook().getCategory());
 
             likeRepository.delete(like);
             pageRepository.save(page);
 
-            return page.getId();
+            ResponsePageDto dto = ResponsePageDto.from(page);
+            dto.setLikeCount(likeService.countLikesForPage(page.getId()));
+
+            return dto;
         }
 
 
@@ -267,6 +262,7 @@ public class PageService {
         }
 
         page.setHashtags(hashtagEntities);
+
         return pageRepository.save(page);
     }
 
@@ -286,6 +282,18 @@ public class PageService {
 
 
 
+    @Transactional
+    public Set<ResponsePageDto> parseTopRankedPaged(Set<String> pageIds){
+        Set<ResponsePageDto> pageDetails = new LinkedHashSet<>();
+        for (String pageId : pageIds){
+            Page page = getPageById(Long.parseLong(pageId));
+            ResponsePageDto responsePageDto = ResponsePageDto.from(page);
+            responsePageDto.setLikeCount(likeService.countLikesForPage(page.getId()));
+            pageDetails.add(responsePageDto);
+        }
+        return pageDetails;
+    }
+
     
 
 
@@ -295,10 +303,10 @@ public class PageService {
         return pageRepository.findAllByUserId(userId);
     }
 
-    @Transactional
-    public List<Like> getUserLikeList(Long userId){
-        return likeRepository.findAllByUserId(userId);
-    }
+//    @Transactional
+//    public List<Like> getUserLikeList(Long userId){
+//        return likeRepository.findAllByUserId(userId);
+//    }
 
     @Transactional
     public List<Scrap> getUserScrapList(Long userId){
@@ -364,4 +372,6 @@ public class PageService {
             throw new ScrapException(ResponseCode.SCARP_NOT_OWNED);
         }
     }
+
+
 }

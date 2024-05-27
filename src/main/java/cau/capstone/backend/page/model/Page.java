@@ -55,8 +55,8 @@ public class Page extends BaseEntity {
     @OneToMany(mappedBy = "page", fetch = FetchType.LAZY)
     private List<Scrap> scraps = new ArrayList<>();
 
-    @OneToMany(mappedBy = "page", fetch = FetchType.LAZY)
-    private List<Like> likes = new ArrayList<>();
+//    @OneToMany(mappedBy = "page", fetch = FetchType.LAZY)
+//    private List<Like> likes = new ArrayList<>();
 
 
     @Column(name = "view_count")
@@ -118,12 +118,13 @@ public class Page extends BaseEntity {
     public void setNextId(Page page) {this.nextId = page.getId();}
     public void setNextId(long nextId) {this.nextId = nextId;}
 
-    public void setEmotion(String emotion) { this.emotion.setTypeFromString(emotion);
+    public void setEmotion(String emotion, int intensity) {
+        this.emotion.setTypeFromString(emotion);
+        this.emotion.setIntensity(intensity);
     }
 
 
     public int getScrapCount() { return scraps.size(); }
-    public int getLikeCount() { return likes.size(); }
     public boolean isScrapped() { return isScrapped; }
 
 

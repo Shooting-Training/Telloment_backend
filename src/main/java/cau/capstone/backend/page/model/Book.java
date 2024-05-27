@@ -45,6 +45,13 @@ public class Book extends BaseEntity {
             inverseJoinColumns = @JoinColumn(name = "hashtag_id"))
     private Set<Hashtag> hashtags = new HashSet<>();
 
+
+    // 조회수 = totalPageViewCount == bookViewCount
+    @Column(name = "book_view_count")
+    private int bookViewCount = 0;
+
+
+
     public static Book createBook(User user, String bookName, String categoryCode) {
         Book book = new Book();
         book.user = user;

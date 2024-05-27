@@ -1,18 +1,23 @@
 package cau.capstone.backend.page.model.repository;
 
 import cau.capstone.backend.page.model.Like;
+import cau.capstone.backend.page.model.LikeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-
+import java.util.Optional;
 
 
 @Repository
 
 public interface LikeRepository extends JpaRepository<Like, Long> {
 
-    Like findByUserIdAndPageId(Long userId, Long pageId); // 해당 유저가 해당 게시물을 좋아요 했는지 확인
+    List<Like> findByLikeTypeAndTargetId(LikeType likeType, Long targetId);
 
-    List<Like> findAllByUserId(Long userId); // 해당 유저가 좋아요한 모든 게시물 조회
+    Optional<Like> findByLikeTypeAndTargetIdAndUserId(LikeType likeType, Long targetId, Long userId);
+
+    int countByLikeTypeAndTargetId(LikeType likeType, Long targetId);
+
+    void deleteAllByLikeTypeAndTargetId(LikeType likeType, Long targetId);
 }

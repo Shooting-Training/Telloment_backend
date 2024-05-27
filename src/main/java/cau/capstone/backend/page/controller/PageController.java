@@ -1,7 +1,9 @@
 package cau.capstone.backend.page.controller;
 
 
+import cau.capstone.backend.User.model.repository.UserRepository;
 import cau.capstone.backend.global.security.Entity.JwtTokenProvider;
+import cau.capstone.backend.global.util.exception.UserException;
 import cau.capstone.backend.page.dto.request.*;
 import cau.capstone.backend.page.dto.response.ResponsePageDto;
 import cau.capstone.backend.page.dto.response.ResponseScrapDto;
@@ -32,6 +34,8 @@ import java.util.stream.Collectors;
 public class PageController {
 
     private final PageService pageService;
+
+    private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
 
     //페이지 관련 기본 동작: 읽기 ,저장, 유저의 페이지 정보 반환, 수정, 삭제
@@ -56,7 +60,9 @@ public class PageController {
     @Operation(summary = "유저가 작성한 페이지 정보 반환")
     @GetMapping("/list")
     public ApiResponse<List<ResponsePageDto>> getPageList(@RequestHeader String accessToken){
-        Long userId = jwtTokenProvider.getUserPk(accessToken);
+        Long userId = userRepository.findByEmail(jwtTokenProvider.getUserEmail(accessToken))
+                .orElseThrow(() -> new UserException(ResponseCode.USER_NOT_FOUND)).getId();
+
         List<ResponsePageDto> responsePageDtoList = pageService.getPageList(userId);
 
         return ApiResponse.success(responsePageDtoList, ResponseCode.PAGE_READ_SUCCESS.getMessage());
@@ -82,10 +88,11 @@ public class PageController {
     @Operation(summary = "페이지 삭제")
     @DeleteMapping("/delete/{pageId}")
     public ApiResponse<Long> deletePage(@PathVariable Long pageId, @RequestHeader String accessToken){
-        Long userId = jwtTokenProvider.getUserPk(accessToken);
+        Long userId = userRepository.findByEmail(jwtTokenProvider.getUserEmail(accessToken))
+                .orElseThrow(() -> new UserException(ResponseCode.USER_NOT_FOUND)).getId();
 
 
-            return ApiResponse.success(pageService.deletePage(pageId, userId), ResponseCode.PAGE_DELETE_SUCCESS.getMessage());
+        return ApiResponse.success(pageService.deletePage(pageId, userId), ResponseCode.PAGE_DELETE_SUCCESS.getMessage());
         }
 
 
@@ -101,7 +108,7 @@ public class PageController {
     //페이지 좋아요
     @Operation(summary = "페이지 좋아요")
     @PostMapping("/like")
-    public ApiResponse<Long> likePage(@RequestBody @Valid LikePageDto likePageDto, @RequestHeader String accessToken){
+    public ApiResponse<ResponsePageDto> likePage(@RequestBody @Valid LikePageDto likePageDto, @RequestHeader String accessToken){
 
         return ApiResponse.success(pageService.likePage(likePageDto, accessToken), ResponseCode.PAGE_LIKE_SUCCESS.getMessage());
     }
@@ -110,7 +117,7 @@ public class PageController {
 
     @Operation(summary = "페이지 좋아요 취소")
     @DeleteMapping("/dislike")
-    public ApiResponse<Long> dislikePage(@RequestBody @Valid LikePageDto likePageDto, @RequestHeader String accessToken){
+    public ApiResponse<ResponsePageDto> dislikePage(@RequestBody @Valid LikePageDto likePageDto, @RequestHeader String accessToken){
 
         return ApiResponse.success(pageService.dislikePage(likePageDto, accessToken), ResponseCode.PAGE_DISLIKE_SUCCESS.getMessage());
     }

@@ -139,6 +139,17 @@ public class UserService {
 
         return userId;
     }
+
+
+    @Transactional(readOnly = true)
+    public List<ResponseSearchUserDto> searchUser(String keyword) {
+        List<User> userList = userRepository.findAllByNameContaining(keyword);
+        log.info("검색 결과: {}", userList.size());
+        return userList.stream()
+                .map(ResponseSearchUserDto::of)
+                .collect(Collectors.toList());
+    }
+
 //
 //    //for test
 //    @Transactional
@@ -151,130 +162,102 @@ public class UserService {
 //    }
 //
 
-
-    //팔로우하는 특정 회원 검색
-    @Transactional(readOnly = true)
-    public List<ResponseSearchUserDto> searchUser(String accessToken, String name) {
-        Long hostId = jwtTokenProvider.getUserPk(accessToken);
-
-        validateUser(hostId);
-        log.info("{} 회원 검증 완료", hostId);
-        List<User> users = new ArrayList<>(userRepository.findAllByNameContaining(name));
-        log.info("{} 검색 결과 조회 완료", name);
-        users.removeIf(user -> user.getId().equals(hostId)); // 검색 결과에서 자기 자신은 제외 (removeIf 메서드는 ArrayList에만 존재)
-        return users.stream()
-                .map(user -> ResponseSearchUserDto.builder()
-                        .userId(user.getId())
-                        .name(user.getName())
-                        .image(user.getImage())
-                        .isFollow(followRepository.existsByFollowerIdAndFolloweeId(hostId, user.getId()))
-                        .build()).collect(Collectors.toList());
-    }
-
-
-    //for test
-    @Transactional(readOnly = true)
-    public List<ResponseSearchUserDto> searchUser(Long hostId, String name) {
-
-        validateUser(hostId);
-        log.info("{} 회원 검증 완료", hostId);
-        List<User> users = new ArrayList<>(userRepository.findAllByNameContaining(name));
-        log.info("{} 검색 결과 조회 완료", name);
-        users.removeIf(user -> user.getId().equals(hostId)); // 검색 결과에서 자기 자신은 제외 (removeIf 메서드는 ArrayList에만 존재)
-        return users.stream()
-                .map(user -> ResponseSearchUserDto.builder()
-                        .userId(user.getId())
-                        .name(user.getName())
-                        .image(user.getImage())
-                        .isFollow(followRepository.existsByFollowerIdAndFolloweeId(hostId, user.getId()))
-                        .build()).collect(Collectors.toList());
-    }
-
-
-    @Transactional(readOnly = true)
-    public List<ResponseSearchUserDto> searchUser(String keyword) {
-        List<User> userList = userRepository.findAllByNameContaining(keyword);
-        log.info("검색 결과: {}", userList.size());
-        return userList.stream()
-                .map(ResponseSearchUserDto::of)
-                .collect(Collectors.toList());
-    }
+//
+//    //팔로우하는 특정 회원 검색
+//    @Transactional(readOnly = true)
+//    public List<ResponseSearchUserDto> searchUser(String accessToken, String name) {
+//        Long hostId = jwtTokenProvider.getUserPk(accessToken);
+//
+//        validateUser(hostId);
+//        log.info("{} 회원 검증 완료", hostId);
+//        List<User> users = new ArrayList<>(userRepository.findAllByNameContaining(name));
+//        log.info("{} 검색 결과 조회 완료", name);
+//        users.removeIf(user -> user.getId().equals(hostId)); // 검색 결과에서 자기 자신은 제외 (removeIf 메서드는 ArrayList에만 존재)
+//        return users.stream()
+//                .map(user -> ResponseSearchUserDto.builder()
+//                        .userId(user.getId())
+//                        .name(user.getName())
+//                        .image(user.getImage())
+//                        .isFollow(followRepository.existsByFollowerIdAndFolloweeId(hostId, user.getId()))
+//                        .build()).collect(Collectors.toList());
+//    }
 
 
 
-
-    // 회원이 특정 회원 팔로우
-    @Transactional
-    public void followUser(String accessToken, Long followeeId) {
-        Long followerId = jwtTokenProvider.getUserPk(accessToken);
-
-        validateUser(followerId);
-        validateUser(followeeId);
-
-        // 이미 팔로우 중인 경우
-        if (followRepository.existsByFolloweeIdAndFollowerId(followerId, followeeId)) {
-            log.info("{}는 이미 {}를 팔로우한 상태입니다.", followerId, followeeId);
-            throw new UserException(ResponseCode.FOLLOWED_ALREADY);
-        }
-
-        User followee = getUserById(followeeId); // 팔로우 대상이 존재하는지 확인 (toId가 존재하지 않으면 예외 발생
-        User follower = getUserById(followerId); // 팔로우 요청자가 존재하는지 확인 (fromId가 존재하지 않으면 예외 발생
-        followRepository.save(Follow.createFollow(followee, follower));
-        log.info("이제 {}가 {}를 팔로우합니다.", follower, followee);
-
-    }
-
-    @Transactional
-    public void followUser(Long followerId, Long followeeId) {
-
-        validateUser(followerId);
-        validateUser(followeeId);
-
-        // 이미 팔로우 중인 경우
-        if (followRepository.existsByFolloweeIdAndFollowerId(followerId, followeeId)) {
-            log.info("{}는 이미 {}를 팔로우한 상태입니다.", followerId, followeeId);
-            throw new UserException(ResponseCode.FOLLOWED_ALREADY);
-        }
-
-        User followee = getUserById(followeeId); // 팔로우 대상이 존재하는지 확인 (toId가 존재하지 않으면 예외 발생
-        User follower = getUserById(followerId); // 팔로우 요청자가 존재하는지 확인 (fromId가 존재하지 않으면 예외 발생
-        followRepository.save(Follow.createFollow(followee, follower));
-        log.info("이제 {}가 {}를 팔로우합니다.", follower, followee);
-
-    }
-
-    // 회원이 특정 회원 팔로우 취소
-    @Transactional
-    public void unfollowUser(String accessToken, Long followeeId) {
-        Long followerId = jwtTokenProvider.getUserPk(accessToken);
-
-        validateUser(followeeId);
-        validateUser(followerId);
-
-        // 이미 팔로우 취소한 경우
-        if (!followRepository.existsByFollowerIdAndFolloweeId(followerId, followeeId)) {
-            log.info("{}는 이미 {}를 팔로우 취소한 상태입니다.", followerId, followeeId);
-            throw new UserException(ResponseCode.UNFOLLOWED_ALREADY);
-        }
-        followRepository.deleteByFollowerIdAndFolloweeId(followerId, followeeId);
-        log.info("이제 {}가 {}를 언팔로우합니다.", followerId, followeeId);
-    }
-    //for test
-    @Transactional
-    public void unfollowUser(Long followerId, Long followeeId) {
-
-        validateUser(followeeId);
-        validateUser(followerId);
-
-        // 이미 팔로우 취소한 경우
-        if (!followRepository.existsByFollowerIdAndFolloweeId(followerId, followeeId)) {
-            log.info("{}는 이미 {}를 팔로우 취소한 상태입니다.", followerId, followeeId);
-            throw new UserException(ResponseCode.UNFOLLOWED_ALREADY);
-        }
-        followRepository.deleteByFollowerIdAndFolloweeId(followerId, followeeId);
-        log.info("이제 {}가 {}를 언팔로우합니다.", followerId, followeeId);
-    }
-
+//
+//
+//    // 회원이 특정 회원 팔로우
+//    @Transactional
+//    public void followUser(String accessToken, Long followeeId) {
+//        Long followerId = jwtTokenProvider.getUserPk(accessToken);
+//
+//        validateUser(followerId);
+//        validateUser(followeeId);
+//
+//        // 이미 팔로우 중인 경우
+//        if (followRepository.existsByFolloweeIdAndFollowerId(followerId, followeeId)) {
+//            log.info("{}는 이미 {}를 팔로우한 상태입니다.", followerId, followeeId);
+//            throw new UserException(ResponseCode.FOLLOWED_ALREADY);
+//        }
+//
+//        User followee = getUserById(followeeId); // 팔로우 대상이 존재하는지 확인 (toId가 존재하지 않으면 예외 발생
+//        User follower = getUserById(followerId); // 팔로우 요청자가 존재하는지 확인 (fromId가 존재하지 않으면 예외 발생
+//        followRepository.save(Follow.createFollow(followee, follower));
+//        log.info("이제 {}가 {}를 팔로우합니다.", follower, followee);
+//
+//    }
+//
+//    @Transactional
+//    public void followUser(Long followerId, Long followeeId) {
+//
+//        validateUser(followerId);
+//        validateUser(followeeId);
+//
+//        // 이미 팔로우 중인 경우
+//        if (followRepository.existsByFolloweeIdAndFollowerId(followerId, followeeId)) {
+//            log.info("{}는 이미 {}를 팔로우한 상태입니다.", followerId, followeeId);
+//            throw new UserException(ResponseCode.FOLLOWED_ALREADY);
+//        }
+//
+//        User followee = getUserById(followeeId); // 팔로우 대상이 존재하는지 확인 (toId가 존재하지 않으면 예외 발생
+//        User follower = getUserById(followerId); // 팔로우 요청자가 존재하는지 확인 (fromId가 존재하지 않으면 예외 발생
+//        followRepository.save(Follow.createFollow(followee, follower));
+//        log.info("이제 {}가 {}를 팔로우합니다.", follower, followee);
+//
+//    }
+//
+//    // 회원이 특정 회원 팔로우 취소
+//    @Transactional
+//    public void unfollowUser(String accessToken, Long followeeId) {
+//        Long followerId = jwtTokenProvider.getUserPk(accessToken);
+//
+//        validateUser(followeeId);
+//        validateUser(followerId);
+//
+//        // 이미 팔로우 취소한 경우
+//        if (!followRepository.existsByFollowerIdAndFolloweeId(followerId, followeeId)) {
+//            log.info("{}는 이미 {}를 팔로우 취소한 상태입니다.", followerId, followeeId);
+//            throw new UserException(ResponseCode.UNFOLLOWED_ALREADY);
+//        }
+//        followRepository.deleteByFollowerIdAndFolloweeId(followerId, followeeId);
+//        log.info("이제 {}가 {}를 언팔로우합니다.", followerId, followeeId);
+//    }
+//    //for test
+//    @Transactional
+//    public void unfollowUser(Long followerId, Long followeeId) {
+//
+//        validateUser(followeeId);
+//        validateUser(followerId);
+//
+//        // 이미 팔로우 취소한 경우
+//        if (!followRepository.existsByFollowerIdAndFolloweeId(followerId, followeeId)) {
+//            log.info("{}는 이미 {}를 팔로우 취소한 상태입니다.", followerId, followeeId);
+//            throw new UserException(ResponseCode.UNFOLLOWED_ALREADY);
+//        }
+//        followRepository.deleteByFollowerIdAndFolloweeId(followerId, followeeId);
+//        log.info("이제 {}가 {}를 언팔로우합니다.", followerId, followeeId);
+//    }
+//
 
     private void validateUser(Long userId) {
         if (!userRepository.existsById(userId))

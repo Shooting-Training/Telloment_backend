@@ -7,6 +7,7 @@ import cau.capstone.backend.global.util.api.ResponseCode;
 import cau.capstone.backend.page.dto.request.AddPageToBookDto;
 import cau.capstone.backend.page.dto.request.CreateBookDto;
 import cau.capstone.backend.page.dto.request.DeletePageFromBookDto;
+import cau.capstone.backend.page.dto.response.CategoryDto;
 import cau.capstone.backend.page.dto.response.ResponseBookDto;
 import cau.capstone.backend.page.dto.response.ResponsePageDto;
 import cau.capstone.backend.page.model.Book;
@@ -91,6 +92,12 @@ public class BookController {
         Pageable pageable = PageRequest.of(page, size);
         org.springframework.data.domain.Page<Book> result = bookService.searchBooksByNameOrHashtags(name, hashtags, pageable);
         return ResponseEntity.ok(result);
+    }
+
+
+    @GetMapping("/categories")
+    public ApiResponse<List<CategoryDto>> getAllCategories() {
+        return ApiResponse.success(bookService.getAllCategories(), ResponseCode.CATEGORY_READ_SUCCESS.getMessage());
     }
 
 

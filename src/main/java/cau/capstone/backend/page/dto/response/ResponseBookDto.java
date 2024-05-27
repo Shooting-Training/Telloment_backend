@@ -17,11 +17,15 @@ public class ResponseBookDto {
 
     private Long bookId;
     private String bookName;
+    private String categoryCode;
+    private int totalLikeCount;
+    private int totalViewCount;
 
-    public static ResponseBookDto of(Long bookId, String bookName) {
+    public static ResponseBookDto of(Long bookId, String bookName, String categoryCode) {
         return ResponseBookDto.builder()
                 .bookId(bookId)
                 .bookName(bookName)
+                .categoryCode(categoryCode)
                 .build();
     }
 
@@ -29,6 +33,8 @@ public class ResponseBookDto {
         return ResponseBookDto.builder()
                 .bookId(book.getId())
                 .bookName(book.getBookName())
+                .categoryCode(book.getCategory().getCode())
+                .totalViewCount(book.getBookViewCount())
                 .build();
     }
 
@@ -38,5 +44,9 @@ public class ResponseBookDto {
 
     public String getBookName() {
         return bookName;
+    }
+
+    public void setTotalLikeCount(int totalLikeCount) {
+        this.totalLikeCount = totalLikeCount;
     }
 }

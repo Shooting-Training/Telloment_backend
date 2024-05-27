@@ -40,7 +40,6 @@ public class UserController {
     }
 
 
-
     // 회원정보 수정
     @Operation(summary = "[프로필] 회원 정보 수정", description = "회원 정보를 수정합니다.")
     @PutMapping("/update")
@@ -61,24 +60,24 @@ public class UserController {
     @Operation(summary = "회원 검색 결과 조회", description = "회원 검색 결과를 조회합니다.")
     @GetMapping("/search")
     public ApiResponse<List<ResponseSearchUserDto>> searchUser(@RequestParam String keyword, @RequestHeader String accessToken) {
-        return ApiResponse.success(userService.searchUser(accessToken, keyword), ResponseCode.USER_SEARCH_SUCCESS.getMessage());
+        return ApiResponse.success(userService.searchUser(keyword), ResponseCode.USER_SEARCH_SUCCESS.getMessage());
     }
-
-    // 회원이 특정 회원 팔로우
-    @Operation(summary = "회원이 특정 회원 팔로우", description = "회원이 특정 회원을 팔로우합니다.")
-    @PostMapping("/follow/{followeeId}")
-    public ApiResponse<Void> followUser(@RequestHeader String accessToken, @PathVariable Long followeeId) {
-        userService.followUser(accessToken, followeeId);
-
-        return ApiResponse.success(null, ResponseCode.USER_FOLLOW_SUCCESS.getMessage());
-    }
-
-    // 회원이 특정 회원 팔로우 취소
-    @Operation(summary = " 회원이 특정 회원 팔로우 취소", description = "회원이 특정 회원을 팔로우 취소합니다.")
-    @DeleteMapping("/unfollow/{followeeId}")
-    public ApiResponse<Void> unfollowUser(@RequestHeader String accessToken, @PathVariable Long followeeId) {
-
-        userService.unfollowUser(accessToken, followeeId);
-        return ApiResponse.success(null, ResponseCode.USER_UNFOLLOW_SUCCESS.getMessage());
-    }
+//
+//    // 회원이 특정 회원 팔로우
+//    @Operation(summary = "회원이 특정 회원 팔로우", description = "회원이 특정 회원을 팔로우합니다.")
+//    @PostMapping("/follow/{followeeId}")
+//    public ApiResponse<Void> followUser(@RequestHeader String accessToken, @PathVariable Long followeeId) {
+//        userService.followUser(accessToken, followeeId);
+//
+//        return ApiResponse.success(null, ResponseCode.USER_FOLLOW_SUCCESS.getMessage());
+//    }
+//
+//    // 회원이 특정 회원 팔로우 취소
+//    @Operation(summary = " 회원이 특정 회원 팔로우 취소", description = "회원이 특정 회원을 팔로우 취소합니다.")
+//    @DeleteMapping("/unfollow/{followeeId}")
+//    public ApiResponse<Void> unfollowUser(@RequestHeader String accessToken, @PathVariable Long followeeId) {
+//
+//        userService.unfollowUser(accessToken, followeeId);
+//        return ApiResponse.success(null, ResponseCode.USER_UNFOLLOW_SUCCESS.getMessage());
+//    }
 }

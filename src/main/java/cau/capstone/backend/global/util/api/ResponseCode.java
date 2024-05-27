@@ -76,6 +76,8 @@ public enum ResponseCode {
     BOOK_UPDATE_SUCCESS(HttpStatus.OK, true, "북 수정 성공"),
     BOOK_DELETE_SUCCESS(HttpStatus.OK, true, "북 삭제 성공"),
 
+    CATEGORY_READ_SUCCESS(HttpStatus.OK, true, "카테고리 조회 성공"),
+
 
 
     TOKEN_CHECK_SUCCESS(HttpStatus.OK, true, "토큰 검증 완료"),

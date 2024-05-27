@@ -23,9 +23,7 @@ public class ResponsePageDto {
     private LocalDateTime createdAt;
     private int likeCount;
     private int scrapCount;
-    private boolean isScrapped;
     private String emotionType;
-    private String categoryCode;
 
 
     public static ResponsePageDto of(Page page){
@@ -35,9 +33,6 @@ public class ResponsePageDto {
                 .title(page.getTitle())
                 .content(page.getContent())
                 .createdAt(page.getCreatedAt())
-                .likeCount(page.getLikeCount())
-                .scrapCount(page.getScrapCount())
-                .isScrapped(page.isScrapped())
                 .emotionType(page.getEmotion().getType().getDescription())
                 .build();
     }
@@ -50,10 +45,12 @@ public class ResponsePageDto {
                 .title(page.getTitle())
                 .content(page.getContent())
                 .createdAt(page.getCreatedAt())
-                .likeCount(page.getLikeCount())
-                .scrapCount(page.getScrapCount())
-                .isScrapped(page.isScrapped())
                 .emotionType(page.getEmotion().getType().getDescription())
                 .build();
+    }
+
+
+    public void setLikeCount(int likeCount) {
+        this.likeCount = likeCount;
     }
 }

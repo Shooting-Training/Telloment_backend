@@ -2,6 +2,8 @@ package cau.capstone.backend.page.model;
 
 
 import javax.persistence.*;
+import java.util.HashMap;
+import java.util.Map;
 
 @Entity
 public class Emotion {
@@ -14,6 +16,9 @@ public class Emotion {
 
     @Enumerated(EnumType.ORDINAL)
     private EmotionIntensity intensity;
+
+
+
 
     public Emotion() {
     }
@@ -54,8 +59,8 @@ public class Emotion {
         return intensity;
     }
 
-    public void setIntensity(EmotionIntensity intensity) {
-        this.intensity = intensity;
+    public void setIntensity(int intensity) {
+        this.intensity = EmotionIntensity.values()[intensity];
     }
 
     @Override

@@ -2,6 +2,7 @@ package cau.capstone.backend.page.service;
 
 import cau.capstone.backend.User.model.User;
 import cau.capstone.backend.User.model.repository.UserRepository;
+import cau.capstone.backend.global.redis.RankingService;
 import cau.capstone.backend.global.security.Entity.JwtTokenProvider;
 import cau.capstone.backend.global.util.api.ResponseCode;
 import cau.capstone.backend.global.util.exception.BookException;
@@ -10,23 +11,22 @@ import cau.capstone.backend.global.util.exception.UserException;
 import cau.capstone.backend.page.dto.request.AddPageToBookDto;
 import cau.capstone.backend.page.dto.request.CreateBookDto;
 import cau.capstone.backend.page.dto.request.DeletePageFromBookDto;
+import cau.capstone.backend.page.dto.response.CategoryDto;
 import cau.capstone.backend.page.dto.response.ResponseBookDto;
 import cau.capstone.backend.page.dto.response.ResponsePageDto;
-import cau.capstone.backend.page.model.Book;
-import cau.capstone.backend.page.model.Hashtag;
-import cau.capstone.backend.page.model.Page;
+import cau.capstone.backend.page.model.*;
 import cau.capstone.backend.page.model.repository.BookRepository;
 import cau.capstone.backend.page.model.repository.HashtagRepository;
+import cau.capstone.backend.page.model.repository.LikeRepository;
 import cau.capstone.backend.page.model.repository.PageRepository;
+import com.amazonaws.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -39,6 +39,10 @@ public class BookService {
     private final BookRepository bookRepository;
     private final PageRepository pageRepository;
     private final HashtagRepository hashtagRepository;
+    private final LikeRepository likeRepository;
+
+    private final RankingService rankingService;
+    private final LikeService likeService;
 
     private final JwtTokenProvider jwtTokenProvider;
 
@@ -46,8 +50,7 @@ public class BookService {
 
     @Transactional
     public long createBook(CreateBookDto createBookDto, String accessToken) {
-//        Long userId = jwtTokenProvider.getUserPk(accessToken);
-//        User user = getUserById(userId);
+
         String email = jwtTokenProvider.getUserEmail(accessToken);
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserException(ResponseCode.USER_NOT_FOUND));
@@ -68,14 +71,57 @@ public class BookService {
 
         List<Book> bookList = bookRepository.findAllByUserId(userId);
 
-        List<ResponseBookDto> responseBookDtoList = bookList.stream()
-                .map(ResponseBookDto::from)
-                .collect(Collectors.toList());
+        List<ResponseBookDto> responseBookDtoList = new ArrayList<>();
+
+        for (Book book : bookList) {
+            ResponseBookDto responseBookDto = ResponseBookDto.from(book);
+            responseBookDto.setTotalLikeCount(likeService.countTotalLikesForBook(book.getId()));
+
+            responseBookDtoList.add(responseBookDto);
+        }
 
 
         return responseBookDtoList;
     }
 
+
+    @Transactional
+    public ResponseBookDto likeBook(Long bookId, String accessToken){
+        String userEmail = jwtTokenProvider.getUserEmail(accessToken);
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new UserException(ResponseCode.USER_NOT_FOUND));
+        Book book = getBookById(bookId);
+
+        rankingService.likeBook(bookId, book.getCategory());
+
+        Like like = Like.createLike(user, LikeType.BOOK, bookId);
+        user.addLike(like);
+
+        likeRepository.save(like);
+        userRepository.save(user);
+
+        return ResponseBookDto.from(book);
+    }
+
+    @Transactional
+    public ResponseBookDto unlikeBook(Long bookId, String accessToken) {
+        String userEmail = jwtTokenProvider.getUserEmail(accessToken);
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new UserException(ResponseCode.USER_NOT_FOUND));
+        Book book = getBookById(bookId);
+
+        rankingService.unlikeBook(bookId, book.getCategory());
+
+        Like like = likeRepository.findByLikeTypeAndTargetIdAndUserId(LikeType.BOOK, bookId, user.getId())
+                .orElseThrow(() -> new BookException(ResponseCode.LIKE_NOT_FOUND));
+
+        user.removeLike(like);
+
+        likeRepository.delete(like);
+        userRepository.save(user);
+
+        return ResponseBookDto.from(book);
+    }
 
 
     @Transactional
@@ -88,7 +134,11 @@ public class BookService {
         validateBook(bookId, userId);
 
         Book book = getBookById(bookId);
+        likeService.deleteBookLike(book);
+
         bookRepository.delete(book);
+//유저의 좋아요 리스트도 제거?
+
 
         return bookId;
     }
@@ -115,7 +165,7 @@ public class BookService {
         Long pageId = deletePageFromBookDto.getPageId();
         Long bookId = deletePageFromBookDto.getBookId();
 
-        validatePageInBook(pageId, bookId, jwtTokenProvider.getUserPk(accessToken));
+        validatePageInBook(pageId, bookId, jwtTokenProvider.getUserEmail(accessToken));
 
         Page page = getPageById(pageId);
         Book book = getBookById(bookId);
@@ -145,6 +195,7 @@ public class BookService {
     public List<Book> getBooksByHashtag(String hashtag) {
         return hashtagRepository.findBooksByHashtag(hashtag);
     }
+
 
     @Transactional
     public Book createBookWithHashtags(Book book, Set<String> hashtags) {
@@ -178,6 +229,24 @@ public class BookService {
 
     public org.springframework.data.domain.Page<Book> searchBooksByNameOrHashtags(String name, Set<String> hashtags, Pageable pageable) {
         return bookRepository.findByBookNameContainingOrHashtagsIn(name, hashtags, pageable);
+    }
+
+    public List<CategoryDto> getAllCategories() {
+        return Arrays.stream(Category.values())
+                .map(category -> new CategoryDto(category.name(), category.getName()))
+                .collect(Collectors.toList());
+    }
+
+    public Set<ResponseBookDto> parseTopRankedBooks(Set<String> bookIds) {
+        Set<ResponseBookDto> topRankedBooks = new LinkedHashSet<>();
+        for (String bookId : bookIds) {
+            Book book = bookRepository.findById(Long.parseLong(bookId))
+                    .orElseThrow(() -> new BookException(ResponseCode.BOOK_NOT_FOUND));
+            ResponseBookDto responseBookDto = ResponseBookDto.from(book);
+            responseBookDto.setTotalLikeCount(likeService.countTotalLikesForBook(book.getId()));
+            topRankedBooks.add(responseBookDto);
+        }
+        return topRankedBooks;
     }
 
 
@@ -215,7 +284,10 @@ public class BookService {
         }
     }
 
-    private void validatePageInBook(Long pageId, Long bookId, Long userId){
+    private void validatePageInBook(Long pageId, Long bookId, String userEmail){
+        Long userId = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new UserException(ResponseCode.USER_NOT_FOUND)).getId();
+
         validatePage(pageId, userId);
         validateBook(bookId, userId);
 

@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.util.Set;
 
 
 @Getter
@@ -25,6 +26,8 @@ public class CreatePageDto {
 
     @NotBlank(message = MessageUtil.NOT_BLANK)
     private String content;
+
+    private Set<String> hashtags;
 
 
     public static CreatePageDto of( String title, String content, Long bookId) {
