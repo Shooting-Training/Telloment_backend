@@ -1,9 +1,7 @@
 package cau.capstone.backend.voice.controller;
 
-import cau.capstone.backend.User.model.User;
-import cau.capstone.backend.User.model.repository.UserRepository;
+import cau.capstone.backend.global.util.api.ApiResponse;
 import cau.capstone.backend.global.util.api.ResponseCode;
-import cau.capstone.backend.global.util.exception.UserException;
 import cau.capstone.backend.voice.aiserver.EmotionDto;
 import cau.capstone.backend.voice.aiserver.FastAPIService;
 import cau.capstone.backend.global.security.Entity.JwtTokenProvider;
@@ -12,6 +10,7 @@ import cau.capstone.backend.voice.dto.request.SpeechRequestDto;
 import cau.capstone.backend.voice.dto.response.EmotionResponseDto;
 import cau.capstone.backend.voice.dto.response.VoiceResponseDto;
 import cau.capstone.backend.voice.service.VoiceService;
+import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -27,6 +26,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/voice")
+@Api(tags = "음성 API")
 public class VoiceController {
 
     private final JwtTokenProvider jwtTokenProvider;
@@ -34,16 +34,14 @@ public class VoiceController {
     private final PageService pageService;
     private final VoiceService voiceService;
 
-    private final UserRepository userRepository;
-
-    @PostMapping("/user/{userId}")
-    public String cloneVoice(@RequestPart FilePart file, @PathVariable Long userId) {
+    @PostMapping("user/{userId}/clone")
+    public ApiResponse<String> cloneVoice(@RequestPart FilePart file, @PathVariable Long userId) {
         Mono<String> test = fastAPIService.cloneVoice(userId, file);
-        return test.block();
+        return ApiResponse.success(test.block(), ResponseCode.VOICE_CLONE_SUCCESS.getMessage());
     }
 
     @GetMapping("/page/{pageId}")
-    public EmotionResponseDto getEmotionFromPage(@PathVariable Long pageId, @RequestHeader String accessToken) {
+    public ApiResponse<EmotionResponseDto> getEmotionFromPage(@PathVariable Long pageId, @RequestHeader String accessToken) {
 
         var page = pageService.getPage(accessToken, pageId);
         Mono<EmotionDto> dto = fastAPIService.getEmotionData(page.getContent());
@@ -51,19 +49,13 @@ public class VoiceController {
         String emotion = res.getEmotion();
         int value = res.getValue();
 
-        return EmotionResponseDto.of(emotion, value);
+        return ApiResponse.success(EmotionResponseDto.of(emotion, value), ResponseCode.VOICE_EMOTION_SUCCESS.getMessage());
     }
 
     @GetMapping("/{voiceId}/page/{pageId}/speech")
     public ResponseEntity<byte[]> getSpeechFromPage(@PathVariable Long pageId, @RequestHeader String accessToken, @RequestBody SpeechRequestDto speechRequestDto) {
-//        Long userId = jwtTokenProvider.getUserPk(accessToken);
-        String email = jwtTokenProvider.getUserEmail(accessToken);
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserException(ResponseCode.USER_NOT_FOUND));
-        Long userId = user.getId();
-
         var page = pageService.getPage(accessToken, pageId);
-        return fastAPIService.processStringAndGetWav(userId, page.getContent())
+        return fastAPIService.processStringAndGetWav(accessToken, page.getContent(), speechRequestDto.getEmotion(), speechRequestDto.getValue())
                 .map(wavFile -> ResponseEntity.ok()
                         .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"output.wav\"")
                         .contentType(MediaType.APPLICATION_OCTET_STREAM)
@@ -78,14 +70,14 @@ public class VoiceController {
     }
 
     @PostMapping("/{voiceId}/scrap")
-    public String scrapVoice(@RequestHeader String accessToken, @PathVariable Long voiceId) {
+    public ApiResponse<String> scrapVoice(@RequestHeader String accessToken, @PathVariable Long voiceId) {
         voiceService.scrapVoiceByUser(accessToken, voiceId);
-        return "Success";
+        return ApiResponse.success("Success", ResponseCode.VOICE_SCRAP_SUCCESS.getMessage());
     }
 
     @DeleteMapping("/{voiceId}/scrap")
-    public String deleteScrapVoice(@RequestHeader String accessToken, @PathVariable Long voiceId) {
+    public ApiResponse<String> deleteScrapVoice(@RequestHeader String accessToken, @PathVariable Long voiceId) {
         voiceService.deleteScrapVoiceByUser(accessToken, voiceId);
-        return "Success";
+        return ApiResponse.success("Success", ResponseCode.VOICE_DELETE_SCRAP_SUCCESS.getMessage());
     }
 }

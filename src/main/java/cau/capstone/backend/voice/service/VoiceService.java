@@ -1,10 +1,7 @@
 package cau.capstone.backend.voice.service;
 
-import cau.capstone.backend.User.model.User;
 import cau.capstone.backend.User.model.repository.UserRepository;
 import cau.capstone.backend.global.security.Entity.JwtTokenProvider;
-import cau.capstone.backend.global.util.api.ResponseCode;
-import cau.capstone.backend.global.util.exception.UserException;
 import cau.capstone.backend.voice.dto.response.VoiceResponseDto;
 import cau.capstone.backend.voice.model.VoiceScrapEntity;
 import cau.capstone.backend.voice.model.VoiceScrapKey;
@@ -27,8 +24,12 @@ public class VoiceService {
     private final JwtTokenProvider jwtTokenProvider;
     private final VoiceRepository voiceRepository;
     private final VoiceScrapRepository voiceScrapRepository;
-
     private final UserRepository userRepository;
+
+    private Long getUserId(String accessToken) {
+        String email = jwtTokenProvider.getUserEmail(accessToken);
+        return userRepository.findByEmail(email).orElseThrow().getId();
+    }
 
     public List<VoiceResponseDto> getAccessableVoiceList() {
         return voiceRepository.findAllByProcessFlag(0).stream()
@@ -38,9 +39,7 @@ public class VoiceService {
 
     public VoiceResponseDto getVoiceByToken(String accessToken) {
         String email = jwtTokenProvider.getUserEmail(accessToken);
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserException(ResponseCode.USER_NOT_FOUND));
-        Long userId = user.getId();
+        Long userId = userRepository.findByEmail(email).orElseThrow().getId();
         var entity = voiceRepository.findById(userId)
                 .orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND, "Voice not found"));
         return VoiceResponseDto.from(entity);
@@ -48,10 +47,7 @@ public class VoiceService {
 
     @Transactional
     public void scrapVoiceByUser(String accessToken, Long voiceId) {
-        String email = jwtTokenProvider.getUserEmail(accessToken);
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserException(ResponseCode.USER_NOT_FOUND));
-        Long userId = user.getId();
+        Long userId = getUserId(accessToken);
         var key = new VoiceScrapKey(userId, voiceId);
         voiceScrapRepository.findById(key)
                 .ifPresent(entity -> {
@@ -67,10 +63,7 @@ public class VoiceService {
 
     @Transactional
     public void deleteScrapVoiceByUser(String accessToken, Long voiceId) {
-        String email = jwtTokenProvider.getUserEmail(accessToken);
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserException(ResponseCode.USER_NOT_FOUND));
-        Long userId = user.getId();
+        Long userId = getUserId(accessToken);
         var key = new VoiceScrapKey(userId, voiceId);
         voiceScrapRepository.findById(key)
                 .orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND, "Not found"));
