@@ -1,5 +1,9 @@
 package cau.capstone.backend.voice.controller;
 
+import cau.capstone.backend.User.model.User;
+import cau.capstone.backend.User.model.repository.UserRepository;
+import cau.capstone.backend.global.util.api.ResponseCode;
+import cau.capstone.backend.global.util.exception.UserException;
 import cau.capstone.backend.voice.aiserver.EmotionDto;
 import cau.capstone.backend.voice.aiserver.FastAPIService;
 import cau.capstone.backend.global.security.Entity.JwtTokenProvider;
@@ -30,6 +34,8 @@ public class VoiceController {
     private final PageService pageService;
     private final VoiceService voiceService;
 
+    private final UserRepository userRepository;
+
     @PostMapping("/user/{userId}")
     public String cloneVoice(@RequestPart FilePart file, @PathVariable Long userId) {
         Mono<String> test = fastAPIService.cloneVoice(userId, file);
@@ -50,7 +56,12 @@ public class VoiceController {
 
     @GetMapping("/{voiceId}/page/{pageId}/speech")
     public ResponseEntity<byte[]> getSpeechFromPage(@PathVariable Long pageId, @RequestHeader String accessToken, @RequestBody SpeechRequestDto speechRequestDto) {
-        Long userId = jwtTokenProvider.getUserPk(accessToken);
+//        Long userId = jwtTokenProvider.getUserPk(accessToken);
+        String email = jwtTokenProvider.getUserEmail(accessToken);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserException(ResponseCode.USER_NOT_FOUND));
+        Long userId = user.getId();
+
         var page = pageService.getPage(accessToken, pageId);
         return fastAPIService.processStringAndGetWav(userId, page.getContent())
                 .map(wavFile -> ResponseEntity.ok()

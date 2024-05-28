@@ -16,14 +16,17 @@ import cau.capstone.backend.global.util.exception.LikeException;
 import cau.capstone.backend.global.util.exception.PageException;
 import cau.capstone.backend.global.util.exception.ScrapException;
 import cau.capstone.backend.global.util.exception.UserException;
+import com.amazonaws.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -65,11 +68,49 @@ public class PageService {
         return ResponsePageDto.from(page);
 }
 
-    public org.springframework.data.domain.Page<Page> searchPagesWithKeywordAndPaging(String keyword, Pageable pageable) {
-        return pageRepository.findByKeywordWithPaging(keyword, pageable);
+    public org.springframework.data.domain.Page<ResponsePageDto> searchPagesWithKeywordAndPaging(String keyword, Pageable pageable) {
+        org.springframework.data.domain.Page<Page> pages = pageRepository.findByKeywordWithPaging(keyword, pageable);
+
+        List<ResponsePageDto> responsePageDtoList = new ArrayList<>();
+
+        for (Page page : pages) {
+            ResponsePageDto responsePageDto = ResponsePageDto.from(page);
+            responsePageDto.setLikeCount(likeService.countLikesForPage(page.getId()));
+            responsePageDtoList.add(responsePageDto);
+        }
+
+        return new PageImpl<>(responsePageDtoList, pageable, pages.getTotalElements());
     }
 
 
+    public org.springframework.data.domain.Page<ResponsePageDto> findAllPages(Pageable pageable) {
+        org.springframework.data.domain.Page<Page> pages = pageRepository.findAll(pageable);
+
+        List<ResponsePageDto> responsePageDtoList = new ArrayList<>();
+
+        for (Page page : pages) {
+            ResponsePageDto responsePageDto = ResponsePageDto.from(page);
+            responsePageDto.setLikeCount(likeService.countLikesForPage(page.getId()));
+            responsePageDtoList.add(responsePageDto);
+        }
+
+
+        return new PageImpl<>(responsePageDtoList, pageable, pages.getTotalElements());
+    }
+
+    public org.springframework.data.domain.Page<ResponsePageDto> findPagesByEmotionType(EmotionType emotionType, Pageable pageable) {
+        org.springframework.data.domain.Page<Page> pages = pageRepository.findByEmotionType(emotionType, pageable);
+
+        List<ResponsePageDto> responsePageDtoList = new ArrayList<>();
+
+        for (Page page : pages) {
+            ResponsePageDto responsePageDto = ResponsePageDto.from(page);
+            responsePageDto.setLikeCount(likeService.countLikesForPage(page.getId()));
+            responsePageDtoList.add(responsePageDto);
+        }
+
+        return new PageImpl<>(responsePageDtoList, pageable, pages.getTotalElements());
+    }
 
     @Transactional
     public long createPage(CreatePageDto createPageDto, String accessToken) {
@@ -125,22 +166,6 @@ public class PageService {
         log.info("Page deleted: " + pageId);
 
         return pageId;
-    }
-
-
-
-
-
-    @Transactional
-    public List<ResponsePageDto> getPageListByDate(Long userId, LocalDate date){
-        List<Page> pageList = pageRepository.findAllByUserIdAndCreatedAt(userId, date);
-
-        List<ResponsePageDto> responsePageDtoList = pageList.stream()
-                .map(ResponsePageDto::from)
-                .collect(Collectors.toList());
-
-        log.info("Page list returned: " + pageList.size());
-        return responsePageDtoList;
     }
 
 
@@ -251,6 +276,20 @@ public class PageService {
         return hashtagRepository.findPagesByHashtag(hashtag);
     }
 
+    public org.springframework.data.domain.Page<ResponsePageDto> getPagesByHashtag(String hashtag, Pageable pageable) {
+        org.springframework.data.domain.Page<Page> pages = hashtagRepository.findPagesByHashtag(hashtag, pageable);
+
+        List<ResponsePageDto> responsePageDtoList = new ArrayList<>();
+
+        for (Page page : pages) {
+            ResponsePageDto responsePageDto = ResponsePageDto.from(page);
+            responsePageDto.setLikeCount(likeService.countLikesForPage(page.getId()));
+            responsePageDtoList.add(responsePageDto);
+        }
+
+        return new PageImpl<>(responsePageDtoList, pageable, pages.getTotalElements());
+    }
+
     @Transactional
     public Page createPageWithHashtags(Page page, Set<String> hashtags) {
         Set<Hashtag> hashtagEntities = new HashSet<>();
@@ -272,7 +311,7 @@ public class PageService {
 
         for (String tag : hashtags) {
             Hashtag existingHashtag = hashtagRepository.findByTag(tag)
-                    .orElseGet(() -> new Hashtag(tag));
+                    .orElseGet(() -> hashtagRepository.save(new Hashtag(tag)));
             existingHashtags.add(existingHashtag);
         }
 
@@ -292,6 +331,17 @@ public class PageService {
             pageDetails.add(responsePageDto);
         }
         return pageDetails;
+    }
+
+    public org.springframework.data.domain.Page<ResponsePageDto> getPagesCreatedWithinLast24Hours(Pageable pageable) {
+        LocalDateTime twentyFourHoursAgo = LocalDateTime.now().minusHours(24);
+        org.springframework.data.domain.Page<Page> pages = pageRepository.findAllCreatedWithinLast24Hours(twentyFourHoursAgo, pageable);
+
+        List<ResponsePageDto> responsePageDtoList = pages.stream()
+                .map(ResponsePageDto::from)
+                .collect(Collectors.toList());
+
+        return new PageImpl<>(responsePageDtoList, pageable, pages.getTotalElements());
     }
 
     

@@ -22,6 +22,7 @@ import cau.capstone.backend.page.model.repository.PageRepository;
 import com.amazonaws.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,7 +58,39 @@ public class BookService {
 
         Book book = Book.createBook(user, createBookDto.getBookName(), createBookDto.getCategoryCode());
 
+        setHashtagsToBook(book, createBookDto.getHashtags());
+
         return bookRepository.save(book).getId();
+    }
+
+
+    @Transactional
+    public Book createBookWithHashtags(Book book, Set<String> hashtags) {
+        Set<Hashtag> hashtagEntities = new HashSet<>();
+
+        for (String tag : hashtags) {
+            Hashtag hashtag = hashtagRepository.findByTag(tag)
+                    .orElseGet(() -> hashtagRepository.save(new Hashtag(tag)));
+            hashtagEntities.add(hashtag);
+        }
+
+        book.setHashtags(hashtagEntities);
+        return bookRepository.save(book);
+
+    }
+
+    @Transactional
+    public void setHashtagsToBook(Book book, Set<String> hashtags) {
+        Set<Hashtag> existingHashtags = book.getHashtags();
+
+        for (String tag : hashtags) {
+            Hashtag hashtag = hashtagRepository.findByTag(tag)
+                    .orElseGet(() -> hashtagRepository.save(new Hashtag(tag)));
+            existingHashtags.add(hashtag);
+        }
+
+        book.setHashtags(existingHashtags);
+        bookRepository.save(book);
     }
 
 
@@ -93,6 +126,10 @@ public class BookService {
         Book book = getBookById(bookId);
 
         rankingService.likeBook(bookId, book.getCategory());
+
+        if(likeRepository.existsByLikeTypeAndTargetIdAndUserId(LikeType.BOOK, bookId, user.getId())){
+            throw new BookException(ResponseCode.LIKE_ALREADY_EXIST);
+        }
 
         Like like = Like.createLike(user, LikeType.BOOK, bookId);
         user.addLike(like);
@@ -192,44 +229,49 @@ public class BookService {
     }
 
 
-    public List<Book> getBooksByHashtag(String hashtag) {
-        return hashtagRepository.findBooksByHashtag(hashtag);
-    }
 
+    public org.springframework.data.domain.Page<ResponseBookDto> searchBooksWithKeywordAndPaging(String keyword, Pageable pageable) {
+        org.springframework.data.domain.Page<Book> books = bookRepository.findByKeywordWithPaging(keyword, pageable);
 
-    @Transactional
-    public Book createBookWithHashtags(Book book, Set<String> hashtags) {
-        Set<Hashtag> hashtagEntities = new HashSet<>();
+        List<ResponseBookDto> responseBookDtoList = new ArrayList<>();
 
-        for (String tag : hashtags) {
-            Hashtag hashtag = hashtagRepository.findByTag(tag)
-                    .orElseGet(() -> hashtagRepository.save(new Hashtag(tag)));
-            hashtagEntities.add(hashtag);
+        for (Book book : books) {
+            ResponseBookDto responseBookDto = ResponseBookDto.from(book);
+            responseBookDto.setTotalLikeCount(likeService.countTotalLikesForBook(book.getId()));
+            responseBookDtoList.add(responseBookDto);
         }
 
-        book.setHashtags(hashtagEntities);
-        return bookRepository.save(book);
-
+        return new PageImpl<>(responseBookDtoList, pageable, books.getTotalElements());
     }
 
-    @Transactional
-    public void setHashtagsToBook(Book book, Set<String> hashtags) {
-        Set<Hashtag> existingHashtags = book.getHashtags();
+    public org.springframework.data.domain.Page<ResponseBookDto> findAllBooks(Pageable pageable) {
+        org.springframework.data.domain.Page<Book> books = bookRepository.findAll(pageable);
 
-        for (String tag : hashtags) {
-            Hashtag existingHashtag = hashtagRepository.findByTag(tag)
-                    .orElseGet(() -> new Hashtag(tag));
-            existingHashtags.add(existingHashtag);
+        List<ResponseBookDto> responseBookDtoList = new ArrayList<>();
+
+        for (Book book : books) {
+            ResponseBookDto responseBookDto = ResponseBookDto.from(book);
+            responseBookDto.setTotalLikeCount(likeService.countTotalLikesForBook(book.getId()));
+            responseBookDtoList.add(responseBookDto);
         }
 
-        book.setHashtags(existingHashtags);
-        bookRepository.save(book);
+        return new PageImpl<>(responseBookDtoList, pageable, books.getTotalElements());
     }
 
+    public org.springframework.data.domain.Page<ResponseBookDto> findAllBooksByCategory(Category category,Pageable pageable) {
+        org.springframework.data.domain.Page<Book> books = bookRepository.findByCategory(category, pageable);
 
-    public org.springframework.data.domain.Page<Book> searchBooksByNameOrHashtags(String name, Set<String> hashtags, Pageable pageable) {
-        return bookRepository.findByBookNameContainingOrHashtagsIn(name, hashtags, pageable);
+        List<ResponseBookDto> responseBookDtoList = new ArrayList<>();
+
+        for (Book book : books) {
+            ResponseBookDto responseBookDto = ResponseBookDto.from(book);
+            responseBookDto.setTotalLikeCount(likeService.countTotalLikesForBook(book.getId()));
+            responseBookDtoList.add(responseBookDto);
+        }
+
+        return new PageImpl<>(responseBookDtoList, pageable, books.getTotalElements());
     }
+
 
     public List<CategoryDto> getAllCategories() {
         return Arrays.stream(Category.values())

@@ -11,6 +11,7 @@ import cau.capstone.backend.page.dto.response.CategoryDto;
 import cau.capstone.backend.page.dto.response.ResponseBookDto;
 import cau.capstone.backend.page.dto.response.ResponsePageDto;
 import cau.capstone.backend.page.model.Book;
+import cau.capstone.backend.page.model.Category;
 import cau.capstone.backend.page.model.Page;
 import cau.capstone.backend.page.service.BookService;
 import io.swagger.annotations.Api;
@@ -83,21 +84,45 @@ public class BookController {
     }
 
 
-    @GetMapping("/search")
-    public ResponseEntity<org.springframework.data.domain.Page<Book>> searchBooks(
-            @RequestParam("name") String name,
-            @RequestParam("hashtags") Set<String> hashtags,
+    @Operation(summary = "전체 북의 리스트를 페이저블하게 반환")
+    @GetMapping("/allbooks")
+    public ResponseEntity<org.springframework.data.domain.Page<ResponseBookDto>> getAllBooks(
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
-        org.springframework.data.domain.Page<Book> result = bookService.searchBooksByNameOrHashtags(name, hashtags, pageable);
+        org.springframework.data.domain.Page<ResponseBookDto> result = bookService.findAllBooks(pageable);
+        return ResponseEntity.ok(result);
+    }
+
+    @Operation(summary = "카테고리별 북의 리스트를 페이저블하게 반환")
+    @GetMapping("/allbooks/category")
+    public ResponseEntity<org.springframework.data.domain.Page<ResponseBookDto>> getAllBooks(
+            @RequestParam(value = "category") String categoryCode,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        org.springframework.data.domain.Page<ResponseBookDto> result = bookService.findAllBooksByCategory(Category.getByCode(categoryCode), pageable);
         return ResponseEntity.ok(result);
     }
 
 
+    @Operation(summary = "북의 카테고리 리스트 반환")
     @GetMapping("/categories")
     public ApiResponse<List<CategoryDto>> getAllCategories() {
         return ApiResponse.success(bookService.getAllCategories(), ResponseCode.CATEGORY_READ_SUCCESS.getMessage());
+    }
+
+
+    @Operation(summary = "북을 좋아요")
+    @PostMapping("/like/{bookId}")
+    public ApiResponse<ResponseBookDto> likeBook(@PathVariable Long bookId, @RequestHeader String accessToken){
+        return ApiResponse.success(bookService.likeBook(bookId, accessToken), ResponseCode.BOOK_LIKE_SUCCESS.getMessage());
+    }
+
+    @Operation(summary = "북 좋아요 취소")
+    @DeleteMapping("/like/{bookId}")
+    public ApiResponse<ResponseBookDto> unlikeBook(@PathVariable Long bookId, @RequestHeader String accessToken){
+        return ApiResponse.success(bookService.unlikeBook(bookId, accessToken), ResponseCode.BOOK_DISLIKE_SUCCESS.getMessage());
     }
 
 

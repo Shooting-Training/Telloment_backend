@@ -56,12 +56,6 @@ public class UserController {
     }
 
 
-    // 회원 검색 결과 조회
-    @Operation(summary = "회원 검색 결과 조회", description = "회원 검색 결과를 조회합니다.")
-    @GetMapping("/search")
-    public ApiResponse<List<ResponseSearchUserDto>> searchUser(@RequestParam String keyword, @RequestHeader String accessToken) {
-        return ApiResponse.success(userService.searchUser(keyword), ResponseCode.USER_SEARCH_SUCCESS.getMessage());
-    }
 //
 //    // 회원이 특정 회원 팔로우
 //    @Operation(summary = "회원이 특정 회원 팔로우", description = "회원이 특정 회원을 팔로우합니다.")

@@ -7,6 +7,7 @@ import cau.capstone.backend.global.util.exception.UserException;
 import cau.capstone.backend.page.dto.request.*;
 import cau.capstone.backend.page.dto.response.ResponsePageDto;
 import cau.capstone.backend.page.dto.response.ResponseScrapDto;
+import cau.capstone.backend.page.model.EmotionType;
 import cau.capstone.backend.page.model.Page;
 import cau.capstone.backend.page.service.PageService;
 import cau.capstone.backend.global.util.api.ApiResponse;
@@ -47,6 +48,29 @@ public class PageController {
 
         return ApiResponse.success(pageService.getPage(accessToken, pageId), ResponseCode.PAGE_READ_SUCCESS.getMessage());
     }
+
+    @Operation(summary = "페이지 전체를 페이저블하게 반환")
+    @GetMapping("/allpages")
+    public ResponseEntity<org.springframework.data.domain.Page<ResponsePageDto>> getAllPages(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        org.springframework.data.domain.Page<ResponsePageDto> result = pageService.findAllPages(pageable);
+        return ResponseEntity.ok(result);
+    }
+
+    @Operation(summary = "페이지 전체를 감정으로 분류해 페이저블하게 반환")
+    @GetMapping("/allpages/emotion")
+    public ResponseEntity<org.springframework.data.domain.Page<ResponsePageDto>> getAllPagesByEmotion(
+            @RequestParam("emotion") String emotionType,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        org.springframework.data.domain.Page<ResponsePageDto> result = pageService.findPagesByEmotionType(EmotionType.getByCode(emotionType), pageable);
+        return ResponseEntity.ok(result);
+    }
+
+
 
 
     //페이지 정보 저장
@@ -123,27 +147,14 @@ public class PageController {
     }
 
 
-    //특정 날짜에 적은 페이지 정보 반환
-    @Operation(summary = "특정 날짜에 적은 페이지 정보 반환")
-    @GetMapping("/{userId}")
-    public ApiResponse<List<ResponsePageDto>> getPageListByDate(@PathVariable Long userId,
-                                                                @RequestParam int yy,
-                                                                @RequestParam int mm,
-                                                                @RequestParam int dd){
-        LocalDate date = LocalDate.of(yy, mm, dd);
 
-
-        return ApiResponse.success(pageService.getPageListByDate(userId, date), ResponseCode.PAGE_READ_SUCCESS.getMessage());
-    }
-
-
-    @GetMapping("/search")
-    public ResponseEntity<org.springframework.data.domain.Page<Page>> searchPages(
-            @RequestParam("keyword") String keyword,
+    @Operation(summary = "최근 24시간 이내에 생성된 페이지 반환")
+    @GetMapping("/recent")
+    public ResponseEntity<org.springframework.data.domain.Page<ResponsePageDto>> getPagesCreatedWithinLast24Hours(
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
-        org.springframework.data.domain.Page<Page> result = pageService.searchPagesWithKeywordAndPaging(keyword, pageable);
+        org.springframework.data.domain.Page<ResponsePageDto> result = pageService.getPagesCreatedWithinLast24Hours(pageable);
         return ResponseEntity.ok(result);
     }
 

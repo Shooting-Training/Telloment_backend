@@ -42,6 +42,7 @@ public enum ResponseCode {
     FOLLOWED_ALREADY(HttpStatus.CONFLICT, false, "이미 팔로우한 사용자입니다."),
     UNFOLLOWED_ALREADY(HttpStatus.CONFLICT, false, "이미 언팔로우한 사용자입니다."),
     SCRAP_ALREADY_SCRAPPED(HttpStatus.CONFLICT, false, "이미 스크랩된 페이지입니다."),
+    LIKE_ALREADY_EXIST(HttpStatus.CONFLICT, false, "이미 좋아요한 페이지입니다."),
 
 
     // 500 Internal Server Error
@@ -75,6 +76,8 @@ public enum ResponseCode {
     BOOK_READ_SUCCESS(HttpStatus.OK, true, "북 읽기 성공"),
     BOOK_UPDATE_SUCCESS(HttpStatus.OK, true, "북 수정 성공"),
     BOOK_DELETE_SUCCESS(HttpStatus.OK, true, "북 삭제 성공"),
+    BOOK_LIKE_SUCCESS(HttpStatus.OK, true, "북 좋아요 성공"),
+    BOOK_DISLIKE_SUCCESS(HttpStatus.OK, true, "북 좋아요 취소 성공"),
 
     CATEGORY_READ_SUCCESS(HttpStatus.OK, true, "카테고리 조회 성공"),
 

@@ -23,7 +23,11 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
     List<Book> findByCategory(Category category);
 
-    @Query("SELECT b FROM Book b LEFT JOIN b.hashtags h WHERE b.bookName LIKE %:name% OR h.tag IN :hashtags")
-    org.springframework.data.domain.Page<Book> findByBookNameContainingOrHashtagsIn(@Param("name") String name, @Param("hashtags") Set<String> hashtags, Pageable pageable);
+//    @Query("SELECT b FROM Book b LEFT JOIN b.hashtags h WHERE b.bookName LIKE %:name% OR h.tag IN :hashtags")
+//    org.springframework.data.domain.Page<Book> findByBookNameContainingOrHashtagsIn(@Param("name") String name, @Param("hashtags") Set<String> hashtags, Pageable pageable);
 
+    @Query("SELECT DISTINCT b FROM Book b LEFT JOIN b.hashtags h WHERE LOWER(b.bookName) LIKE LOWER(concat('%', :keyword, '%')) OR LOWER(h.tag) LIKE LOWER(concat('%', :keyword, '%'))")
+    org.springframework.data.domain.Page<Book> findByKeywordWithPaging(@Param("keyword") String keyword, Pageable pageable);
+
+    org.springframework.data.domain.Page<Book> findByCategory(Category category, Pageable pageable);
 }

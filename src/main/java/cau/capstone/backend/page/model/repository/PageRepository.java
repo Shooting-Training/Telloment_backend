@@ -1,5 +1,6 @@
 package cau.capstone.backend.page.model.repository;
 
+import cau.capstone.backend.page.model.EmotionType;
 import cau.capstone.backend.page.model.Page;
 
 import org.springframework.data.domain.Pageable;
@@ -11,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,4 +36,10 @@ public interface PageRepository extends JpaRepository<Page, Long> {
 
     @Query("SELECT p FROM Page p LEFT JOIN p.hashtags h WHERE LOWER(p.title) LIKE LOWER(concat('%', :keyword, '%')) OR LOWER(p.content) LIKE LOWER(concat('%', :keyword, '%')) OR LOWER(h.tag) LIKE LOWER(concat('%', :keyword, '%')) GROUP BY p")
     org.springframework.data.domain.Page<Page> findByKeywordWithPaging(@Param("keyword") String keyword, Pageable pageable);
+
+    @Query("SELECT p FROM Page p WHERE p.emotion.type = :emotionType")
+    org.springframework.data.domain.Page<Page> findByEmotionType(EmotionType emotionType, Pageable pageable);
+
+    @Query("SELECT p FROM Page p WHERE p.createdAt >= :startTime")
+    org.springframework.data.domain.Page<Page> findAllCreatedWithinLast24Hours(@Param("startTime") LocalDateTime startTime, Pageable pageable);
 }

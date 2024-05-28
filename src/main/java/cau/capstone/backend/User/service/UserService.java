@@ -2,10 +2,8 @@ package cau.capstone.backend.User.service;
 
 
 import cau.capstone.backend.User.dto.request.UpdateUserDto;
-import cau.capstone.backend.User.model.Follow;
 import cau.capstone.backend.User.model.User;
 import cau.capstone.backend.User.dto.response.ResponseSearchUserDto;
-import cau.capstone.backend.User.dto.response.ResponseSimpleUserDto;
 import cau.capstone.backend.User.model.repository.FollowRepository;
 import cau.capstone.backend.User.model.repository.UserRepository;
 import cau.capstone.backend.global.security.Entity.JwtTokenProvider;
@@ -16,12 +14,12 @@ import cau.capstone.backend.global.util.api.ResponseCode;
 import cau.capstone.backend.global.util.exception.UserException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import java.util.stream.Collectors;
@@ -141,14 +139,17 @@ public class UserService {
     }
 
 
-    @Transactional(readOnly = true)
-    public List<ResponseSearchUserDto> searchUser(String keyword) {
-        List<User> userList = userRepository.findAllByNameContaining(keyword);
-        log.info("검색 결과: {}", userList.size());
-        return userList.stream()
+    public org.springframework.data.domain.Page<ResponseSearchUserDto> searchUsersWithKeywordAndPaging(String keyword, Pageable pageable) {
+        org.springframework.data.domain.Page<User> users = userRepository.findByKeywordWithPaging(keyword, pageable);
+
+        List<ResponseSearchUserDto> responseUserDtoList = users.stream()
                 .map(ResponseSearchUserDto::of)
                 .collect(Collectors.toList());
+
+        return new PageImpl<>(responseUserDtoList, pageable, users.getTotalElements());
     }
+
+
 
 //
 //    //for test

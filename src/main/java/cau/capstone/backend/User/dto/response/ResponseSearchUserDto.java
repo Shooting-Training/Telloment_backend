@@ -16,17 +16,17 @@ import java.io.Serializable;
 public class ResponseSearchUserDto implements Serializable {
 
     private Long userId;
+    private String userEmail;
     private String name;
     private String nickName;
-    private String image;
-    private boolean isFollow;
+
 
     public static ResponseSearchUserDto of(User user){
         return ResponseSearchUserDto.builder()
                 .userId(user.getId())
+                .userEmail(user.getEmail())
                 .name(user.getName())
-                .name(user.getNickname())
-                .image(user.getImage())
+                .nickName(user.getNickname())
                 .build();
     }
 }

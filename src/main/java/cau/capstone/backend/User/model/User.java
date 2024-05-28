@@ -47,10 +47,6 @@ public class User extends BaseEntity implements UserDetails  {
     @Column(name = "user_role")
     @Enumerated(EnumType.STRING)
     private Authority role = Authority.USER; //권한
-//
-//    @Column(name="provider", columnDefinition = "varchar(10) default 'EMAIL'")
-//    @Enumerated(EnumType.STRING)
-//    private Provider provider = Provider.EMAIL; //로그인 제공자
 
     @Column
     private LocalDateTime lastLoginAt; //마지막 로그인 시간
