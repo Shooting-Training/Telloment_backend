@@ -26,7 +26,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/voice")
-@Api(tags = )
+@Api(tags = "음성 API")
 public class VoiceController {
 
     private final JwtTokenProvider jwtTokenProvider;
