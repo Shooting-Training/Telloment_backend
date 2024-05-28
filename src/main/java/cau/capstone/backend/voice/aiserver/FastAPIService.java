@@ -71,13 +71,15 @@ public class FastAPIService {
     }
 
 
-    public Mono<byte[]> processStringAndGetWav(Long userId, String content) {
+    public Mono<byte[]> processStringAndGetWav(Long userId, String content, String emotion, int emotionStrength) {
 //        RequestPayload requestPayload = new RequestPayload(id, content);
 
         return this.webClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/v1/voice/{user_id}/speech")
                         .queryParam("text", content)
+                        .queryParam("emotion", emotion)
+                        .queryParam("value", emotionStrength)
                         .build(userId))
                 .retrieve()
                 .bodyToMono(byte[].class);

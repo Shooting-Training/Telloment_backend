@@ -30,7 +30,7 @@ public class VoiceController {
     private final PageService pageService;
     private final VoiceService voiceService;
 
-    @PostMapping("/user/{userId}")
+    @PostMapping("user/{userId}/clone")
     public String cloneVoice(@RequestPart FilePart file, @PathVariable Long userId) {
         Mono<String> test = fastAPIService.cloneVoice(userId, file);
         return test.block();
@@ -52,7 +52,7 @@ public class VoiceController {
     public ResponseEntity<byte[]> getSpeechFromPage(@PathVariable Long pageId, @RequestHeader String accessToken, @RequestBody SpeechRequestDto speechRequestDto) {
         Long userId = jwtTokenProvider.getUserPk(accessToken);
         var page = pageService.getPage(accessToken, pageId);
-        return fastAPIService.processStringAndGetWav(userId, page.getContent())
+        return fastAPIService.processStringAndGetWav(userId, page.getContent(), speechRequestDto.getEmotion(), speechRequestDto.getValue())
                 .map(wavFile -> ResponseEntity.ok()
                         .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"output.wav\"")
                         .contentType(MediaType.APPLICATION_OCTET_STREAM)
