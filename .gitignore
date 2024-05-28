@@ -180,7 +180,6 @@ Temporary Items
 .attach_pid*
 .classpath
 .factorypath
-.gradle
 .metadata
 .project
 .recommenders
