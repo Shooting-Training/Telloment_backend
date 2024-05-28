@@ -10,6 +10,7 @@ import cau.capstone.backend.voice.dto.request.SpeechRequestDto;
 import cau.capstone.backend.voice.dto.response.EmotionResponseDto;
 import cau.capstone.backend.voice.dto.response.VoiceResponseDto;
 import cau.capstone.backend.voice.service.VoiceService;
+import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -25,6 +26,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/voice")
+@Api(tags = )
 public class VoiceController {
 
     private final JwtTokenProvider jwtTokenProvider;
@@ -52,9 +54,8 @@ public class VoiceController {
 
     @GetMapping("/{voiceId}/page/{pageId}/speech")
     public ResponseEntity<byte[]> getSpeechFromPage(@PathVariable Long pageId, @RequestHeader String accessToken, @RequestBody SpeechRequestDto speechRequestDto) {
-        Long userId = jwtTokenProvider.getUserPk(accessToken);
         var page = pageService.getPage(accessToken, pageId);
-        return fastAPIService.processStringAndGetWav(userId, page.getContent(), speechRequestDto.getEmotion(), speechRequestDto.getValue())
+        return fastAPIService.processStringAndGetWav(accessToken, page.getContent(), speechRequestDto.getEmotion(), speechRequestDto.getValue())
                 .map(wavFile -> ResponseEntity.ok()
                         .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"output.wav\"")
                         .contentType(MediaType.APPLICATION_OCTET_STREAM)

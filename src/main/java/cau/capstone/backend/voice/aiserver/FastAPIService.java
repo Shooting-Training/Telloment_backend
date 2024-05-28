@@ -1,5 +1,6 @@
 package cau.capstone.backend.voice.aiserver;
 
+import cau.capstone.backend.global.security.Entity.JwtTokenProvider;
 import cau.capstone.backend.page.model.Page;
 import cau.capstone.backend.page.model.repository.PageRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ public class FastAPIService {
 
     private final WebClient webClient;
     private final PageRepository pageRepository;
+    private final JwtTokenProvider jwtTokenProvider;
 
 
 //    public FastAPIService(WebClient webClient) {
@@ -71,16 +73,16 @@ public class FastAPIService {
     }
 
 
-    public Mono<byte[]> processStringAndGetWav(Long userId, String content, String emotion, int emotionStrength) {
+    public Mono<byte[]> processStringAndGetWav(String token, String content, String emotion, int emotionStrength) {
 //        RequestPayload requestPayload = new RequestPayload(id, content);
-
+        var email = jwtTokenProvider.getUserEmail(token);
         return this.webClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/v1/voice/{user_id}/speech")
                         .queryParam("text", content)
                         .queryParam("emotion", emotion)
                         .queryParam("value", emotionStrength)
-                        .build(userId))
+                        .build(email))
                 .retrieve()
                 .bodyToMono(byte[].class);
     }
