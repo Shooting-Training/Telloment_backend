@@ -86,10 +86,21 @@ public enum ResponseCode {
 
     // 201 Created
     USER_CREATE_SUCCESS(HttpStatus.CREATED, true, "사용자 생성 성공"),
-    PAGE_CREATE_SUCCESS(HttpStatus.CREATED, true, "페이지 생성 성공");
+    PAGE_CREATE_SUCCESS(HttpStatus.CREATED, true, "페이지 생성 성공"),
 
+    //voice api response
+    VOICE_CLONE_SUCCESS(HttpStatus.OK, true, "음성 복제 성공"),
+    VOICE_EMOTION_SUCCESS(HttpStatus.OK, true, "페이지 감정 분석 성공"),
+    VOICE_SPEECH_SUCCESS(HttpStatus.OK, true, "페이지 음성 생성 성공"),
+    VOICE_LIST_SUCCESS(HttpStatus.OK, true, "음성 목록 조회 성공"),
+    VOICE_SCRAP_SUCCESS(HttpStatus.OK, true, "음성 스크랩 성공"),
+    VOICE_DELETE_SCRAP_SUCCESS(HttpStatus.OK, true, "음성 스크랩 삭제 성공"),
 
+    VOICE_LIST_EMPTY(HttpStatus.NOT_FOUND, false, "음성 목록이 비어있습니다."),
+    VOICE_CLONE_FAILURE(HttpStatus.INTERNAL_SERVER_ERROR, false, "음성 복제 실패"),
+    VOICE_EMOTION_FAILURE(HttpStatus.INTERNAL_SERVER_ERROR, false, "페이지 감정 분석 실패"),
 
+    ;
     private final HttpStatus httpStatus;
     private final Boolean success;
     private final String message;
