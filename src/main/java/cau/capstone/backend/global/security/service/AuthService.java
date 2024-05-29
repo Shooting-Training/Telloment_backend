@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +29,7 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenRepository refreshTokenRepository;
 
-
+    private final CustomUserDetailsService customUserDetailsService;
 
     @Transactional
     public ResponseUserDto signUp (CreateUserDto createUserDto) {
@@ -73,12 +74,14 @@ public class AuthService {
             throw new RuntimeException("Refresh Token 이 유효하지 않습니다.");
         }
 
-        // 2. Access Token 에서 User ID 가져오기
-        Authentication authentication = jwtTokenProvider.getAuthentication(requestTokenDto.getAccessToken());
+        // 2. refresh token 에서 User ID 가져오기
+        String userEmail = jwtTokenProvider.getUserEmail(requestTokenDto.getRefreshToken());
+
+        System.out.println("userEmail : " + userEmail);
 
         // 3. 저장소에서 user ID 를 기반으로 Refresh Token 값 가져옴
-        RefreshToken refreshToken = refreshTokenRepository.findByKey(authentication.getName())
-                .orElseThrow(() -> new RuntimeException("로그아웃 된 사용자입니다."));
+        RefreshToken refreshToken = refreshTokenRepository.findByKey(userEmail)
+                .orElseThrow(() -> new RuntimeException("Refresh Token을 찾을 수 없습니다. 로그인을 다시 해주세요"));
 
         // 4. Refresh Token 일치하는지 검사
         if (!refreshToken.getValue().equals(requestTokenDto.getRefreshToken())) {
@@ -86,6 +89,9 @@ public class AuthService {
         }
 
         // 5. 새로운 토큰 생성
+        UserDetails userDetails = customUserDetailsService.loadUserByUsername(userEmail);
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+
         TokenDto tokenDto = jwtTokenProvider.generateTokenDto(authentication);
 
         // 6. 저장소 정보 업데이트

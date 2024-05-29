@@ -38,19 +38,10 @@ public class JwtTokenProvider {
     // 만료시간 : 1Hour
     private static final String AUTHORITIES_KEY = "auth";
     private static final String BEARER_TYPE = "bearer";
-    private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60 * 60 * 24;            // 30분
+    private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60 * 60 ;
+
     private static final long REFRESH_TOKEN_EXPIRE_TIME = 1000 * 60 * 60 * 24 * 7;  // 7일
 
-
-//    public JwtTokenProvider(@Value("${jwt.secret.key}") String secretKey) {
-//        if (secretKey == null) {
-//            log.error("JWT secret key is null");
-//        } else {
-//            log.info("JWT secret key is successfully set");
-//        }
-//        this.secretKey = secretKey;
-//        System.out.println("secretKey : " + secretKey);
-//    }
 
     @PostConstruct
     protected void init() {
@@ -85,6 +76,7 @@ public class JwtTokenProvider {
 
         // Refresh Token 생성
         String refreshToken = Jwts.builder()
+                .setSubject(authentication.getName())       // 여기에 유저 이름을 포함시킴
                 .setExpiration(new Date(now + REFRESH_TOKEN_EXPIRE_TIME))
                 .signWith(key, SignatureAlgorithm.HS512)
                 .compact();
@@ -147,6 +139,11 @@ public class JwtTokenProvider {
 
     public String getUserEmail(String token) {
         return Jwts.parser().setSigningKey(key).parseClaimsJws(token).getBody().getSubject();
+    }
+
+    public String getUserIdFromToken(String token) {
+        Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+        return claims.getSubject();
     }
 
     //    //토큰 생성
