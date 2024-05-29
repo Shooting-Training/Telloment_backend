@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import reactor.util.annotation.Nullable;
 
 import java.time.LocalDateTime;
 
@@ -23,6 +24,8 @@ public class ResponsePageDto {
     private LocalDateTime createdAt;
     private int likeCount;
     private int scrapCount;
+
+    @Nullable
     private String emotionType;
 
 

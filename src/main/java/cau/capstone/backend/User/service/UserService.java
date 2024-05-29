@@ -57,7 +57,7 @@ public class UserService {
 
     // 현재 SecurityContext 에 있는 유저 정보 가져와 유저 정보 반환
     public ResponseUserDto getMyInfo() {
-        return userRepository.findById(SecurityUtil.getCurrentMemberId())
+        return userRepository.findByEmail(SecurityUtil.getCurrentMemberEmail())
                 .map(ResponseUserDto::of)
                 .orElseThrow(() -> new RuntimeException("로그인 유저 정보가 없습니다."));
     }

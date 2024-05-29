@@ -72,7 +72,7 @@ public class User extends BaseEntity implements UserDetails  {
 
 
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private Score score = new Score();
+    private Score score;
 
     @Builder
     public User(String email, String passwd,Authority role) {
@@ -133,6 +133,8 @@ public class User extends BaseEntity implements UserDetails  {
         user.name = name;
         user.nickname = nickname;
         user.role = Authority.USER;
+
+        user.score = new Score(user);
         return user;
     }
 

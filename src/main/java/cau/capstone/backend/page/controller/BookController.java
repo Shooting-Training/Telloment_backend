@@ -43,7 +43,7 @@ public class BookController {
     }
 
 
-    @Operation(summary = "북 리스트 반환")
+    @Operation(summary = "유저가 생성한 북 리스트 반환")
     @GetMapping("/list")
     public ApiResponse<List<ResponseBookDto>> getBookList(@RequestHeader String accessToken){
 
