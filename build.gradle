@@ -59,19 +59,12 @@ dependencies {
     implementation group: 'io.springfox', name: 'springfox-boot-starter', version: '3.0.0'
 //    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:1.6.11'
 
-
-//
-//    implementation 'org.hibernate:hibernate-spatial:6.4.1.Final'
-//    implementation 'org.hibernate:hibernate-core:6.4.1.Final'
-
     implementation 'io.netty:netty-resolver-dns-native-macos:4.1.68.Final:osx-aarch_64'
 
     //S3
     implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
     //redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
-
-    implementation 'org.liquibase:liquibase-core:4.4.1'
 
     //webflux, webclient
     implementation 'org.springframework.boot:spring-boot-starter-webflux'

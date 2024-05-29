@@ -55,9 +55,6 @@ public class Page extends BaseEntity {
     @OneToMany(mappedBy = "page", fetch = FetchType.LAZY)
     private List<Scrap> scraps = new ArrayList<>();
 
-//    @OneToMany(mappedBy = "page", fetch = FetchType.LAZY)
-//    private List<Like> likes = new ArrayList<>();
-
 
     @Column(name = "view_count")
     private int viewCount = 0;
