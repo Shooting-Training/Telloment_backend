@@ -23,22 +23,31 @@ public class ResponsePageDto {
     private String content;
     private LocalDateTime createdAt;
     private int likeCount;
-    private int scrapCount;
+
+    private Long prevId;
+    private Long nextId;
+    private Long rootId;
 
     @Nullable
     private String emotionType;
+    private int emotionIntensity;
+
+    private String voiceInfo;
 
 
-    public static ResponsePageDto of(Page page){
-        return ResponsePageDto.builder()
-                .pageId(page.getId())
-                .userId(page.getUser().getId())
-                .title(page.getTitle())
-                .content(page.getContent())
-                .createdAt(page.getCreatedAt())
-                .emotionType(page.getEmotion().getType().getDescription())
-                .build();
-    }
+//    public static ResponsePageDto from(Page page, int likeCount){
+//        return ResponsePageDto.builder()
+//                .pageId(page.getId())
+//                .userId(page.getUser().getId())
+//                .title(page.getTitle())
+//                .content(page.getContent())
+//                .createdAt(page.getCreatedAt())
+//                .emotionType(page.getEmotion().getType().getDescription())
+//                .emotionIntensity(page.getEmotion().getIntensity().getIntensity())
+//                .voiceInfo(page.getVoiceInfo())
+//                .likeCount(likeCount)
+//                .build();
+//    }
 
 
     public static ResponsePageDto from(Page page){
@@ -49,6 +58,11 @@ public class ResponsePageDto {
                 .content(page.getContent())
                 .createdAt(page.getCreatedAt())
                 .emotionType(page.getEmotion().getType().getDescription())
+                .emotionIntensity(page.getEmotion().getIntensity().getIntensity())
+                .voiceInfo(page.getVoiceInfo())
+                .rootId(page.getRootId())
+                .prevId(page.getPrevId())
+                .nextId(page.getNextId())
                 .build();
     }
 

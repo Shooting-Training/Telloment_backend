@@ -43,8 +43,6 @@ public class SearchingController {
         return ResponseEntity.ok(result);
     }
 
-
-
     //해시태그로만 페이지 검색
     @Operation(summary = "해시태그로 페이지 검색")
     @GetMapping("/pages/hashtag")

@@ -22,13 +22,13 @@ public class ResponseBookDto {
     private int totalLikeCount;
     private int totalViewCount;
 
-    public static ResponseBookDto of(Long bookId, String bookName, String categoryCode) {
-        return ResponseBookDto.builder()
-                .bookId(bookId)
-                .bookName(bookName)
-                .categoryCode(categoryCode)
-                .build();
-    }
+//    public static ResponseBookDto of(Long bookId, String bookName, String categoryCode) {
+//        return ResponseBookDto.builder()
+//                .bookId(bookId)
+//                .bookName(bookName)
+//                .categoryCode(categoryCode)
+//                .build();
+//    }
 
     public static ResponseBookDto from(Book book) {
         return ResponseBookDto.builder()

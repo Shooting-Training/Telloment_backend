@@ -20,7 +20,9 @@ import com.amazonaws.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,7 +51,7 @@ public class PageService {
 
 
     @Transactional
-    public ResponsePageDto getPage(String  accessToken, Long pageId) {
+    public ResponsePageDto getPage(String accessToken, Long pageId) {
 
         String userEmail = jwtTokenProvider.getUserEmail(accessToken);
         User user = userRepository.findByEmail(userEmail)
@@ -57,8 +59,11 @@ public class PageService {
         Long userId = user.getId();
 
         Page page = getPageById(pageId);
+        Book book = getBookById(page.getBook().getId());
         page.setViewCount(page.getViewCount() + 1);
+        book.setBookViewCount(book.getBookViewCount() + 1);
         pageRepository.save(page);
+        bookRepository.save(book);
 
         rankingService.incrementViewCountPage(page.getId(), page.getEmotion().getType());
         rankingService.incrementViewCountBook(page.getBook().getId(), page.getBook().getCategory());
@@ -68,7 +73,13 @@ public class PageService {
 }
 
     public org.springframework.data.domain.Page<ResponsePageDto> searchPagesWithKeywordAndPaging(String keyword, Pageable pageable) {
-        org.springframework.data.domain.Page<Page> pages = pageRepository.findByKeywordWithPaging(keyword, pageable);
+        Pageable sortedByCreationDateDesc = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                Sort.by(Sort.Direction.DESC, "createdAt")
+        );
+
+        org.springframework.data.domain.Page<Page> pages = pageRepository.findByKeywordWithPaging(keyword, sortedByCreationDateDesc);
 
         List<ResponsePageDto> responsePageDtoList = new ArrayList<>();
 
@@ -83,7 +94,14 @@ public class PageService {
 
 
     public org.springframework.data.domain.Page<ResponsePageDto> findAllPages(Pageable pageable) {
-        org.springframework.data.domain.Page<Page> pages = pageRepository.findAll(pageable);
+
+        Pageable sortedByCreationDateDesc = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                Sort.by(Sort.Direction.DESC, "createdAt")
+        );
+
+        org.springframework.data.domain.Page<Page> pages = pageRepository.findAll(sortedByCreationDateDesc);
 
         List<ResponsePageDto> responsePageDtoList = new ArrayList<>();
 
@@ -98,7 +116,13 @@ public class PageService {
     }
 
     public org.springframework.data.domain.Page<ResponsePageDto> findPagesByEmotionType(EmotionType emotionType, Pageable pageable) {
-        org.springframework.data.domain.Page<Page> pages = pageRepository.findByEmotionType(emotionType, pageable);
+        Pageable sortedByCreationDateDesc = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                Sort.by(Sort.Direction.DESC, "createdAt")
+        );
+
+        org.springframework.data.domain.Page<Page> pages = pageRepository.findByEmotionType(emotionType, sortedByCreationDateDesc);
 
         List<ResponsePageDto> responsePageDtoList = new ArrayList<>();
 
@@ -112,38 +136,51 @@ public class PageService {
     }
 
     @Transactional
-    public long createPage(CreatePageDto createPageDto, String accessToken) {
+    public ResponsePageDto createPage(CreatePageDto createPageDto, String accessToken) {
         String userEmail = jwtTokenProvider.getUserEmail(accessToken);
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new UserException(ResponseCode.USER_NOT_FOUND));
 
         Book book = getBookById(createPageDto.getBookId());
 
-        Page page = Page.createPage(user, book,  createPageDto.getTitle(), createPageDto.getContent());
+        Page page = Page.createPage(user, book, createPageDto.getTitle(), createPageDto.getContent());
 
         setHashtagsToPage(page, createPageDto.getHashtags());
-        setPageEmotion(page.getId(), createPageDto.getEmotion().getType().getCode(), createPageDto.getEmotion().getIntensity().getIntensity());
+        setPageEmotion(page, createPageDto.getEmotionType(), createPageDto.getEmotionIntensity());
 
-        return pageRepository.save(page).getId();
+        pageRepository.save(page);
+
+        ResponsePageDto responsePageDto = ResponsePageDto.from(page);
+
+        return responsePageDto;
     }
 
     //먼저 페이지를 생성하고, 페이지의 감정을 다시 반환받아 설정한다.
     @Transactional
-    public ResponsePageDto setPageEmotion(Long pageId, String emotionCode, int emotionIntensity){
-        Page page = getPageById(pageId);
+    public void setPageEmotion(Page page, String emotionCode, int emotionIntensity){
 
-        if(EmotionType.getByCode(emotionCode) == null){
-            throw new PageException(ResponseCode.EMOTION_NOT_FOUND);
+        if(page == null){
+            throw new PageException(ResponseCode.PAGE_NOT_FOUND);
         }
 
-        if(emotionIntensity <0 || emotionIntensity > 5){
-            throw new PageException(ResponseCode.EMOTION_INTENSITY_OUT_OF_RANGE);
+        System.out.println("emotionCode: " + emotionCode);
+        System.out.println("emotionIntensity: " + emotionIntensity);
+
+        if(emotionCode == null || EmotionType.getByCode(emotionCode) == null || emotionCode.isEmpty() ){
+            emotionCode = "NEUTRAL";
         }
+
+        if(emotionIntensity <0 || emotionIntensity > 3){
+            emotionIntensity = 0;
+        }
+
+        System.out.println("emotionCode: " + emotionCode);
+        System.out.println("emotionIntensity: " + emotionIntensity);
 
         page.setEmotion(emotionCode, emotionIntensity);
-        pageRepository.save(page);
 
-        return ResponsePageDto.from(page);
+
+//        return ResponsePageDto.from(page);
     }
 
     @Transactional
@@ -151,20 +188,27 @@ public class PageService {
         validateUser(userId);
         List<Page> pageList = pageRepository.findAllByUserId(userId);
 
-        List<ResponsePageDto> responsePageDtoList = pageList.stream()
-                .map(ResponsePageDto::from)
-                .collect(Collectors.toList());
+        List<ResponsePageDto> responsePageDtoList = new ArrayList<>();
+
+        for(Page page : pageList){
+            ResponsePageDto responsePageDto = ResponsePageDto.from(page);
+            responsePageDto.setLikeCount(likeService.countLikesForPage(page.getId()));
+            responsePageDtoList.add(responsePageDto);
+        }
 
         return responsePageDtoList;
     }
 
     //페이지 정보 수정
     @Transactional
-    public long updatePage(UpdatePageDto updatePageDto){
+    public ResponsePageDto updatePage(UpdatePageDto updatePageDto){
         Page page = getPageById(updatePageDto.getPageId());
         page.updatePage(updatePageDto.getTitle(), updatePageDto.getContent());
 
-        return pageRepository.save(page).getId();
+        ResponsePageDto responsePageDto = ResponsePageDto.from(page);
+        responsePageDto.setLikeCount(likeService.countLikesForPage(page.getId()));
+
+        return responsePageDto;
     }
 
     //페이지 삭제
@@ -230,9 +274,6 @@ public class PageService {
         Page page = getPageById(likePageDto.getPageId());
         Book book = getBookById(page.getBook().getId());
         Like like = Like.createLike(user, LikeType.PAGE, page.getId());
-
-
-
 
         scoreService.plusLikeScore(userId, page);
         rankingService.likeBook(book.getId(), book.getCategory());
@@ -325,7 +366,7 @@ public class PageService {
         }
 
         page.setHashtags(existingHashtags);
-        pageRepository.save(page);
+
     }
 
 

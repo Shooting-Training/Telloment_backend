@@ -30,39 +30,73 @@ public class ScoreService {
     public void plusLikeScore(Long userId, Page page){
         Book book = page.getBook();
         Category category = book.getCategory();
+
         Score score = scoreRepository.findByUserId(userId);
+
+        checkUpper(score, userId);
+
 //category_code = {TRIP, ITNSCI, MVD, HUMR, MUS, MRG, ROM, COK, HLTH, STD, ART, ANML, HUMN, LIT, FIN}
         switch (category.getCode()){
             case "TRIP" :
                 score.setTripScore(score.getTripScore() + 10);
-            case "ITNCSI" :
+                break;
+
+            case "ITNSCI" :
                 score.setItnscienceScore(score.getItnscienceScore() + 10);
+                break;
+
             case "MVD" :
                 score.setMoviedramaScore(score.getMoviedramaScore() + 10);
+                break;
+
             case "HUMR" :
                 score.setHumorScore(score.getHumorScore() + 10);
+                break;
+
             case "MUS" :
                 score.setMusicScore(score.getMusicScore() + 10);
+                break;
+
             case "MRG" :
                 score.setMarriageScore(score.getMarriageScore() + 10);
+                break;
+
             case "ROM" :
                 score.setRomanceScore(score.getRomanceScore() + 10);
+                break;
+
             case "COK" :
                 score.setCookingScore(score.getCookingScore() + 10);
+                break;
+
             case "HLTH" :
                 score.setHealthScore(score.getHealthScore() + 10);
+                break;
+
             case "STD" :
                 score.setStudyingScore(score.getStudyingScore() + 10);
+                break;
+
             case "ART" :
                 score.setArtScore(score.getArtScore() + 10);
+                break;
+
             case "ANML" :
                 score.setAnimalScore(score.getAnimalScore() + 10);
+                break;
+
             case "HUMN" :
                 score.setHumanityScore(score.getHumanityScore() + 10);
+                break;
+
             case "LIT" :
                 score.setLiteratureScore(score.getLiteratureScore() + 10);
+                break;
+
             case "FIN" :
                 score.setFinanceScore(score.getFinanceScore() + 10);
+                break;
+
             default:
                 break;
         }
@@ -71,41 +105,88 @@ public class ScoreService {
     }
 
     public void plusViewScore(Long userId, Page page){
-        Book book = page.getBook();
-        Category category = book.getCategory();
+
+        Category category = page.getBook().getCategory();
+
         Score score = scoreRepository.findByUserId(userId);
+
+        checkUpper(score, userId);
 //category_code = {TRIP, ITNSCI, MVD, HUMR, MUS, MRG, ROM, COK, HLTH, STD, ART, ANML, HUMN, LIT, FIN}
         switch (category.getCode()){
             case "TRIP" :
                 score.setTripScore(score.getTripScore() + 1);
-            case "ITNCSI" :
+                System.out.println("trip");
+                break;
+            case "ITNSCI" :
                 score.setItnscienceScore(score.getItnscienceScore() + 1);
+                System.out.println("itnsci");
+                break;
+
             case "MVD" :
                 score.setMoviedramaScore(score.getMoviedramaScore() + 1);
+                System.out.println("mvd");
+                break;
+
             case "HUMR" :
                 score.setHumorScore(score.getHumorScore() + 1);
+                System.out.println("humr");
+                break;
+
             case "MUS" :
                 score.setMusicScore(score.getMusicScore() + 1);
+                System.out.println("mus");
+                break;
+
             case "MRG" :
                 score.setMarriageScore(score.getMarriageScore() + 1);
+                System.out.println("mrg");
+                break;
+
             case "ROM" :
                 score.setRomanceScore(score.getRomanceScore() + 1);
+                System.out.println("rom");
+                break;
+
             case "COK" :
                 score.setCookingScore(score.getCookingScore() + 1);
+                System.out.println("cok");
+                break;
+
             case "HLTH" :
                 score.setHealthScore(score.getHealthScore() + 1);
+                System.out.println("hlth");
+                break;
+
             case "STD" :
                 score.setStudyingScore(score.getStudyingScore() + 1);
+                System.out.println("std");
+                break;
+
             case "ART" :
                 score.setArtScore(score.getArtScore() + 1);
+                System.out.println("art");
+                break;
+
             case "ANML" :
                 score.setAnimalScore(score.getAnimalScore() + 1);
+                System.out.println("anml");
+                break;
+
             case "HUMN" :
                 score.setHumanityScore(score.getHumanityScore() + 1);
+                System.out.println("humn");
+                break;
+
             case "LIT" :
                 score.setLiteratureScore(score.getLiteratureScore() + 1);
+                System.out.println("lit");
+                break;
+
             case "FIN" :
                 score.setFinanceScore(score.getFinanceScore() + 1);
+                System.out.println("fin");
+                break;
+
             default:
                 break;
         }
@@ -116,11 +197,10 @@ public class ScoreService {
 
 
     //유저 개인의 점수 총합이 상한에 도달하면 전부 1/2로 나누기, 나머지 버림 (상한 = 1000점)
-    public void checkUpper(Long userId){
+    public void checkUpper(Score score, Long userId) {
         int totalScore = scoreRepository.getTotalScoreByUserId(userId);
 
         if(totalScore >= upperLimit){
-            Score score = scoreRepository.findByUserId(userId);
 
             score.setTripScore(score.getTripScore() / 2);
             score.setItnscienceScore(score.getItnscienceScore() / 2);
@@ -138,9 +218,7 @@ public class ScoreService {
             score.setLiteratureScore(score.getLiteratureScore() / 2);
             score.setFinanceScore(score.getFinanceScore() / 2);
 
-
             scoreRepository.save(score);
-
 
         }
     }

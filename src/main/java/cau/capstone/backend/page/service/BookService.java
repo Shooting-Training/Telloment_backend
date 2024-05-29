@@ -23,7 +23,9 @@ import com.amazonaws.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -94,7 +96,7 @@ public class BookService {
         }
 
         book.setHashtags(existingHashtags);
-        bookRepository.save(book);
+
     }
 
 
@@ -236,7 +238,13 @@ public class BookService {
 
 
     public org.springframework.data.domain.Page<ResponseBookDto> searchBooksWithKeywordAndPaging(String keyword, Pageable pageable) {
-        org.springframework.data.domain.Page<Book> books = bookRepository.findByKeywordWithPaging(keyword, pageable);
+        Pageable sortedByCreationDateDesc = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                Sort.by(Sort.Direction.DESC, "updatedAt")
+        );
+
+        org.springframework.data.domain.Page<Book> books = bookRepository.findByKeywordWithPaging(keyword, sortedByCreationDateDesc);
 
         List<ResponseBookDto> responseBookDtoList = new ArrayList<>();
 
@@ -250,7 +258,13 @@ public class BookService {
     }
 
     public org.springframework.data.domain.Page<ResponseBookDto> findAllBooks(Pageable pageable) {
-        org.springframework.data.domain.Page<Book> books = bookRepository.findAll(pageable);
+        Pageable sortedByCreationDateDesc = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                Sort.by(Sort.Direction.DESC, "updatedAt")
+        );
+
+        org.springframework.data.domain.Page<Book> books = bookRepository.findAll(sortedByCreationDateDesc);
 
         List<ResponseBookDto> responseBookDtoList = new ArrayList<>();
 
@@ -264,7 +278,13 @@ public class BookService {
     }
 
     public org.springframework.data.domain.Page<ResponseBookDto> findAllBooksByCategory(Category category,Pageable pageable) {
-        org.springframework.data.domain.Page<Book> books = bookRepository.findByCategory(category, pageable);
+        Pageable sortedByCreationDateDesc = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                Sort.by(Sort.Direction.DESC, "updatedAt")
+        );
+
+        org.springframework.data.domain.Page<Book> books = bookRepository.findByCategory(category, sortedByCreationDateDesc);
 
         List<ResponseBookDto> responseBookDtoList = new ArrayList<>();
 

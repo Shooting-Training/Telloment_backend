@@ -78,14 +78,14 @@ public class Page extends BaseEntity {
         page.content = content;
         page.book = book;
 
+        page.emotion = new Emotion();
+
         return page;
     }
 
     public void updatePage(String title, String content){
         this.title = title;
         this.content = content;
-
-        LocalDateTime modifiedAt = LocalDateTime.now();
 
         this.modified = true;
     }

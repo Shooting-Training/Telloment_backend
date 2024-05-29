@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -28,18 +29,20 @@ public class CreatePageDto {
     @NotBlank(message = MessageUtil.NOT_BLANK)
     private String content;
 
-    @NotBlank(message = MessageUtil.NOT_BLANK)
-    private Emotion emotion;
+    private String emotionType;
+
+    private int emotionIntensity;
 
     private Set<String> hashtags;
 
 
-    public static CreatePageDto of(Long bookId, String title, String content, Emotion emotion, Set<String> hashtags) {
+    public static CreatePageDto of(Long bookId, String title, String content, String emotionType, int emotionIntensity, Set<String> hashtags) {
         return CreatePageDto.builder()
                 .bookId(bookId)
                 .title(title)
                 .content(content)
-                .emotion(emotion)
+                .emotionType(emotionType)
+                .emotionIntensity(emotionIntensity)
                 .hashtags(hashtags)
                 .build();
     }

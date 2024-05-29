@@ -71,12 +71,10 @@ public class PageController {
     }
 
 
-
-
     //페이지 정보 저장
     @Operation(summary = "페이지 정보 저장")
     @PostMapping("/save")
-    public ApiResponse<Long> savePage(@RequestBody @Valid CreatePageDto createPageDto,
+    public ApiResponse<ResponsePageDto> savePage(@RequestBody @Valid CreatePageDto createPageDto,
                                       @RequestHeader String accessToken){
         return ApiResponse.success(pageService.createPage(createPageDto, accessToken), ResponseCode.PAGE_CREATE_SUCCESS.getMessage());
     }
@@ -96,7 +94,7 @@ public class PageController {
     //페이지 정보 수정
     @Operation(summary = "페이지 정보 수정")
     @PutMapping("/update")
-    public ApiResponse<Long> updatePage(@RequestBody @Valid UpdatePageDto updatePageDto){
+    public ApiResponse<ResponsePageDto> updatePage(@RequestBody @Valid UpdatePageDto updatePageDto){
 
         return ApiResponse.success(pageService.updatePage(updatePageDto), ResponseCode.PAGE_UPDATE_SUCCESS.getMessage());
     }
