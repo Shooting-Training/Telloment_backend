@@ -94,7 +94,6 @@ public class Page extends BaseEntity {
         this.content = content;
 
         LocalDateTime modifiedAt = LocalDateTime.now();
-        setUpdatedAt(modifiedAt);
 
         this.modified = true;
     }

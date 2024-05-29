@@ -65,12 +65,11 @@ public class Book extends BaseEntity {
     public void addPage(Page page) {
         this.pages.add(page);
 
-        setUpdatedAt(LocalDateTime.now());
     }
 
     public void removePage(Page page){
         this.pages.remove(page);
-        setUpdatedAt(LocalDateTime.now());
+
     }
 
 
