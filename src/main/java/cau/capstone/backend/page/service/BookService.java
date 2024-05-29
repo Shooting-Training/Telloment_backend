@@ -275,7 +275,7 @@ public class BookService {
 
     public List<CategoryDto> getAllCategories() {
         return Arrays.stream(Category.values())
-                .map(category -> new CategoryDto(category.name(), category.getName()))
+                .map(category -> new CategoryDto(category.getCode(), category.getName()))
                 .collect(Collectors.toList());
     }
 
