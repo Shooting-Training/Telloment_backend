@@ -36,7 +36,6 @@ import java.util.stream.Collectors;
 public class PageService {
 
     private final PageRepository pageRepository; //
-    private final ScrapRepository scrapRepository;
     private final UserRepository userRepository;
     private final LikeRepository likeRepository;
     private final BookRepository bookRepository;
@@ -123,6 +122,7 @@ public class PageService {
         Page page = Page.createPage(user, book,  createPageDto.getTitle(), createPageDto.getContent());
 
         setHashtagsToPage(page, createPageDto.getHashtags());
+        setPageEmotion(page.getId(), createPageDto.getEmotion().getType().getCode(), createPageDto.getEmotion().getIntensity().getIntensity());
 
         return pageRepository.save(page).getId();
     }
@@ -131,6 +131,15 @@ public class PageService {
     @Transactional
     public ResponsePageDto setPageEmotion(Long pageId, String emotionCode, int emotionIntensity){
         Page page = getPageById(pageId);
+
+        if(EmotionType.getByCode(emotionCode) == null){
+            throw new PageException(ResponseCode.EMOTION_NOT_FOUND);
+        }
+
+        if(emotionIntensity <0 || emotionIntensity > 5){
+            throw new PageException(ResponseCode.EMOTION_INTENSITY_OUT_OF_RANGE);
+        }
+
         page.setEmotion(emotionCode, emotionIntensity);
         pageRepository.save(page);
 
@@ -359,11 +368,6 @@ public class PageService {
 //    }
 
     @Transactional
-    public List<Scrap> getUserScrapList(Long userId){
-        return scrapRepository.findAllByUserId(userId);
-    }
-
-    @Transactional
     public List<Book> getUserBookList(Long userId){
         return bookRepository.findAllByUserId(userId);
     }
@@ -386,10 +390,6 @@ public class PageService {
                 .orElseThrow(() -> new PageException(ResponseCode.BOOK_NOT_FOUND));
     }
 
-    private Scrap getScrapById(Long scrapId){
-        return scrapRepository.findById(scrapId)
-                .orElseThrow(() -> new ScrapException(ResponseCode.SCRAP_NOT_FOUND));
-    }
 
 
     private void validateUser(Long userId){
@@ -414,14 +414,6 @@ public class PageService {
         }
     }
 
-    private void validateScrap(Long scrapId, Long userId){
-        if(!scrapRepository.existsById(scrapId)){
-            throw new ScrapException(ResponseCode.SCRAP_NOT_FOUND);
-        }
-        if(!scrapRepository.existsByIdAndUserId(scrapId, userId)){ //유저가 스크랩 한 게 맞는지 확인
-            throw new ScrapException(ResponseCode.SCARP_NOT_OWNED);
-        }
-    }
 
 
 }

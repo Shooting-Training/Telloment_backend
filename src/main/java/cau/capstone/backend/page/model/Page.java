@@ -52,9 +52,6 @@ public class Page extends BaseEntity {
     @JoinColumn(name = "book_id")
     private Book book;
 
-    @OneToMany(mappedBy = "page", fetch = FetchType.LAZY)
-    private List<Scrap> scraps = new ArrayList<>();
-
 
     @Column(name = "view_count")
     private int viewCount = 0;
@@ -70,10 +67,8 @@ public class Page extends BaseEntity {
             inverseJoinColumns = @JoinColumn(name = "hashtag_id"))
     private Set<Hashtag> hashtags = new HashSet<>();
 
-
-    @Column(name = "is_scrapped")
-    private boolean isScrapped = false;
-
+    @Column(name = "voice_info")
+    private String voiceInfo;
 
     //생성메서드
     public static Page createPage(User user,Book book, String title, String content){
@@ -118,10 +113,6 @@ public class Page extends BaseEntity {
         this.emotion.setTypeFromString(emotion);
         this.emotion.setIntensity(intensity);
     }
-
-
-    public int getScrapCount() { return scraps.size(); }
-    public boolean isScrapped() { return isScrapped; }
 
 
     public boolean containsKeyword(String keyword) {

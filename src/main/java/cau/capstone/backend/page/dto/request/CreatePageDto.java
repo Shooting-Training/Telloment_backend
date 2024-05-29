@@ -1,6 +1,7 @@
 package cau.capstone.backend.page.dto.request;
 
 import cau.capstone.backend.global.util.MessageUtil;
+import cau.capstone.backend.page.model.Emotion;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,16 +28,20 @@ public class CreatePageDto {
     @NotBlank(message = MessageUtil.NOT_BLANK)
     private String content;
 
+    @NotBlank(message = MessageUtil.NOT_BLANK)
+    private Emotion emotion;
+
     private Set<String> hashtags;
 
 
-    public static CreatePageDto of( String title, String content, Long bookId) {
+    public static CreatePageDto of(Long bookId, String title, String content, Emotion emotion, Set<String> hashtags) {
         return CreatePageDto.builder()
+                .bookId(bookId)
                 .title(title)
                 .content(content)
-                .bookId(bookId)
+                .emotion(emotion)
+                .hashtags(hashtags)
                 .build();
     }
-
 
 }

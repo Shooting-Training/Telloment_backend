@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 public class VoiceResponseDto {
     private long id;
     private String status;
+    //nickname, email
 
     public static VoiceResponseDto of(long id, String status) {
         return VoiceResponseDto.builder()

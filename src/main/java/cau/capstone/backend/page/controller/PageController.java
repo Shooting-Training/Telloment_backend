@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import java.util.stream.Collectors;
@@ -156,6 +157,19 @@ public class PageController {
         Pageable pageable = PageRequest.of(page, size);
         org.springframework.data.domain.Page<ResponsePageDto> result = pageService.getPagesCreatedWithinLast24Hours(pageable);
         return ResponseEntity.ok(result);
+    }
+
+
+    @Operation(summary = "이모션 코드 리스트 반환")
+    @GetMapping("/emotionlist")
+    public ApiResponse<List<String>> getEmotionList() {
+        List<String> emotionList = new ArrayList<>();
+
+        for (EmotionType emotionType : EmotionType.values()) {
+            emotionList.add(emotionType.getCode());
+        }
+
+        return ApiResponse.success(emotionList, ResponseCode.EMOTION_READ_SUCCESS.getMessage());
     }
 
 

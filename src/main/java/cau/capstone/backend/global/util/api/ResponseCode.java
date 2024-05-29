@@ -26,6 +26,10 @@ public enum ResponseCode {
     SCRAP_NOT_FOUND(HttpStatus.NOT_FOUND, false, "스크랩을 찾을 수 없습니다."),
     BOOK_NOT_FOUND(HttpStatus.NOT_FOUND, false, "페이지를 찾을 수 없습니다."),
     LIKE_NOT_FOUND(HttpStatus.NOT_FOUND, false, "좋아요를 찾을 수 없습니다."),
+    CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, false, "카테고리를 찾을 수 없습니다."),
+
+    EMOTION_NOT_FOUND(HttpStatus.NOT_FOUND, false, "감정을 찾을 수 없습니다."),
+    EMOTION_INTENSITY_OUT_OF_RANGE(HttpStatus.NOT_FOUND, false, "감정 강도가 범위를 벗어났습니다."),
 
 
     // 405 Method Not Allowed
@@ -81,6 +85,7 @@ public enum ResponseCode {
 
     CATEGORY_READ_SUCCESS(HttpStatus.OK, true, "카테고리 조회 성공"),
 
+    EMOTION_READ_SUCCESS(HttpStatus.OK, true, "감정 조회 성공"),
 
 
     TOKEN_CHECK_SUCCESS(HttpStatus.OK, true, "토큰 검증 완료"),

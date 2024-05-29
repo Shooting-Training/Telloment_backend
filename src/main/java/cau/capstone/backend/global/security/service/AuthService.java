@@ -64,6 +64,8 @@ public class AuthService {
         return tokenDto;
     }
 
+    
+    //refresh token을 이용하여 access token 정보 확인해 재발급
     @Transactional
     public TokenDto reissue(RequestTokenDto requestTokenDto){
         // 1. Refresh Token 검증

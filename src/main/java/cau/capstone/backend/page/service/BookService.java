@@ -56,6 +56,10 @@ public class BookService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserException(ResponseCode.USER_NOT_FOUND));
 
+        if(Category.getByCode(createBookDto.getCategoryCode()) == null){
+            throw new BookException(ResponseCode.CATEGORY_NOT_FOUND);
+        }
+
         Book book = Book.createBook(user, createBookDto.getBookName(), createBookDto.getCategoryCode());
 
         setHashtagsToBook(book, createBookDto.getHashtags());
@@ -110,6 +114,7 @@ public class BookService {
             ResponseBookDto responseBookDto = ResponseBookDto.from(book);
             responseBookDto.setTotalLikeCount(likeService.countTotalLikesForBook(book.getId()));
 
+            System.out.println(responseBookDto.getBookName() + " " + responseBookDto.getTotalLikeCount());
             responseBookDtoList.add(responseBookDto);
         }
 
@@ -275,7 +280,7 @@ public class BookService {
 
     public List<CategoryDto> getAllCategories() {
         return Arrays.stream(Category.values())
-                .map(category -> new CategoryDto(category.name(), category.getName()))
+                .map(category -> new CategoryDto(category.getCode(), category.getName()))
                 .collect(Collectors.toList());
     }
 
