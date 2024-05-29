@@ -3,7 +3,6 @@ package cau.capstone.backend.User.model;
 import cau.capstone.backend.page.model.Like;
 import cau.capstone.backend.page.model.Page;
 import cau.capstone.backend.page.model.Book;
-import cau.capstone.backend.page.model.Scrap;
 import cau.capstone.backend.global.Authority;
 import cau.capstone.backend.global.BaseEntity;
 import lombok.*;
@@ -55,17 +54,10 @@ public class User extends BaseEntity implements UserDetails  {
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Page> pages = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    private List<Scrap> scraps = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Like> likes = new ArrayList<>();
 
-    @OneToMany(mappedBy = "followee", fetch = FetchType.LAZY)
-    private List<Follow> followers = new ArrayList<>();
-
-    @OneToMany(mappedBy = "follower", fetch = FetchType.LAZY)
-    private List<Follow> following = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Book> books = new ArrayList<>();

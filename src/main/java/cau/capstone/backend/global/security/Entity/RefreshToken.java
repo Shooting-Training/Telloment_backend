@@ -17,6 +17,7 @@ import javax.persistence.Table;
 @Entity
 public class RefreshToken {
 
+    //key == email
     @Id
     @Column(name = "token_key")
     private String key;

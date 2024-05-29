@@ -5,7 +5,7 @@ import java.util.Map;
 
 public enum Category {
     TRIP("TRIP", "trip"),
-    ITNSCIENCE("ITNCSI", "IT and Science"),
+    ITNSCIENCE("ITNSCI", "IT and Science"),
     MOVIEDRAMA("MVD", "Movie and Drama"),
     HUMOR("HUMR", "Humor"),
     MUSIC("MUS", "Music"),

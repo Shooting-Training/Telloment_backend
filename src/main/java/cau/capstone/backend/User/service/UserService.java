@@ -4,7 +4,6 @@ package cau.capstone.backend.User.service;
 import cau.capstone.backend.User.dto.request.UpdateUserDto;
 import cau.capstone.backend.User.model.User;
 import cau.capstone.backend.User.dto.response.ResponseSearchUserDto;
-import cau.capstone.backend.User.model.repository.FollowRepository;
 import cau.capstone.backend.User.model.repository.UserRepository;
 import cau.capstone.backend.global.security.Entity.JwtTokenProvider;
 import cau.capstone.backend.global.security.SecurityUtil;
@@ -30,7 +29,6 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final FollowRepository followRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
 

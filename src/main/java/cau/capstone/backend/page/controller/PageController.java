@@ -6,7 +6,6 @@ import cau.capstone.backend.global.security.Entity.JwtTokenProvider;
 import cau.capstone.backend.global.util.exception.UserException;
 import cau.capstone.backend.page.dto.request.*;
 import cau.capstone.backend.page.dto.response.ResponsePageDto;
-import cau.capstone.backend.page.dto.response.ResponseScrapDto;
 import cau.capstone.backend.page.model.EmotionType;
 import cau.capstone.backend.page.model.Page;
 import cau.capstone.backend.page.service.PageService;
