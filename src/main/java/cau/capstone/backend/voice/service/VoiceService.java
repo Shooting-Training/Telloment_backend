@@ -2,6 +2,7 @@ package cau.capstone.backend.voice.service;
 
 import cau.capstone.backend.User.model.repository.UserRepository;
 import cau.capstone.backend.global.util.api.ResponseCode;
+import cau.capstone.backend.global.util.exception.UserException;
 import cau.capstone.backend.global.util.exception.VoiceException;
 import cau.capstone.backend.voice.dto.response.VoiceResponseDto;
 import cau.capstone.backend.voice.model.VoiceScrapEntity;
@@ -47,7 +48,7 @@ public class VoiceService {
         var key = new VoiceScrapKey(userId, voiceId);
         voiceScrapRepository.findById(key)
                 .ifPresent(entity -> {
-                    throw new VoiceException(ResponseCode.VOICE_SCRAP_FAILURE);
+                    throw new UserException(ResponseCode.VOICE_SCRAP_FAILURE_ALREADY_EXIST);
                 });
 
         voiceScrapRepository.save(
