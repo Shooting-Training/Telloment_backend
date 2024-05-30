@@ -2,6 +2,7 @@ package cau.capstone.backend.User.service;
 
 
 import cau.capstone.backend.User.dto.request.UpdateUserDto;
+import cau.capstone.backend.User.dto.response.ResponseUserLikeDto;
 import cau.capstone.backend.User.model.User;
 import cau.capstone.backend.User.dto.response.ResponseSearchUserDto;
 import cau.capstone.backend.User.model.repository.UserRepository;
@@ -11,6 +12,7 @@ import cau.capstone.backend.global.security.dto.CreateUserDto;
 import cau.capstone.backend.global.security.dto.ResponseUserDto;
 import cau.capstone.backend.global.util.api.ResponseCode;
 import cau.capstone.backend.global.util.exception.UserException;
+import cau.capstone.backend.page.service.LikeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageImpl;
@@ -19,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 
 import java.util.stream.Collectors;
@@ -31,6 +34,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
+    private final LikeService likeService;
 
 
     @Transactional
@@ -151,6 +155,27 @@ public class UserService {
         return new PageImpl<>(responseUserDtoList, pageable, users.getTotalElements());
     }
 
+
+    public List<ResponseUserLikeDto> findTop10UsersByLikes() {
+        // 유저 리스트를 가져옵니다.
+        List<User> users = userRepository.findAll();
+
+        // 유저별로 총 좋아요 수를 계산합니다.
+        List<ResponseUserLikeDto> userLikes = users.stream().map(user -> {
+            int totalLikes = user.getBooks().stream()
+                    .mapToInt(book -> likeService.countTotalLikesForBook(book.getId()))
+                    .sum();
+            return new ResponseUserLikeDto(user, totalLikes);
+        }).collect(Collectors.toList());
+
+        // 총 좋아요 수를 기준으로 내림차순 정렬하고 상위 10명을 선택합니다.
+        List<ResponseUserLikeDto> top10UsersByLikes = userLikes.stream()
+                .sorted(Comparator.comparingInt(ResponseUserLikeDto::getTotalLikes).reversed())
+                .limit(10)
+                .collect(Collectors.toList());
+
+        return top10UsersByLikes;
+    }
 
 
 //

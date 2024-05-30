@@ -42,4 +42,16 @@ public interface PageRepository extends JpaRepository<Page, Long> {
 
     @Query("SELECT p FROM Page p WHERE p.createdAt >= :startTime")
     org.springframework.data.domain.Page<Page> findAllCreatedWithinLast24Hours(@Param("startTime") LocalDateTime startTime, Pageable pageable);
+
+
+    @Query("SELECT p FROM Page p WHERE p.createdAt >= :startTime AND p.emotion.type = :emotionType")
+    org.springframework.data.domain.Page<Page> findAllByEmotionTypeCreatedWithinLast24Hours(@Param("startTime") LocalDateTime startTime, @Param("emotionType") EmotionType emotionType, Pageable pageable);
+
+    @Query("SELECT p FROM Page p JOIN p.hashtags h WHERE p.createdAt >= :startTime AND LOWER(h.tag) LIKE LOWER(concat('%', :hashTag, '%')) GROUP BY p")
+    org.springframework.data.domain.Page<Page> findAllByHashTagCreatedWithinLast24Hours(@Param("startTime") LocalDateTime startTime, @Param("hashTag") String hashTag, Pageable pageable);
+
+
+    @Query("SELECT p FROM Page p JOIN p.hashtags h WHERE p.createdAt >= :startTime AND p.emotion.type = :emotionType AND LOWER(h.tag) LIKE LOWER(concat('%', :hashTag, '%')) GROUP BY p")
+    org.springframework.data.domain.Page<Page> findAllByEmotionTypeAndHashTagCreatedWithinLast24Hours(@Param("startTime") LocalDateTime startTime, @Param("emotionType") EmotionType emotionType, @Param("hashTag") String hashTag, Pageable pageable);
+
 }

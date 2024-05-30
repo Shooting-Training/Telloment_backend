@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -101,7 +102,7 @@ public class BookController {
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
-        org.springframework.data.domain.Page<ResponseBookDto> result = bookService.findAllBooksByCategory(Category.getByCode(categoryCode), pageable);
+        org.springframework.data.domain.Page<ResponseBookDto> result = bookService.findAllBooksByCategory(Category.getByCode(categoryCode.toUpperCase(Locale.ROOT)), pageable);
         return ResponseEntity.ok(result);
     }
 

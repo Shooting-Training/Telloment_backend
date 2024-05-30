@@ -100,7 +100,7 @@ public class Page extends BaseEntity {
         return page;
     }
 
-    public void setRootId(Page page) { this.rootId = page.getRootId();}
+    public void setRootId(Page page) { this.rootId = page.getId();}
     public void setRootId(long rootId) { this.rootId = rootId;}
 
     public void setPrevId(Page page) {this.prevId  = page.getId();}

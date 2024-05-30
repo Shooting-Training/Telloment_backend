@@ -1,5 +1,8 @@
 package cau.capstone.backend.User.service;
 
+import cau.capstone.backend.User.model.User;
+import cau.capstone.backend.User.model.repository.UserRepository;
+import cau.capstone.backend.global.security.Entity.JwtTokenProvider;
 import cau.capstone.backend.page.model.Book;
 import cau.capstone.backend.page.model.Category;
 import cau.capstone.backend.User.model.Score;
@@ -21,6 +24,8 @@ import java.util.stream.Collectors;
 public class ScoreService {
 
     private final ScoreRepository scoreRepository;
+    private final UserRepository userRepository;
+    private final JwtTokenProvider jwtTokenProvider;
 
 
     private final int upperLimit = 1000;
@@ -224,7 +229,12 @@ public class ScoreService {
     }
 
 
-    public List<Map.Entry<String, Integer>> getSortedScoresByUserId(Long userId) {
+    public List<Map.Entry<String, Integer>> getSortedScoresByUserId(String accessToken) {
+        User user = userRepository.findByEmail(jwtTokenProvider.getUserEmail(accessToken))
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        Long userId = user.getId();
+
         List<Map<String, Object>> scores = scoreRepository.findScoresByUserId(userId);
 
         if (scores.isEmpty()) {

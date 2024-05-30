@@ -144,7 +144,10 @@ public class BookService {
         likeRepository.save(like);
         userRepository.save(user);
 
-        return ResponseBookDto.from(book);
+        ResponseBookDto responseBookDto = ResponseBookDto.from(book);
+        responseBookDto.setTotalLikeCount(likeService.countTotalLikesForBook(bookId));
+
+        return responseBookDto;
     }
 
     @Transactional

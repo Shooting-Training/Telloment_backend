@@ -4,6 +4,7 @@ import cau.capstone.backend.User.dto.request.SearchUserDto;
 import cau.capstone.backend.User.dto.request.UpdateUserDto;
 import cau.capstone.backend.User.dto.response.ResponseSearchUserDto;
 import cau.capstone.backend.User.dto.response.ResponseSimpleUserDto;
+import cau.capstone.backend.User.service.ScoreService;
 import cau.capstone.backend.global.security.Entity.JwtTokenProvider;
 import cau.capstone.backend.User.service.UserService;
 import cau.capstone.backend.global.security.dto.ResponseUserDto;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Map;
 
 
 @Api(tags = "1. User")
@@ -26,6 +28,7 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final ScoreService scoreService;
 
 
     // 회원 기본정보 조회
@@ -55,6 +58,14 @@ public class UserController {
         return ApiResponse.success(userService.deleteUser(accessToken), ResponseCode.USER_DELETE_SUCCESS.getMessage());
     }
 
+
+    //높은 점수를 갖는 카테고리부터 내림차순으로 전부 반환
+    @Operation(summary = "유저의 카테고리 점수 반환", description = "유저의 카테고리 점수를 반환합니다.")
+    @GetMapping("/score")
+    public ApiResponse<List<Map.Entry<String, Integer>>> getUserScore(@RequestHeader String accessToken) {
+
+        return ApiResponse.success(scoreService.getSortedScoresByUserId(accessToken), ResponseCode.USER_SCORE_SUCCESS.getMessage());
+    }
 
 //
 //    // 회원이 특정 회원 팔로우

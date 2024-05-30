@@ -122,7 +122,7 @@ public class PageController {
     //페이지 링크
     @Operation(summary = "페이지 링크")
     @PutMapping("/link")
-    public ApiResponse<Long> getPageLink(@RequestBody @Valid LinkPageDto linkPageDto){
+    public ApiResponse<ResponsePageDto> getPageLink(@RequestBody @Valid LinkPageDto linkPageDto){
 
         return ApiResponse.success(pageService.linkPage(linkPageDto), ResponseCode.PAGE_LINK_SUCCESS.getMessage());
     }
@@ -146,15 +146,7 @@ public class PageController {
 
 
 
-    @Operation(summary = "최근 24시간 이내에 생성된 페이지 반환")
-    @GetMapping("/recent")
-    public ResponseEntity<org.springframework.data.domain.Page<ResponsePageDto>> getPagesCreatedWithinLast24Hours(
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        org.springframework.data.domain.Page<ResponsePageDto> result = pageService.getPagesCreatedWithinLast24Hours(pageable);
-        return ResponseEntity.ok(result);
-    }
+
 
 
     @Operation(summary = "이모션 코드 리스트 반환")

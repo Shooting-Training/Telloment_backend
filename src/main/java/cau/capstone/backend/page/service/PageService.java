@@ -91,7 +91,7 @@ public class PageService {
             responsePageDtoList.add(responsePageDto);
         }
 
-        return new PageImpl<>(responsePageDtoList, pageable, pages.getTotalElements());
+        return new PageImpl<>(responsePageDtoList, sortedByCreationDateDesc, pages.getTotalElements());
     }
 
 
@@ -114,7 +114,7 @@ public class PageService {
         }
 
 
-        return new PageImpl<>(responsePageDtoList, pageable, pages.getTotalElements());
+        return new PageImpl<>(responsePageDtoList, sortedByCreationDateDesc, pages.getTotalElements());
     }
 
     public org.springframework.data.domain.Page<ResponsePageDto> findPagesByEmotionType(EmotionType emotionType, Pageable pageable) {
@@ -134,7 +134,7 @@ public class PageService {
             responsePageDtoList.add(responsePageDto);
         }
 
-        return new PageImpl<>(responsePageDtoList, pageable, pages.getTotalElements());
+        return new PageImpl<>(responsePageDtoList, sortedByCreationDateDesc, pages.getTotalElements());
     }
 
     @Transactional
@@ -223,10 +223,9 @@ public class PageService {
         return pageId;
     }
 
-
     //페이지 연결하기
     @Transactional
-    public long linkPage(LinkPageDto linkPageDto){
+    public ResponsePageDto linkPage(LinkPageDto linkPageDto){
 
         Long prevPageId = linkPageDto.getPrevPageId();
         Long nextPageId = linkPageDto.getNextPageId();
@@ -234,33 +233,88 @@ public class PageService {
         Page prevPage = getPageById(prevPageId);
         Page linkedPage = getPageById(nextPageId);
 
-        validatePage(prevPage.getId(), prevPage.getUser().getId()) ;
+        validatePage(prevPage.getId(), prevPage.getUser().getId());
         validatePage(linkedPage.getId(), linkedPage.getUser().getId());
 
-        //첫 페이지 바로 다음에 연결
-        if (prevPage.getRootId() == -1){
-            prevPage.setNextId(linkedPage);
-            linkedPage.setRootId(prevPage);
-            linkedPage.setPrevId(prevPage);
+        // 이전 페이지가 이미 다른 페이지와 연결되어 있는지 확인
+        if (prevPage.getNextId() != -1) {
+            throw new PageException(ResponseCode.PAGE_ALREADY_LINKED_BETWEEN);
+        }
+
+        if (linkedPage.getNextId() != -1 && prevPage.getPrevId() != -1) {
+            throw new PageException(ResponseCode.PAGE_ALREADY_LINKED_END);
+        }
+
+        if (prevPage.getPrevId() != -1 && linkedPage.getNextId()!= -1) {
+            throw new PageException(ResponseCode.PAGE_ALREADY_LINKED_SWITCHED);
+        }
+
+        // 첫 페이지 바로 다음에 연결
+        if (prevPage.getRootId() == -1 && linkedPage.getRootId() == -1 && linkedPage.getNextId() == -1){
+            prevPage.setNextId(linkedPage.getId());
+            prevPage.setRootId(prevPage.getId());
+            linkedPage.setRootId(prevPage.getId());
+            linkedPage.setPrevId(prevPage.getId());
 
             pageRepository.save(prevPage);
             pageRepository.save(linkedPage);
         }
+        // 이 경우는 기존의 rootPage == linkedPage, prevPage는 새로 연결된 페이지
+        else if(linkedPage.getRootId() == linkedPage.getId() && linkedPage.getPrevId() == -1) {
+            linkedPage.setPrevId(prevPage.getId());
+            prevPage.setNextId(linkedPage.getId());
+            prevPage.setRootId(prevPage.getId());
 
-        //페이지 연결 순서가 세 번째 이상
-        else if(prevPage.getRootId() != -1){
+            updateRootInfoForAllLinkedPages(prevPage.getRootId(), linkedPage.getId());
+
+            pageRepository.save(prevPage);
+            pageRepository.save(linkedPage);
+        }
+        // 페이지 연결 순서가 세 번째 이상
+        else {
             Page rootPage = pageRepository.findById(prevPage.getRootId())
                     .orElseThrow(() -> new PageException(ResponseCode.PAGE_NOT_FOUND));
 
-            prevPage.setNextId(linkedPage);
-            linkedPage.setPrevId(prevPage);
-            linkedPage.setRootId(rootPage);
+            prevPage.setNextId(linkedPage.getId());
+            linkedPage.setPrevId(prevPage.getId());
+            linkedPage.setRootId(rootPage.getId());
 
             pageRepository.save(prevPage);
             pageRepository.save(linkedPage);
         }
 
-        return linkedPage.getId();
+        return ResponsePageDto.from(linkedPage);
+    }
+
+
+
+
+    private void updateRootInfoForAllLinkedPages(Long newRootId, Long startPageId) {
+        Page currentPage = getPageById(startPageId);
+        while (currentPage != null) {
+            currentPage.setRootId(newRootId);
+            try {
+                pageRepository.save(currentPage);
+                System.out.println("Page with ID " + currentPage.getId() + " saved with new root ID " + newRootId);
+            } catch (Exception e) {
+                System.err.println("Failed to save page with ID " + currentPage.getId() + ": " + e.getMessage());
+                e.printStackTrace();
+                break;
+            }
+
+            Long nextId = currentPage.getNextId();
+            System.out.println("currentPage.getNextId() : " + nextId);
+            if (nextId != -1) {
+                currentPage = getPageById(nextId);
+                if (currentPage == null) {
+                    System.err.println("Failed to retrieve page with ID " + nextId);
+                    break;
+                }
+            } else {
+                currentPage = null;
+            }
+        }
+        System.out.println("updateRootInfoForAllLinkedPages() finished");
     }
 
 
@@ -386,14 +440,78 @@ public class PageService {
     }
 
     public org.springframework.data.domain.Page<ResponsePageDto> getPagesCreatedWithinLast24Hours(Pageable pageable) {
+        Pageable sortedByCreationDateDesc = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                Sort.by(Sort.Direction.DESC, "createdAt")
+        );
+
         LocalDateTime twentyFourHoursAgo = LocalDateTime.now().minusHours(24);
-        org.springframework.data.domain.Page<Page> pages = pageRepository.findAllCreatedWithinLast24Hours(twentyFourHoursAgo, pageable);
+        org.springframework.data.domain.Page<Page> pages = pageRepository.findAllCreatedWithinLast24Hours(twentyFourHoursAgo, sortedByCreationDateDesc);
 
         List<ResponsePageDto> responsePageDtoList = pages.stream()
                 .map(ResponsePageDto::from)
                 .collect(Collectors.toList());
 
-        return new PageImpl<>(responsePageDtoList, pageable, pages.getTotalElements());
+        return new PageImpl<>(responsePageDtoList, sortedByCreationDateDesc, pages.getTotalElements());
+    }
+
+    public org.springframework.data.domain.Page<ResponsePageDto> getPagesCreatedWithinLast24HoursByEmotionAndHashtag(String emotionType,String hashTag, Pageable pageable) {
+        Pageable sortedByCreationDateDesc = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                Sort.by(Sort.Direction.DESC, "createdAt")
+        );
+
+        LocalDateTime twentyFourHoursAgo = LocalDateTime.now().minusHours(24);
+
+        //그냥 최근 것만 - 모든 정보가 비어 있다.
+        if((emotionType == null || emotionType.isEmpty()) && (hashTag == null || hashTag.isEmpty())){
+            org.springframework.data.domain.Page<Page> pages = pageRepository.findAllCreatedWithinLast24Hours(twentyFourHoursAgo, sortedByCreationDateDesc);
+            List<ResponsePageDto> responsePageDtoList = new ArrayList<>();
+            for (Page page : pages) {
+                ResponsePageDto responsePageDto = ResponsePageDto.from(page);
+                responsePageDto.setLikeCount(likeService.countLikesForPage(page.getId()));
+                responsePageDtoList.add(responsePageDto);
+            }
+            return new PageImpl<>(responsePageDtoList, sortedByCreationDateDesc, pages.getTotalElements());
+
+        }
+        //값이 emotionType만 입력
+        else if(hashTag == null || hashTag.isEmpty()){
+            EmotionType emotion = EmotionType.getByCode(emotionType);
+            org.springframework.data.domain.Page<Page> pages = pageRepository.findAllByEmotionTypeCreatedWithinLast24Hours(twentyFourHoursAgo, emotion, sortedByCreationDateDesc);
+            List<ResponsePageDto> responsePageDtoList = new ArrayList<>();
+            for (Page page : pages) {
+                ResponsePageDto responsePageDto = ResponsePageDto.from(page);
+                responsePageDto.setLikeCount(likeService.countLikesForPage(page.getId()));
+                responsePageDtoList.add(responsePageDto);
+            }
+            return new PageImpl<>(responsePageDtoList, sortedByCreationDateDesc, pages.getTotalElements());
+        }
+        //값이 해시태그만 입력
+        else if(emotionType == null || emotionType.isEmpty()){
+            org.springframework.data.domain.Page<Page> pages = pageRepository.findAllByHashTagCreatedWithinLast24Hours(twentyFourHoursAgo, hashTag, sortedByCreationDateDesc);
+            List<ResponsePageDto> responsePageDtoList = new ArrayList<>();
+            for (Page page : pages) {
+                ResponsePageDto responsePageDto = ResponsePageDto.from(page);
+                responsePageDto.setLikeCount(likeService.countLikesForPage(page.getId()));
+                responsePageDtoList.add(responsePageDto);
+            }
+            return new PageImpl<>(responsePageDtoList, sortedByCreationDateDesc, pages.getTotalElements());
+        }
+        //둘 다 입력
+        else{
+            EmotionType emotion = EmotionType.getByCode(emotionType);
+            org.springframework.data.domain.Page<Page> pages = pageRepository.findAllByEmotionTypeAndHashTagCreatedWithinLast24Hours(twentyFourHoursAgo, emotion, hashTag, sortedByCreationDateDesc);
+            List<ResponsePageDto> responsePageDtoList = new ArrayList<>();
+            for (Page page : pages) {
+                ResponsePageDto responsePageDto = ResponsePageDto.from(page);
+                responsePageDto.setLikeCount(likeService.countLikesForPage(page.getId()));
+                responsePageDtoList.add(responsePageDto);
+            }
+            return new PageImpl<>(responsePageDtoList, sortedByCreationDateDesc, pages.getTotalElements());
+        }
     }
 
     

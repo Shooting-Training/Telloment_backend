@@ -50,6 +50,12 @@ public enum ResponseCode {
     LIKE_ALREADY_EXIST(HttpStatus.CONFLICT, false, "이미 좋아요한 페이지입니다."),
     UNUSABLE_EMAIL(HttpStatus.CONFLICT, false, "사용할 수 없는 이메일입니다."),
 
+
+    PAGE_ALREADY_LINKED(HttpStatus.CONFLICT, false, "이미 연결된 페이지입니다."),
+    PAGE_ALREADY_LINKED_BETWEEN(HttpStatus.CONFLICT, false, "이미 연결된 페이지입니다. 중간에 추가할 수 없음"),
+    PAGE_ALREADY_LINKED_END(HttpStatus.CONFLICT, false, "이미 연결된 페이지입니다. 끝에는 페이지 하나만 추가할 수 있습니다."),
+    PAGE_ALREADY_LINKED_SWITCHED(HttpStatus.CONFLICT, false, "이미 연결된 페이지입니다. 페이지 연결이 엉킬 수 있습니다."),
+
     // 500 Internal Server Error
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, false, "서버에 오류가 발생하였습니다."),
 
@@ -62,6 +68,7 @@ public enum ResponseCode {
     USER_UNFOLLOW_SUCCESS(HttpStatus.OK, true, "사용자 언팔로우 성공"),
     USER_LOGIN_SUCCESS(HttpStatus.OK, true, "사용자 로그인 성공"),
     USER_DELETE_SUCCESS(HttpStatus.OK, true, "사용자 삭제 성공"),
+    USER_SCORE_SUCCESS(HttpStatus.OK, true, "사용자 점수 조회 성공"),
 
     PAGE_READ_SUCCESS(HttpStatus.OK, true, "페이지 조회 성공"),
     PAGE_UPDATE_SUCCESS(HttpStatus.OK, true, "페이지 수정 성공"),
