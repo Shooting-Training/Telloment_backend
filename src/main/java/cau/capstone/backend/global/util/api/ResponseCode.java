@@ -1,5 +1,6 @@
 package cau.capstone.backend.global.util.api;
 
+import cau.capstone.backend.global.security.Entity.BaseRes;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -108,8 +109,11 @@ public enum ResponseCode {
     VOICE_CLONE_FAILURE(HttpStatus.INTERNAL_SERVER_ERROR, false, "음성 복제 실패"),
     VOICE_EMOTION_FAILURE(HttpStatus.INTERNAL_SERVER_ERROR, false, "페이지 감정 분석 실패"),
     DEFAULT_VOICE_NOT_ASSIGNED(HttpStatus.INTERNAL_SERVER_ERROR, false, "기본 음성이 할당되지 않았습니다."),
+    VOICE_SCRAP_FAILURE_ALREADY_EXIST(HttpStatus.BAD_REQUEST, false, "음성 스크랩 이미 존재"),
 
+    VOICE_PERMISSION_UPDATE_SUCCESS(HttpStatus.OK, true, "음성 사용 권한 변경 성공"),
     ;
+
     private final HttpStatus httpStatus;
     private final Boolean success;
     private final String message;

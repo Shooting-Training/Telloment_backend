@@ -12,12 +12,14 @@ import cau.capstone.backend.voice.dto.response.VoiceResponseDto;
 import cau.capstone.backend.voice.service.VoiceService;
 import io.swagger.annotations.Api;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -64,20 +66,29 @@ public class VoiceController {
                 .block();
     }
 
-    @GetMapping("/")
-    public List<VoiceResponseDto> getVoiceList() {
-        return voiceService.getAccessableVoiceList();
-    }
-
-    @PostMapping("/{voiceId}/scrap")
-    public ApiResponse<String> scrapVoice(@RequestHeader String accessToken, @PathVariable Long voiceId) {
-        voiceService.scrapVoiceByUser(accessToken, voiceId);
+    @PatchMapping("/{voiceId}/scrap")
+    public ApiResponse<String> scrapVoice(@PathVariable Long voiceId) {
+        var email = jwtTokenProvider.getUserEmail();
+        voiceService.scrapVoiceByUser(email, voiceId);
         return ApiResponse.success("Success", ResponseCode.VOICE_SCRAP_SUCCESS.getMessage());
     }
 
     @DeleteMapping("/{voiceId}/scrap")
-    public ApiResponse<String> deleteScrapVoice(@RequestHeader String accessToken, @PathVariable Long voiceId) {
-        voiceService.deleteScrapVoiceByUser(accessToken, voiceId);
+    public ApiResponse<String> deleteScrapVoice(@PathVariable Long voiceId) {
+        var email = jwtTokenProvider.getUserEmail();
+        voiceService.deleteScrapVoiceByUser(email, voiceId);
         return ApiResponse.success("Success", ResponseCode.VOICE_DELETE_SCRAP_SUCCESS.getMessage());
+    }
+
+    @GetMapping("/user/scrap/all")
+    public ApiResponse<List<VoiceResponseDto>> getAllScrappedVoice() {
+        var email = jwtTokenProvider.getUserEmail();
+        return ApiResponse.success(voiceService.getScrappedVoiceList(email), ResponseCode.VOICE_LIST_SUCCESS.getMessage());
+    }
+
+    @GetMapping("/all")
+    public ApiResponse<Page<VoiceResponseDto>> getAllVoice(@RequestParam int page, @RequestParam int size) {
+        var pageable = PageRequest.of(page, size);
+        return ApiResponse.success(voiceService.getAllByPage(pageable), ResponseCode.VOICE_LIST_SUCCESS.getMessage());
     }
 }

@@ -5,6 +5,7 @@ import cau.capstone.backend.User.model.User;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.annotations.ColumnDefault;
 
 import javax.persistence.*;
 
@@ -24,6 +25,7 @@ public class VoiceEntity {
     private User user;
 
     @Column(name = "process_flag")
+    @ColumnDefault("0")
     private short processFlag;
 
     // Getters and Setters

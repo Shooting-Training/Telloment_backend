@@ -7,6 +7,7 @@ import cau.capstone.backend.global.Authority;
 import cau.capstone.backend.global.BaseEntity;
 import lombok.*;
 
+import org.hibernate.annotations.ColumnDefault;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -21,23 +22,24 @@ import java.util.stream.Collectors;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "user")
-public class User extends BaseEntity implements UserDetails  {
+public class User extends BaseEntity implements UserDetails {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Long id;
 
 
-    @Column(name="user_email")
+    @Column(name = "user_email")
     private String email; //닉네임
 
-    @Column(name="user_passwd")
+    @Column(name = "user_passwd")
     private String passwd; //비밀번호
 
-    @Column(name="user_image")
+    @Column(name = "user_image")
     private String image; //프로필 이미지
 
-    @Column(name="user_name")
+    @Column(name = "user_name")
     private String name; //이름
 
     @Column(name = "user_nickname")
@@ -50,6 +52,10 @@ public class User extends BaseEntity implements UserDetails  {
     @Column
     private LocalDateTime lastLoginAt; //마지막 로그인 시간
 
+    @Setter
+    @Column(name = "voice_use_permission_flag")
+    @ColumnDefault("false")
+    private boolean voiceUsePermissionFlag = false; //음성 사용 권한
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Page> pages = new ArrayList<>();
@@ -67,7 +73,7 @@ public class User extends BaseEntity implements UserDetails  {
     private Score score;
 
     @Builder
-    public User(String email, String passwd,Authority role) {
+    public User(String email, String passwd, Authority role) {
         this.email = email;
         this.passwd = passwd;
         this.role = role;
@@ -90,7 +96,7 @@ public class User extends BaseEntity implements UserDetails  {
     }
 
     @Override
-    public String getUsername(){
+    public String getUsername() {
         return this.email;
     }
 
