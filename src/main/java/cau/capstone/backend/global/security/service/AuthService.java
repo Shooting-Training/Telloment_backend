@@ -101,4 +101,11 @@ public class AuthService {
         // 토큰 발급
         return tokenDto;
     }
+
+    @Transactional
+    public void updateVoicePermission(String email, boolean permit){
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserException(ResponseCode.USER_NOT_FOUND));
+        userRepository.save(user);
+    }
 }
