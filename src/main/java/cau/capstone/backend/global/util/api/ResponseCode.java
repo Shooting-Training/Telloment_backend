@@ -48,7 +48,7 @@ public enum ResponseCode {
     UNFOLLOWED_ALREADY(HttpStatus.CONFLICT, false, "이미 언팔로우한 사용자입니다."),
     SCRAP_ALREADY_SCRAPPED(HttpStatus.CONFLICT, false, "이미 스크랩된 페이지입니다."),
     LIKE_ALREADY_EXIST(HttpStatus.CONFLICT, false, "이미 좋아요한 페이지입니다."),
-
+    UNUSABLE_EMAIL(HttpStatus.CONFLICT, false, "사용할 수 없는 이메일입니다."),
 
     // 500 Internal Server Error
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, false, "서버에 오류가 발생하였습니다."),
@@ -108,6 +108,7 @@ public enum ResponseCode {
     VOICE_LIST_EMPTY(HttpStatus.NOT_FOUND, false, "음성 목록이 비어있습니다."),
     VOICE_CLONE_FAILURE(HttpStatus.INTERNAL_SERVER_ERROR, false, "음성 복제 실패"),
     VOICE_EMOTION_FAILURE(HttpStatus.INTERNAL_SERVER_ERROR, false, "페이지 감정 분석 실패"),
+    DEFAULT_VOICE_NOT_ASSIGNED(HttpStatus.INTERNAL_SERVER_ERROR, false, "기본 음성이 할당되지 않았습니다."),
     VOICE_SCRAP_FAILURE_ALREADY_EXIST(HttpStatus.BAD_REQUEST, false, "음성 스크랩 이미 존재"),
 
     VOICE_PERMISSION_UPDATE_SUCCESS(HttpStatus.OK, true, "음성 사용 권한 변경 성공"),

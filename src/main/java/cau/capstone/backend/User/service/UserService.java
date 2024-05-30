@@ -35,6 +35,10 @@ public class UserService {
 
     @Transactional
     public long saveUser(CreateUserDto createUserDto) {
+        String userEmail = createUserDto.getEmail();
+        if(userEmail.startsWith("CLOVA_")) {
+            throw new UserException(ResponseCode.UNUSABLE_EMAIL);
+        }
         if (userRepository.existsByName(createUserDto.getName())) {
             log.info("이미 존재하는 닉네임입니다 by {}", createUserDto.getName());
             throw new UserException(ResponseCode.USER_NAME_ALREADY_EXIST);

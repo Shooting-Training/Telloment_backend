@@ -170,4 +170,15 @@ public class PageController {
     }
 
 
+    @GetMapping("/{pageId}/default_voice")
+    public ApiResponse<String> getDefaultVoice(@PathVariable Long pageId) {
+        return ApiResponse.success(pageService.getDefaultVoice(pageId), "success");
+    }
+
+    @PatchMapping("/{pageId}/default_voice")
+    public ApiResponse<String> setDefaultVoice(@PathVariable Long pageId, @RequestParam("email") String email) {
+        pageService.setDefaultVoice(pageId, email);
+        return ApiResponse.success("success", "success");
+    }
+
 }

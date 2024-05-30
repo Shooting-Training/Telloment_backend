@@ -67,8 +67,8 @@ public class Page extends BaseEntity {
             inverseJoinColumns = @JoinColumn(name = "hashtag_id"))
     private Set<Hashtag> hashtags = new HashSet<>();
 
-    @Column(name = "voice_info")
-    private String voiceInfo;
+    @Column(name = "deafult_voice_user_mail")
+    private String defaultVoiceUserMail;
 
     //생성메서드
     public static Page createPage(User user,Book book, String title, String content){
