@@ -16,6 +16,8 @@ import cau.capstone.backend.global.util.exception.LikeException;
 import cau.capstone.backend.global.util.exception.PageException;
 import cau.capstone.backend.global.util.exception.ScrapException;
 import cau.capstone.backend.global.util.exception.UserException;
+import cau.capstone.backend.voice.dto.response.VoiceResponseDto;
+import cau.capstone.backend.voice.repository.VoiceRepository;
 import com.amazonaws.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -414,6 +416,24 @@ public class PageService {
     }
 
 
+    public String getDefaultVoice(Long pageId) {
+        Page page = getPageById(pageId);
+
+        var email = page.getDefaultVoiceUserMail();
+        if(email == null) {
+            throw new PageException(ResponseCode.DEFAULT_VOICE_NOT_ASSIGNED);
+        }
+
+        return email;
+    }
+
+    public String setDefaultVoice(Long pageId, String userEmail) {
+        Page page = getPageById(pageId);
+        page.setDefaultVoiceUserMail(userEmail);
+        pageRepository.save(page);
+        return page.getDefaultVoiceUserMail();
+    }
+
 
 
     private User getUserById(Long userId){
@@ -454,7 +474,6 @@ public class PageService {
             throw new PageException(ResponseCode.PAGE_NOT_OWNED);
         }
     }
-
 
 
 }

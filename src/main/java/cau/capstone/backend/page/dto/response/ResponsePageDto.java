@@ -32,7 +32,7 @@ public class ResponsePageDto {
     private String emotionType;
     private int emotionIntensity;
 
-    private String voiceInfo;
+    private String defaultVoiceUserMail;
 
 
 //    public static ResponsePageDto from(Page page, int likeCount){
@@ -50,7 +50,7 @@ public class ResponsePageDto {
 //    }
 
 
-    public static ResponsePageDto from(Page page){
+    public static ResponsePageDto from(Page page) {
         return ResponsePageDto.builder()
                 .pageId(page.getId())
                 .userId(page.getUser().getId())
@@ -59,7 +59,7 @@ public class ResponsePageDto {
                 .createdAt(page.getCreatedAt())
                 .emotionType(page.getEmotion().getType().getDescription())
                 .emotionIntensity(page.getEmotion().getIntensity().getIntensity())
-                .voiceInfo(page.getVoiceInfo())
+                .defaultVoiceUserMail(page.getDefaultVoiceUserMail())
                 .rootId(page.getRootId())
                 .prevId(page.getPrevId())
                 .nextId(page.getNextId())
