@@ -1,13 +1,16 @@
 package cau.capstone.backend.voice.model;
 
 
+import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import java.io.Serializable;
 import java.util.Objects;
 
 @Embeddable
 public class VoiceScrapKey implements Serializable {
+    @Column(name = "user_id")
     private Long userId;
+    @Column(name = "voice_id")
     private Long voiceId;
 
     // default constructor
