@@ -13,4 +13,6 @@ public interface VoiceScrapRepository extends JpaRepository<VoiceScrapEntity, Vo
 
     List<VoiceScrapEntity> findAllByIdVoiceId(Long voiceId);
 
+    List<VoiceScrapEntity> findAllByIdUserIdAndUserVoiceUsePermissionFlag(Long userId, boolean voiceUsePermissionFlag);
+
 }

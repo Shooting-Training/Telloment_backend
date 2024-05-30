@@ -52,6 +52,7 @@ public class User extends BaseEntity implements UserDetails {
     @Column
     private LocalDateTime lastLoginAt; //마지막 로그인 시간
 
+    @Setter
     @Column(name = "voice_use_permission_flag")
     @ColumnDefault("false")
     private boolean voiceUsePermissionFlag = false; //음성 사용 권한

@@ -108,6 +108,7 @@ public enum ResponseCode {
     VOICE_LIST_EMPTY(HttpStatus.NOT_FOUND, false, "음성 목록이 비어있습니다."),
     VOICE_CLONE_FAILURE(HttpStatus.INTERNAL_SERVER_ERROR, false, "음성 복제 실패"),
     VOICE_EMOTION_FAILURE(HttpStatus.INTERNAL_SERVER_ERROR, false, "페이지 감정 분석 실패"),
+    VOICE_SCRAP_FAILURE(HttpStatus.BAD_REQUEST, false, "음성 스크랩 실패"),
 
     VOICE_PERMISSION_UPDATE_SUCCESS(HttpStatus.OK, true, "음성 사용 권한 변경 성공"),
     ;
