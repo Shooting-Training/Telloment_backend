@@ -439,22 +439,22 @@ public class PageService {
         return pageDetails;
     }
 
-    public org.springframework.data.domain.Page<ResponsePageDto> getPagesCreatedWithinLast24Hours(Pageable pageable) {
-        Pageable sortedByCreationDateDesc = PageRequest.of(
-                pageable.getPageNumber(),
-                pageable.getPageSize(),
-                Sort.by(Sort.Direction.DESC, "createdAt")
-        );
-
-        LocalDateTime twentyFourHoursAgo = LocalDateTime.now().minusHours(24);
-        org.springframework.data.domain.Page<Page> pages = pageRepository.findAllCreatedWithinLast24Hours(twentyFourHoursAgo, sortedByCreationDateDesc);
-
-        List<ResponsePageDto> responsePageDtoList = pages.stream()
-                .map(ResponsePageDto::from)
-                .collect(Collectors.toList());
-
-        return new PageImpl<>(responsePageDtoList, sortedByCreationDateDesc, pages.getTotalElements());
-    }
+//    public org.springframework.data.domain.Page<ResponsePageDto> getPagesCreatedWithinLast24Hours(Pageable pageable) {
+//        Pageable sortedByCreationDateDesc = PageRequest.of(
+//                pageable.getPageNumber(),
+//                pageable.getPageSize(),
+//                Sort.by(Sort.Direction.DESC, "createdAt")
+//        );
+//
+//        LocalDateTime twentyFourHoursAgo = LocalDateTime.now().minusHours(24);
+//        org.springframework.data.domain.Page<Page> pages = pageRepository.findAllCreatedWithinLast24Hours(twentyFourHoursAgo, sortedByCreationDateDesc);
+//
+//        List<ResponsePageDto> responsePageDtoList = pages.stream()
+//                .map(ResponsePageDto::from)
+//                .collect(Collectors.toList());
+//
+//        return new PageImpl<>(responsePageDtoList, sortedByCreationDateDesc, pages.getTotalElements());
+//    }
 
     public org.springframework.data.domain.Page<ResponsePageDto> getPagesCreatedWithinLast24HoursByEmotionAndHashtag(String emotionType,String hashTag, Pageable pageable) {
         Pageable sortedByCreationDateDesc = PageRequest.of(
