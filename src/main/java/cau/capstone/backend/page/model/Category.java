@@ -1,5 +1,8 @@
 package cau.capstone.backend.page.model;
 
+import cau.capstone.backend.global.util.api.ResponseCode;
+import cau.capstone.backend.global.util.exception.CategoryException;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,7 +43,11 @@ public enum Category {
     }
 
     public static Category getByCode(String code) {
-        return BY_CODE.get(code);
+        Category result = BY_CODE.get(code);
+        if (result == null) {
+            throw new CategoryException(ResponseCode.CATEGORY_NOT_FOUND);
+        }
+        return result;
     }
 
     // Static method to get Category by name

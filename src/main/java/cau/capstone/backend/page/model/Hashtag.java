@@ -30,4 +30,11 @@ public class Hashtag {
         return tag;
     }
 
+    public Set<Page> getPages() {
+        return pages;
+    }
+    public Set<Book> getBooks() {
+        return books;
+    }
+
 }

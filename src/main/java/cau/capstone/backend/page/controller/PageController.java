@@ -28,7 +28,7 @@ import java.util.List;
 
 import java.util.stream.Collectors;
 
-@Api(tags = "2. Page")
+@Api(tags = "3. Page")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/page")
@@ -109,7 +109,7 @@ public class PageController {
     //페이지 삭제
     @Operation(summary = "페이지 삭제")
     @DeleteMapping("/delete/{pageId}")
-    public ApiResponse<Long> deletePage(@PathVariable Long pageId, @RequestHeader String accessToken){
+    public ApiResponse<ResponsePageDto> deletePage(@PathVariable Long pageId, @RequestHeader String accessToken){
         Long userId = userRepository.findByEmail(jwtTokenProvider.getUserEmail(accessToken))
                 .orElseThrow(() -> new UserException(ResponseCode.USER_NOT_FOUND)).getId();
 

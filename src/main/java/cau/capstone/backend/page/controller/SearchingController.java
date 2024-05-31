@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@Api(tags = "7. Searching")
+@Api(tags = "5. Searching")
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/search")
@@ -72,8 +73,8 @@ public class SearchingController {
     @Operation(summary = "최근 24시간 내에 생성된 페이지를 감정, 해시태그 입력 값에 따라 조건부 반환")
     @GetMapping("/page/recent")
     public ApiResponse<org.springframework.data.domain.Page<ResponsePageDto>> getPagesCreatedWithinLast24HoursByEmotionAndHashtag(
-            @RequestParam("emotion") String emotionType,
-            @RequestParam("hashtag") String hashtag,
+            @Nullable @RequestParam("emotion") String emotionType,
+            @Nullable @RequestParam("hashtag") String hashtag,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);

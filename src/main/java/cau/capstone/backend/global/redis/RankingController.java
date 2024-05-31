@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Locale;
 import java.util.Set;
 
 @Api(tags = "6. Ranking")
@@ -29,30 +30,30 @@ public class RankingController {
 
     @Operation(summary = "좋아요 수 상위 N개 페이지 반환, 감정 기준으로 분류")
     @GetMapping("/page/emotion/topliked")
-    public ApiResponse<Set<ResponsePageDto>> getTopLikedPages(@RequestParam String emotionCode, @RequestParam int topN) {
-        Set<ResponsePageDto> responsePageDtos = pageService.parseTopRankedPaged(rankingService.getTopRankedPages(EmotionType.getByCode(emotionCode), topN));
+    public ApiResponse<Set<ResponsePageDto>> getTopLikedPages(@RequestParam("emotion") String emotionCode, @RequestParam("top") int topN) {
+        Set<ResponsePageDto> responsePageDtos = pageService.parseTopRankedPaged(rankingService.getTopRankedPages(EmotionType.getByCode(emotionCode.toUpperCase(Locale.ROOT)), topN));
         return ApiResponse.success(responsePageDtos, "Top " + topN + " liked pages" + " with emotion " + emotionCode);
     }
 
     @Operation(summary = "좋아요 수 상위 N개 책 반환, 카테고리 기준으로 분류")
     @GetMapping("/book/category/topliked")
-    public ApiResponse<Set<ResponseBookDto>> getTopLikeBooks(@RequestParam String categoryCode, @RequestParam int topN) {
-        Set<ResponseBookDto> responseBookDtos = bookService.parseTopRankedBooks(rankingService.getTopRankedBooks(Category.getByCode(categoryCode), topN));
+    public ApiResponse<Set<ResponseBookDto>> getTopLikeBooks(@RequestParam("category") String categoryCode, @RequestParam("top") int topN) {
+        Set<ResponseBookDto> responseBookDtos = bookService.parseTopRankedBooks(rankingService.getTopRankedBooks(Category.getByCode(categoryCode.toUpperCase(Locale.ROOT)), topN));
         return ApiResponse.success(responseBookDtos, "Top " + topN + " liked books" + " with category " + categoryCode);
     }
 
 
     @Operation(summary = "조회수 상위 N개 페이지 반환, 감정 기준으로 분류")
-    @GetMapping("page/emotion/topviewed")
-    public ApiResponse<Set<ResponsePageDto>> getTopViewedPages(@RequestParam String emotionCode, @RequestParam int topN) {
-        Set<ResponsePageDto> responsePageDtos = pageService.parseTopRankedPaged(rankingService.getTopViewedPages(EmotionType.getByCode(emotionCode), topN));
+    @GetMapping("/page/emotion/topviewed")
+    public ApiResponse<Set<ResponsePageDto>> getTopViewedPages(@RequestParam("emotion") String emotionCode, @RequestParam("top") int topN) {
+        Set<ResponsePageDto> responsePageDtos = pageService.parseTopRankedPaged(rankingService.getTopViewedPages(EmotionType.getByCode(emotionCode.toUpperCase(Locale.ROOT)), topN));
         return ApiResponse.success(responsePageDtos, "Top " + topN + " viewed pages" + " with emotion " + emotionCode);
     }
 
     @Operation(summary = "조회수 상위 N개 책 반환, 카테고리 기준으로 분류")
-    @GetMapping("book/category/topviewed")
-    public ApiResponse<Set<ResponseBookDto>> getTopViewedBooks(@RequestParam String categoryCode, @RequestParam int topN) {
-        Set<ResponseBookDto> responseBookDtos = bookService.parseTopRankedBooks(rankingService.getTopViewedBooks(Category.getByCode(categoryCode), topN));
+    @GetMapping("/book/category/topviewed")
+    public ApiResponse<Set<ResponseBookDto>> getTopViewedBooks(@RequestParam("category") String categoryCode, @RequestParam("top") int topN) {
+        Set<ResponseBookDto> responseBookDtos = bookService.parseTopRankedBooks(rankingService.getTopViewedBooks(Category.getByCode(categoryCode.toUpperCase(Locale.ROOT)), topN));
         return ApiResponse.success(responseBookDtos, "Top " + topN + " viewed books" + " with category " + categoryCode);
     }
 

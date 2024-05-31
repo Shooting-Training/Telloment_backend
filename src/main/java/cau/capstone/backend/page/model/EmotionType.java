@@ -1,5 +1,8 @@
 package cau.capstone.backend.page.model;
 
+import cau.capstone.backend.global.util.api.ResponseCode;
+import cau.capstone.backend.global.util.exception.EmotionException;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,7 +27,11 @@ public enum EmotionType {
 
 
     public static EmotionType getByCode(String code) {
-        return BY_CODE.get(code);
+        EmotionType result = BY_CODE.get(code);
+        if (result == null) {
+            throw new EmotionException(ResponseCode.EMOTION_TYPE_NOT_FOUND);
+        }
+        return result;
     }
 
     public static EmotionType getByDescription(String name) {

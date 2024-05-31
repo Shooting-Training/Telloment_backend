@@ -73,5 +73,12 @@ public class Book extends BaseEntity {
     }
 
 
+    @PreRemove
+    private void preRemove() {
+        for (Hashtag hashtag : hashtags) {
+            hashtag.getBooks().remove(this);
+        }
+        hashtags.clear();
+    }
 
 }

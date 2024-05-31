@@ -46,6 +46,7 @@ public class BookService {
 
     private final RankingService rankingService;
     private final LikeService likeService;
+    private final PageService pageService;
 
     private final JwtTokenProvider jwtTokenProvider;
 
@@ -182,6 +183,12 @@ public class BookService {
 
         Book book = getBookById(bookId);
         likeService.deleteBookLike(book);
+
+        user.getBooks().remove(book);
+
+        for (Page page : book.getPages()) {
+            pageService.deletePage(page.getId(), userId);
+        }
 
         bookRepository.delete(book);
 //유저의 좋아요 리스트도 제거?

@@ -31,7 +31,7 @@ public enum ResponseCode {
 
     EMOTION_NOT_FOUND(HttpStatus.NOT_FOUND, false, "감정을 찾을 수 없습니다."),
     EMOTION_INTENSITY_OUT_OF_RANGE(HttpStatus.NOT_FOUND, false, "감정 강도가 범위를 벗어났습니다."),
-
+    EMOTION_TYPE_NOT_FOUND(HttpStatus.NOT_FOUND, false, "감정 타입을 찾을 수 없습니다."),
 
     // 405 Method Not Allowed
     METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, false, "허용되지 않은 메소드입니다."),

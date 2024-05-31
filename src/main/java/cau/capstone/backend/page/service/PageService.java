@@ -1,6 +1,7 @@
 package cau.capstone.backend.page.service;
 
 
+import cau.capstone.backend.page.dto.response.ResponseBookDto;
 import cau.capstone.backend.page.model.Category;
 import cau.capstone.backend.User.service.ScoreService;
 import cau.capstone.backend.global.redis.RankingService;
@@ -215,12 +216,25 @@ public class PageService {
 
     //페이지 삭제
     @Transactional
-    public long deletePage(Long pageId, Long userId){
+    public ResponsePageDto deletePage(Long pageId, Long userId){
         validatePage(pageId, userId);
-        pageRepository.deleteById(pageId);
-        log.info("Page deleted: " + pageId);
+        Page page = getPageById(pageId);
+        ResponsePageDto responsePageDto = ResponsePageDto.from(page);
+        //페이지 제거시 삭제해야 하는 것 - 페이지가 포함된 북의 정보 수정, 페이지에 달린 좋아요 삭제, 페이지 삭제, 페이지의 해시태그 삭제
+        //북 정보 수정
+        Book book = getBookById(page.getBook().getId());
+        book.getPages().remove(page);
 
-        return pageId;
+        //좋아요 삭제
+//        likeRepository.deleteAllByLikeTypeAndTargetId(LikeType.PAGE, pageId);
+        likeService.deletePageLike(page);
+
+        //해시태그 삭제는 @PreRemove로 해결
+        //페이지 삭제
+        pageRepository.deleteById(pageId);
+        bookRepository.save(book);
+
+        return responsePageDto;
     }
 
     //페이지 연결하기

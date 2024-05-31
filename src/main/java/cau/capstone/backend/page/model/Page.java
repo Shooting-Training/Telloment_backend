@@ -100,6 +100,15 @@ public class Page extends BaseEntity {
         return page;
     }
 
+    @PreRemove
+    private void preRemove() {
+        // 해시태그와의 연관 관계를 제거
+        for (Hashtag hashtag : hashtags) {
+            hashtag.getPages().remove(this);
+        }
+        hashtags.clear();
+    }
+
     public void setRootId(Page page) { this.rootId = page.getId();}
     public void setRootId(long rootId) { this.rootId = rootId;}
 
