@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import reactor.util.annotation.Nullable;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 
 @Getter
@@ -33,6 +34,8 @@ public class ResponsePageDto {
     private int emotionIntensity;
 
     private String defaultVoiceUserMail;
+    @Nullable
+    private Set<String> hashtags;
 
 
 //    public static ResponsePageDto from(Page page, int likeCount){
@@ -63,6 +66,7 @@ public class ResponsePageDto {
                 .rootId(page.getRootId())
                 .prevId(page.getPrevId())
                 .nextId(page.getNextId())
+                .hashtags(page.getHashtagsTag())
                 .build();
     }
 

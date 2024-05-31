@@ -28,6 +28,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.util.annotation.Nullable;
 
 
 import java.time.LocalDate;
@@ -477,10 +478,15 @@ public class PageService {
                 Sort.by(Sort.Direction.DESC, "createdAt")
         );
 
+        if (hashTag == null || hashTag.isEmpty()){
+            System.out.println("왜 안됨?");
+        }
+
         LocalDateTime twentyFourHoursAgo = LocalDateTime.now().minusHours(24);
 
         //그냥 최근 것만 - 모든 정보가 비어 있다.
         if((emotionType == null || emotionType.isEmpty()) && (hashTag == null || hashTag.isEmpty())){
+            System.out.println("emotionType, hashTag 둘 다 입력 안됨");
             org.springframework.data.domain.Page<Page> pages = pageRepository.findAllCreatedWithinLast24Hours(twentyFourHoursAgo, sortedByCreationDateDesc);
             List<ResponsePageDto> responsePageDtoList = new ArrayList<>();
             for (Page page : pages) {
@@ -489,10 +495,10 @@ public class PageService {
                 responsePageDtoList.add(responsePageDto);
             }
             return new PageImpl<>(responsePageDtoList, sortedByCreationDateDesc, pages.getTotalElements());
-
         }
         //값이 emotionType만 입력
-        else if(hashTag == null || hashTag.isEmpty()){
+        else if((hashTag == null || hashTag.isEmpty()) && (emotionType != null || !emotionType.isEmpty())){
+            System.out.println("emotionType만 입력됨");
             EmotionType emotion = EmotionType.getByCode(emotionType);
             org.springframework.data.domain.Page<Page> pages = pageRepository.findAllByEmotionTypeCreatedWithinLast24Hours(twentyFourHoursAgo, emotion, sortedByCreationDateDesc);
             List<ResponsePageDto> responsePageDtoList = new ArrayList<>();
@@ -504,7 +510,8 @@ public class PageService {
             return new PageImpl<>(responsePageDtoList, sortedByCreationDateDesc, pages.getTotalElements());
         }
         //값이 해시태그만 입력
-        else if(emotionType == null || emotionType.isEmpty()){
+        else if((emotionType == null || emotionType.isEmpty()) && (hashTag != null || !hashTag.isEmpty())){
+            System.out.println("hashTag만 입력됨");
             org.springframework.data.domain.Page<Page> pages = pageRepository.findAllByHashTagCreatedWithinLast24Hours(twentyFourHoursAgo, hashTag, sortedByCreationDateDesc);
             List<ResponsePageDto> responsePageDtoList = new ArrayList<>();
             for (Page page : pages) {
@@ -516,6 +523,7 @@ public class PageService {
         }
         //둘 다 입력
         else{
+            System.out.println("둘 다 입력됨");
             EmotionType emotion = EmotionType.getByCode(emotionType);
             org.springframework.data.domain.Page<Page> pages = pageRepository.findAllByEmotionTypeAndHashTagCreatedWithinLast24Hours(twentyFourHoursAgo, emotion, hashTag, sortedByCreationDateDesc);
             List<ResponsePageDto> responsePageDtoList = new ArrayList<>();

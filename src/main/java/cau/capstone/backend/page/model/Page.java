@@ -118,6 +118,15 @@ public class Page extends BaseEntity {
     public void setNextId(Page page) {this.nextId = page.getId();}
     public void setNextId(long nextId) {this.nextId = nextId;}
 
+    public Set<String> getHashtagsTag() {
+        Set<String> hashtagSet = new HashSet<>();
+        for (Hashtag hashtag : hashtags) {
+            hashtagSet.add(hashtag.getTag());
+        }
+        return hashtagSet;
+    }
+
+
     public void setEmotion(String emotion, int intensity) {
         this.emotion.setTypeFromString(emotion);
         this.emotion.setIntensity(intensity);

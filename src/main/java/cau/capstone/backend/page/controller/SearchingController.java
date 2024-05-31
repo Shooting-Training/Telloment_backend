@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Locale;
 
 @Api(tags = "5. Searching")
 @RequiredArgsConstructor
@@ -78,8 +79,14 @@ public class SearchingController {
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size) {
         Pageable pageable = PageRequest.of(page, size);
-        org.springframework.data.domain.Page<ResponsePageDto> result = pageService.getPagesCreatedWithinLast24HoursByEmotionAndHashtag(emotionType, hashtag, pageable);
-        return ApiResponse.success(result, "Search pages created within last 24 hours by emotion and hashtag");
+        if (emotionType == null || emotionType.isEmpty()) {
+            org.springframework.data.domain.Page<ResponsePageDto> result = pageService.getPagesCreatedWithinLast24HoursByEmotionAndHashtag(emotionType, hashtag, pageable);
+            return ApiResponse.success(result, "Search pages created within last 24 hours by emotion and hashtag");
+
+        } else {
+            org.springframework.data.domain.Page<ResponsePageDto> result = pageService.getPagesCreatedWithinLast24HoursByEmotionAndHashtag(emotionType.toUpperCase(Locale.ROOT), hashtag, pageable);
+            return ApiResponse.success(result, "Search pages created within last 24 hours by emotion and hashtag");
+        }
     }
 
     @GetMapping("/books")
