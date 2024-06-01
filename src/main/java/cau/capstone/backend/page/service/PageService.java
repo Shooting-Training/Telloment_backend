@@ -74,7 +74,28 @@ public class PageService {
         scoreService.plusViewScore(userId, page);
 
         return ResponsePageDto.from(page);
-}
+    }
+
+    public ResponsePageDto getPage(Long pageId) {
+        var userEmail = jwtTokenProvider.getUserEmail();
+
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new UserException(ResponseCode.USER_NOT_FOUND));
+        Long userId = user.getId();
+
+        Page page = getPageById(pageId);
+        Book book = getBookById(page.getBook().getId());
+        page.setViewCount(page.getViewCount() + 1);
+        book.setBookViewCount(book.getBookViewCount() + 1);
+        pageRepository.save(page);
+        bookRepository.save(book);
+
+        rankingService.incrementViewCountPage(page.getId(), page.getEmotion().getType());
+        rankingService.incrementViewCountBook(page.getBook().getId(), page.getBook().getCategory());
+        scoreService.plusViewScore(userId, page);
+
+        return ResponsePageDto.from(page);
+    }
 
     public org.springframework.data.domain.Page<ResponsePageDto> searchPagesWithKeywordAndPaging(String keyword, Pageable pageable) {
         Pageable sortedByCreationDateDesc = PageRequest.of(
@@ -161,20 +182,20 @@ public class PageService {
 
     //먼저 페이지를 생성하고, 페이지의 감정을 다시 반환받아 설정한다.
     @Transactional
-    public void setPageEmotion(Page page, String emotionCode, int emotionIntensity){
+    public void setPageEmotion(Page page, String emotionCode, int emotionIntensity) {
 
-        if(page == null){
+        if (page == null) {
             throw new PageException(ResponseCode.PAGE_NOT_FOUND);
         }
 
         System.out.println("emotionCode: " + emotionCode);
         System.out.println("emotionIntensity: " + emotionIntensity);
 
-        if(emotionCode == null || EmotionType.getByCode(emotionCode) == null || emotionCode.isEmpty() ){
+        if (emotionCode == null || EmotionType.getByCode(emotionCode) == null || emotionCode.isEmpty()) {
             emotionCode = "NEUTRAL";
         }
 
-        if(emotionIntensity <0 || emotionIntensity > 3){
+        if (emotionIntensity < 0 || emotionIntensity > 3) {
             emotionIntensity = 0;
         }
 
@@ -188,13 +209,13 @@ public class PageService {
     }
 
     @Transactional
-    public List<ResponsePageDto> getPageList(Long userId){
+    public List<ResponsePageDto> getPageList(Long userId) {
         validateUser(userId);
         List<Page> pageList = pageRepository.findAllByUserId(userId);
 
         List<ResponsePageDto> responsePageDtoList = new ArrayList<>();
 
-        for(Page page : pageList){
+        for (Page page : pageList) {
             ResponsePageDto responsePageDto = ResponsePageDto.from(page);
             responsePageDto.setLikeCount(likeService.countLikesForPage(page.getId()));
             responsePageDtoList.add(responsePageDto);
@@ -205,7 +226,7 @@ public class PageService {
 
     //페이지 정보 수정
     @Transactional
-    public ResponsePageDto updatePage(UpdatePageDto updatePageDto){
+    public ResponsePageDto updatePage(UpdatePageDto updatePageDto) {
         Page page = getPageById(updatePageDto.getPageId());
         page.updatePage(updatePageDto.getTitle(), updatePageDto.getContent());
 
@@ -217,7 +238,7 @@ public class PageService {
 
     //페이지 삭제
     @Transactional
-    public ResponsePageDto deletePage(Long pageId, Long userId){
+    public ResponsePageDto deletePage(Long pageId, Long userId) {
         validatePage(pageId, userId);
         Page page = getPageById(pageId);
         ResponsePageDto responsePageDto = ResponsePageDto.from(page);
@@ -240,7 +261,7 @@ public class PageService {
 
     //페이지 연결하기
     @Transactional
-    public ResponsePageDto linkPage(LinkPageDto linkPageDto){
+    public ResponsePageDto linkPage(LinkPageDto linkPageDto) {
 
         Long prevPageId = linkPageDto.getPrevPageId();
         Long nextPageId = linkPageDto.getNextPageId();
@@ -260,12 +281,12 @@ public class PageService {
             throw new PageException(ResponseCode.PAGE_ALREADY_LINKED_END);
         }
 
-        if (prevPage.getPrevId() != -1 && linkedPage.getNextId()!= -1) {
+        if (prevPage.getPrevId() != -1 && linkedPage.getNextId() != -1) {
             throw new PageException(ResponseCode.PAGE_ALREADY_LINKED_SWITCHED);
         }
 
         // 첫 페이지 바로 다음에 연결
-        if (prevPage.getRootId() == -1 && linkedPage.getRootId() == -1 && linkedPage.getNextId() == -1){
+        if (prevPage.getRootId() == -1 && linkedPage.getRootId() == -1 && linkedPage.getNextId() == -1) {
             prevPage.setNextId(linkedPage.getId());
             prevPage.setRootId(prevPage.getId());
             linkedPage.setRootId(prevPage.getId());
@@ -275,7 +296,7 @@ public class PageService {
             pageRepository.save(linkedPage);
         }
         // 이 경우는 기존의 rootPage == linkedPage, prevPage는 새로 연결된 페이지
-        else if(linkedPage.getRootId() == linkedPage.getId() && linkedPage.getPrevId() == -1) {
+        else if (linkedPage.getRootId() == linkedPage.getId() && linkedPage.getPrevId() == -1) {
             linkedPage.setPrevId(prevPage.getId());
             prevPage.setNextId(linkedPage.getId());
             prevPage.setRootId(prevPage.getId());
@@ -300,8 +321,6 @@ public class PageService {
 
         return ResponsePageDto.from(linkedPage);
     }
-
-
 
 
     private void updateRootInfoForAllLinkedPages(Long newRootId, Long startPageId) {
@@ -335,7 +354,7 @@ public class PageService {
 
     //페이지 좋아요
     @Transactional
-    public ResponsePageDto likePage(LikePageDto likePageDto, String accessToken){
+    public ResponsePageDto likePage(LikePageDto likePageDto, String accessToken) {
 
         String userEmail = jwtTokenProvider.getUserEmail(accessToken);
         User user = userRepository.findByEmail(userEmail)
@@ -361,7 +380,7 @@ public class PageService {
 
     //좋아요 해제
     @Transactional
-    public ResponsePageDto dislikePage(LikePageDto likePageDto, String accessToken){
+    public ResponsePageDto dislikePage(LikePageDto likePageDto, String accessToken) {
 
         String userEmail = jwtTokenProvider.getUserEmail(accessToken);
         User user = userRepository.findByEmail(userEmail)
@@ -373,10 +392,9 @@ public class PageService {
         Like like = likeRepository.findByLikeTypeAndTargetIdAndUserId(LikeType.PAGE, likePageDto.getPageId(), userId)
                 .orElseThrow(() -> new LikeException(ResponseCode.LIKE_NOT_FOUND));
 
-        if(like == null){
+        if (like == null) {
             throw new LikeException(ResponseCode.LIKE_NOT_FOUND);
-        }
-        else{
+        } else {
 
             rankingService.unlikePage(page.getId(), page.getEmotion().getType());
             rankingService.unlikeBook(page.getBook().getId(), page.getBook().getCategory());
@@ -441,11 +459,10 @@ public class PageService {
     }
 
 
-
     @Transactional
-    public Set<ResponsePageDto> parseTopRankedPaged(Set<String> pageIds){
+    public Set<ResponsePageDto> parseTopRankedPaged(Set<String> pageIds) {
         Set<ResponsePageDto> pageDetails = new LinkedHashSet<>();
-        for (String pageId : pageIds){
+        for (String pageId : pageIds) {
             Page page = getPageById(Long.parseLong(pageId));
             ResponsePageDto responsePageDto = ResponsePageDto.from(page);
             responsePageDto.setLikeCount(likeService.countLikesForPage(page.getId()));
@@ -471,21 +488,21 @@ public class PageService {
 //        return new PageImpl<>(responsePageDtoList, sortedByCreationDateDesc, pages.getTotalElements());
 //    }
 
-    public org.springframework.data.domain.Page<ResponsePageDto> getPagesCreatedWithinLast24HoursByEmotionAndHashtag(String emotionType,String hashTag, Pageable pageable) {
+    public org.springframework.data.domain.Page<ResponsePageDto> getPagesCreatedWithinLast24HoursByEmotionAndHashtag(String emotionType, String hashTag, Pageable pageable) {
         Pageable sortedByCreationDateDesc = PageRequest.of(
                 pageable.getPageNumber(),
                 pageable.getPageSize(),
                 Sort.by(Sort.Direction.DESC, "createdAt")
         );
 
-        if (hashTag == null || hashTag.isEmpty()){
+        if (hashTag == null || hashTag.isEmpty()) {
             System.out.println("왜 안됨?");
         }
 
         LocalDateTime twentyFourHoursAgo = LocalDateTime.now().minusHours(24);
 
         //그냥 최근 것만 - 모든 정보가 비어 있다.
-        if((emotionType == null || emotionType.isEmpty()) && (hashTag == null || hashTag.isEmpty())){
+        if ((emotionType == null || emotionType.isEmpty()) && (hashTag == null || hashTag.isEmpty())) {
             System.out.println("emotionType, hashTag 둘 다 입력 안됨");
             org.springframework.data.domain.Page<Page> pages = pageRepository.findAllCreatedWithinLast24Hours(twentyFourHoursAgo, sortedByCreationDateDesc);
             List<ResponsePageDto> responsePageDtoList = new ArrayList<>();
@@ -497,7 +514,7 @@ public class PageService {
             return new PageImpl<>(responsePageDtoList, sortedByCreationDateDesc, pages.getTotalElements());
         }
         //값이 emotionType만 입력
-        else if((hashTag == null || hashTag.isEmpty()) && (emotionType != null || !emotionType.isEmpty())){
+        else if ((hashTag == null || hashTag.isEmpty()) && (emotionType != null || !emotionType.isEmpty())) {
             System.out.println("emotionType만 입력됨");
             EmotionType emotion = EmotionType.getByCode(emotionType);
             org.springframework.data.domain.Page<Page> pages = pageRepository.findAllByEmotionTypeCreatedWithinLast24Hours(twentyFourHoursAgo, emotion, sortedByCreationDateDesc);
@@ -510,7 +527,7 @@ public class PageService {
             return new PageImpl<>(responsePageDtoList, sortedByCreationDateDesc, pages.getTotalElements());
         }
         //값이 해시태그만 입력
-        else if((emotionType == null || emotionType.isEmpty()) && (hashTag != null || !hashTag.isEmpty())){
+        else if ((emotionType == null || emotionType.isEmpty()) && (hashTag != null || !hashTag.isEmpty())) {
             System.out.println("hashTag만 입력됨");
             org.springframework.data.domain.Page<Page> pages = pageRepository.findAllByHashTagCreatedWithinLast24Hours(twentyFourHoursAgo, hashTag, sortedByCreationDateDesc);
             List<ResponsePageDto> responsePageDtoList = new ArrayList<>();
@@ -522,7 +539,7 @@ public class PageService {
             return new PageImpl<>(responsePageDtoList, sortedByCreationDateDesc, pages.getTotalElements());
         }
         //둘 다 입력
-        else{
+        else {
             System.out.println("둘 다 입력됨");
             EmotionType emotion = EmotionType.getByCode(emotionType);
             org.springframework.data.domain.Page<Page> pages = pageRepository.findAllByEmotionTypeAndHashTagCreatedWithinLast24Hours(twentyFourHoursAgo, emotion, hashTag, sortedByCreationDateDesc);
@@ -536,12 +553,9 @@ public class PageService {
         }
     }
 
-    
-
-
 
     @Transactional
-    public List<Page> getUserPageList(Long userId){
+    public List<Page> getUserPageList(Long userId) {
         return pageRepository.findAllByUserId(userId);
     }
 
@@ -551,7 +565,7 @@ public class PageService {
 //    }
 
     @Transactional
-    public List<Book> getUserBookList(Long userId){
+    public List<Book> getUserBookList(Long userId) {
         return bookRepository.findAllByUserId(userId);
     }
 
@@ -560,7 +574,7 @@ public class PageService {
         Page page = getPageById(pageId);
 
         var email = page.getDefaultVoiceUserMail();
-        if(email == null) {
+        if (email == null) {
             throw new PageException(ResponseCode.DEFAULT_VOICE_NOT_ASSIGNED);
         }
 
@@ -575,42 +589,40 @@ public class PageService {
     }
 
 
-
-    private User getUserById(Long userId){
+    private User getUserById(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new UserException(ResponseCode.USER_NOT_FOUND));
     }
 
-    private Page getPageById(Long pageId){
+    private Page getPageById(Long pageId) {
         return pageRepository.findById(pageId)
                 .orElseThrow(() -> new PageException(ResponseCode.PAGE_NOT_FOUND));
     }
 
-    private Book getBookById(Long bookId){
+    private Book getBookById(Long bookId) {
         return bookRepository.findById(bookId)
                 .orElseThrow(() -> new PageException(ResponseCode.BOOK_NOT_FOUND));
     }
 
 
-
-    private void validateUser(Long userId){
-        if(!userRepository.existsById(userId)){
+    private void validateUser(Long userId) {
+        if (!userRepository.existsById(userId)) {
             throw new UserException(ResponseCode.USER_NOT_FOUND);
         }
     }
 
-    private void validatePage(Long pageId){
-        if(!pageRepository.existsById(pageId)){
+    private void validatePage(Long pageId) {
+        if (!pageRepository.existsById(pageId)) {
             throw new PageException(ResponseCode.PAGE_NOT_FOUND);
         }
 
     }
 
-    private void validatePage(Long pageId, Long userId){
-        if(!pageRepository.existsById(pageId)){
+    private void validatePage(Long pageId, Long userId) {
+        if (!pageRepository.existsById(pageId)) {
             throw new PageException(ResponseCode.PAGE_NOT_FOUND);
         }
-        if (!pageRepository.existsByIdAndUserId(pageId, userId)){ //페이지의 주인이 아닌지 확인
+        if (!pageRepository.existsByIdAndUserId(pageId, userId)) { //페이지의 주인이 아닌지 확인
             throw new PageException(ResponseCode.PAGE_NOT_OWNED);
         }
     }

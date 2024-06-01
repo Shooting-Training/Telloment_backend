@@ -120,6 +120,8 @@ public enum ResponseCode {
 
     VOICE_PERMISSION_UPDATE_SUCCESS(HttpStatus.OK, true, "음성 사용 권한 변경 성공"),
     VOICE_PERMISSION_GET_SUCCESS(HttpStatus.OK, true, "음성 사용 권한 조회 성공"),
+
+    VOICE_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, false, "음성 서버 오류"),
     ;
 
     private final HttpStatus httpStatus;
