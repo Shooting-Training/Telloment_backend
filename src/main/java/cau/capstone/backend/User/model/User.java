@@ -18,7 +18,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Getter
-
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "user")
@@ -118,6 +117,10 @@ public class User extends BaseEntity implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    public boolean getVoiceUsePermissionFlag() {
+        return this.voiceUsePermissionFlag;
     }
 
 

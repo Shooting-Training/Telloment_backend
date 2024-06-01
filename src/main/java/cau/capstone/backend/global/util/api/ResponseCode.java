@@ -119,6 +119,7 @@ public enum ResponseCode {
     VOICE_SCRAP_FAILURE_ALREADY_EXIST(HttpStatus.BAD_REQUEST, false, "음성 스크랩 이미 존재"),
 
     VOICE_PERMISSION_UPDATE_SUCCESS(HttpStatus.OK, true, "음성 사용 권한 변경 성공"),
+    VOICE_PERMISSION_GET_SUCCESS(HttpStatus.OK, true, "음성 사용 권한 조회 성공"),
     ;
 
     private final HttpStatus httpStatus;

@@ -57,4 +57,10 @@ public class AuthController {
         authService.updateVoicePermission(email, permit);
         return ApiResponse.success("success", ResponseCode.VOICE_PERMISSION_UPDATE_SUCCESS.getMessage());
     }
+
+    @GetMapping("/voice_permission")
+    public ApiResponse<Boolean> getVoicePermission() {
+        var email = jwtTokenProvider.getUserEmail();
+        return ApiResponse.success(authService.getVoicePermission(email), ResponseCode.VOICE_PERMISSION_GET_SUCCESS.getMessage());
+    }
 }
