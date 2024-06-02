@@ -42,10 +42,20 @@ public class VoiceController {
         return ApiResponse.success(test.block(), ResponseCode.VOICE_CLONE_SUCCESS.getMessage());
     }
 
-    @GetMapping("/page/{pageId}")
-    public ApiResponse<EmotionResponseDto> getEmotionFromPage(@PathVariable Long pageId, @RequestHeader String accessToken) {
+    @GetMapping("/emotion")
+    public ApiResponse<EmotionResponseDto> getEmotionFromPage(@RequestParam("content") String content) {
+        Mono<EmotionDto> dto = fastAPIService.getEmotionData(content);
+        var res = dto.block();
+        String emotion = res.getEmotion();
+        int value = res.getValue();
 
-        var page = pageService.getPage(accessToken, pageId);
+        return ApiResponse.success(EmotionResponseDto.of(emotion, value), ResponseCode.VOICE_EMOTION_SUCCESS.getMessage());
+    }
+
+    @GetMapping("/page/{pageId}")
+    public ApiResponse<EmotionResponseDto> getEmotionFromPage(@PathVariable Long pageId) {
+
+        var page = pageService.getPage(pageId);
         Mono<EmotionDto> dto = fastAPIService.getEmotionData(page.getContent());
         var res = dto.block();
         String emotion = res.getEmotion();
