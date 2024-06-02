@@ -37,7 +37,7 @@ public enum ResponseCode {
     METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, false, "허용되지 않은 메소드입니다."),
     SCARP_NOT_OWNED(HttpStatus.METHOD_NOT_ALLOWED, false, "스크랩한 사용자가 아닙니다."),
     PAGE_NOT_OWNED(HttpStatus.METHOD_NOT_ALLOWED, false, "작성한 사용자가 아닙니다."),
-    BOOK_NOT_OWNED(HttpStatus.METHOD_NOT_ALLOWED, false, "작성한 사용자가 아닙니다."),
+    BOOK_NOT_OWNED(HttpStatus.METHOD_NOT_ALLOWED, false, "북을 작성한 사용자가 아닙니다."),
 
     // 409 Conflict
     USER_ALREADY_EXIST(HttpStatus.CONFLICT, false, "이미 가입한 사용자입니다."),

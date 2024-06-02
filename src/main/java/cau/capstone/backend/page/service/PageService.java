@@ -168,6 +168,10 @@ public class PageService {
 
         Book book = getBookById(createPageDto.getBookId());
 
+        if(book.getUser().getId() != user.getId()){
+            throw new PageException(ResponseCode.BOOK_NOT_OWNED);
+        }
+
         Page page = Page.createPage(user, book, createPageDto.getTitle(), createPageDto.getContent());
 
         setHashtagsToPage(page, createPageDto.getHashtags());
