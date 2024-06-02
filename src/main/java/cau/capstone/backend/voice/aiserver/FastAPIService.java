@@ -1,8 +1,10 @@
 package cau.capstone.backend.voice.aiserver;
 
+import cau.capstone.backend.User.model.repository.UserRepository;
 import cau.capstone.backend.global.security.Entity.JwtTokenProvider;
 import cau.capstone.backend.page.model.Page;
 import cau.capstone.backend.page.model.repository.PageRepository;
+import cau.capstone.backend.voice.repository.VoiceRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.buffer.DataBuffer;
 import org.springframework.http.MediaType;
@@ -19,30 +21,13 @@ import reactor.core.publisher.Mono;
 
 public class FastAPIService {
 
-    private final WebClient webClient;
+
     private final PageRepository pageRepository;
+    private final UserRepository userRepository;
+    private final VoiceRepository voiceRepository;
+
+    private final WebClient webClient;
     private final JwtTokenProvider jwtTokenProvider;
-
-
-//    public FastAPIService(WebClient webClient) {
-//        this.webClient = webClient;
-//    }
-
-    public Mono<EmotionDto> getEmotionData(Long pageId) {
-
-        Page page = pageRepository.findPageById(pageId).orElseThrow(() -> new IllegalArgumentException("해당 페이지가 존재하지 않습니다."));
-
-        String content = page.getContent();
-
-        return this.webClient.get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/v1/emotion")
-                        .queryParam("text", content)
-                        .build())
-                .retrieve()
-                .bodyToMono(EmotionDto.class);
-    }
-
 
 
 
@@ -73,42 +58,26 @@ public class FastAPIService {
     }
 
 
-    public Mono<byte[]> processStringAndGetWav(String token, String content, String emotion, int emotionStrength) {
-//        RequestPayload requestPayload = new RequestPayload(id, content);
-        var email = jwtTokenProvider.getUserEmail(token);
+    public Mono<byte[]> processStringAndGetWav(String content, String emotion, int emotionStrength, Long voiceId) {
+        //check voice permission
+        var voice = voiceRepository.findById(voiceId)
+                .orElseThrow(() -> new RuntimeException("해당 음성이 존재하지 않습니다."));
+
+        if(!voice.getUser().getVoiceUsePermissionFlag()) {
+            throw new RuntimeException("음성 사용 권한이 없습니다.");
+        }
+
+        var voiceUserEmail = voice.getUser().getEmail();
+
         return this.webClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/v1/voice/{user_id}/speech")
                         .queryParam("text", content)
                         .queryParam("emotion", emotion)
-                        .queryParam("value", emotionStrength)
-                        .build(email))
+                        .queryParam("strength", emotionStrength)
+                        .build(voiceUserEmail))
                 .retrieve()
                 .bodyToMono(byte[].class);
     }
-
-
-//    public Mono<String> cloneVoice(Long userId, MultipartFile file) {
-////        FileSystemResource resource = new FileSystemResource(filePath);
-//
-//        MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
-//        bodyBuilder.part("audio_file", file.getResource());
-//
-//        return this.webClient.post()
-//                .uri("/v1/voice/{user_id}", userId)
-//                .contentType(MediaType.MULTIPART_FORM_DATA)
-//                .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
-//                .retrieve()
-//                .onStatus(status -> status.value() == 422, response -> {
-//                    // 로깅 또는 예외 처리
-//                    return Mono.error(new RuntimeException("Unprocessable Entity"));
-//                })
-//                .bodyToMono(String.class)
-//                .doOnError(WebClientResponseException.class, ex -> {
-//                    // 예외 로깅
-//                    System.err.println("Error response: " + ex.getResponseBodyAsString());
-//                });
-//    }
-
 
 }

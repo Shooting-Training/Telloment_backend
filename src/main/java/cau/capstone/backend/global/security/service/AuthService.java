@@ -109,4 +109,10 @@ public class AuthService {
         user.setVoiceUsePermissionFlag(permit);
         userRepository.save(user);
     }
+
+    public Boolean getVoicePermission(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserException(ResponseCode.USER_NOT_FOUND));
+        return user.getVoiceUsePermissionFlag();
+    }
 }
