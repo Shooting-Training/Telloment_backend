@@ -4,6 +4,8 @@ public class CategoryDto {
     private String code;
     private String name;
 
+    private int bookCount;
+
     public CategoryDto(String code, String name) {
         this.code = code;
         this.name = name;
@@ -25,4 +27,6 @@ public class CategoryDto {
     public void setName(String name) {
         this.name = name;
     }
+
+    public void setBookCount(int num) {this.bookCount = bookCount; }
 }

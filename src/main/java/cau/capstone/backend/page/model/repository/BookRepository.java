@@ -30,4 +30,6 @@ public interface BookRepository extends JpaRepository<Book, Long> {
     org.springframework.data.domain.Page<Book> findByKeywordWithPaging(@Param("keyword") String keyword, Pageable pageable);
 
     org.springframework.data.domain.Page<Book> findByCategory(Category category, Pageable pageable);
+
+    int countAllByCategory(Category category);
 }

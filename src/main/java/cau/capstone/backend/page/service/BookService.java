@@ -309,9 +309,19 @@ public class BookService {
 
 
     public List<CategoryDto> getAllCategories() {
-        return Arrays.stream(Category.values())
-                .map(category -> new CategoryDto(category.getCode(), category.getName()))
-                .collect(Collectors.toList());
+
+        List<CategoryDto> dtoList = new ArrayList<>();
+
+        for (Category category : Category.values()){
+
+            CategoryDto categoryDto = new CategoryDto(category.getCode(), category.getName());
+            categoryDto.setBookCount(bookRepository.countAllByCategory(category));
+
+            dtoList.add(categoryDto);
+        }
+
+
+        return dtoList;
     }
 
     public Set<ResponseBookDto> parseTopRankedBooks(Set<String> bookIds) {

@@ -69,6 +69,10 @@ public class PageService {
         pageRepository.save(page);
         bookRepository.save(book);
 
+        for(String tag : page.getHashtagsTag()){
+            rankingService.incrementViewCountPageTag(page.getId(), tag);
+        }
+
         rankingService.incrementViewCountPage(page.getId(), page.getEmotion().getType());
         rankingService.incrementViewCountBook(page.getBook().getId(), page.getBook().getCategory());
         scoreService.plusViewScore(userId, page);
@@ -76,6 +80,7 @@ public class PageService {
         return ResponsePageDto.from(page);
     }
 
+    @Transactional
     public ResponsePageDto getPage(Long pageId) {
         var userEmail = jwtTokenProvider.getUserEmail();
 
@@ -89,6 +94,10 @@ public class PageService {
         book.setBookViewCount(book.getBookViewCount() + 1);
         pageRepository.save(page);
         bookRepository.save(book);
+
+        for(String tag : page.getHashtagsTag()){
+            rankingService.incrementViewCountPageTag(page.getId(), tag);
+        }
 
         rankingService.incrementViewCountPage(page.getId(), page.getEmotion().getType());
         rankingService.incrementViewCountBook(page.getBook().getId(), page.getBook().getCategory());
@@ -376,6 +385,10 @@ public class PageService {
         rankingService.likeBook(book.getId(), book.getCategory());
         rankingService.likePage(page.getId(), page.getEmotion().getType());
 
+        for (String tag: page.getHashtagsTag()){
+            rankingService.likePageTag(page.getId(), tag);
+        }
+
         likeRepository.save(like);
         pageRepository.save(page);
 
@@ -405,6 +418,10 @@ public class PageService {
 
             rankingService.unlikePage(page.getId(), page.getEmotion().getType());
             rankingService.unlikeBook(page.getBook().getId(), page.getBook().getCategory());
+
+            for (String tag: page.getHashtagsTag()){
+                rankingService.unlikePageTag(page.getId(), tag);
+            }
 
             likeRepository.delete(like);
             pageRepository.save(page);
@@ -467,7 +484,7 @@ public class PageService {
 
 
     @Transactional
-    public Set<ResponsePageDto> parseTopRankedPaged(Set<String> pageIds) {
+    public Set<ResponsePageDto> parseTopRankedPages(Set<String> pageIds) {
         Set<ResponsePageDto> pageDetails = new LinkedHashSet<>();
         for (String pageId : pageIds) {
             Page page = getPageById(Long.parseLong(pageId));
