@@ -174,7 +174,10 @@ public class PageService {
 
         Page page = Page.createPage(user, book, createPageDto.getTitle(), createPageDto.getContent());
 
-        setHashtagsToPage(page, createPageDto.getHashtags());
+        if(createPageDto.getHashtags() != null){
+            setHashtagsToPage(page, createPageDto.getHashtags());
+        }
+
         setPageEmotion(page, createPageDto.getEmotionType(), createPageDto.getEmotionIntensity());
 
         pageRepository.save(page);

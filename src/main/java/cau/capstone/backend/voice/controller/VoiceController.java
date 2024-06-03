@@ -37,9 +37,9 @@ public class VoiceController {
     private final PageService pageService;
     private final VoiceService voiceService;
 
-    @PostMapping("user/{userId}/clone")
-    public ApiResponse<String> cloneVoice(@RequestPart FilePart file, @PathVariable Long userId) {
-        Mono<String> test = fastAPIService.cloneVoice(userId, file);
+    @PostMapping("user/clone")
+    public ApiResponse<String> cloneVoice(@RequestPart FilePart file) {
+        Mono<String> test = fastAPIService.cloneVoice(file);
         return ApiResponse.success(test.block(), ResponseCode.VOICE_CLONE_SUCCESS.getMessage());
     }
 

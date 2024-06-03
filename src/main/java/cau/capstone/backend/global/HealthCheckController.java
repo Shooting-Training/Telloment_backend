@@ -30,15 +30,4 @@ public class HealthCheckController {
 
         return emotion + " " + value;
     }
-
-    @PostMapping("/test/clone")
-    public String testClone(@RequestPart FilePart file){
-        Mono<String> test = fastAPIService.cloneVoice( (long)11111, file);
-
-        String result = test.block();
-
-        System.out.println(result);
-
-        return result;
-    }
 }

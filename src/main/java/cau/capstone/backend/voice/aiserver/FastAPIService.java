@@ -43,12 +43,13 @@ public class FastAPIService {
     }
 
 
-    public Mono<String> cloneVoice(Long userId, FilePart file) {
+    public Mono<String> cloneVoice(FilePart file) {
+        var email = jwtTokenProvider.getUserEmail();
         MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
         bodyBuilder.asyncPart("audio_file", file.content(), DataBuffer.class);
 
         return this.webClient.post()
-                .uri("/v1/voice/{user_id}", userId)
+                .uri("/v1/voice/{user_id}", email)
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
                 .retrieve()
