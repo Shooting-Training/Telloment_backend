@@ -1,14 +1,23 @@
 package cau.capstone.backend.page.dto.response;
 
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Getter
+@Builder
+@NoArgsConstructor
 public class CategoryDto {
     private String code;
     private String name;
-
     private int bookCount;
 
-    public CategoryDto(String code, String name) {
+    public CategoryDto(String code, String name, int bookCount) {
         this.code = code;
         this.name = name;
+        this.bookCount = bookCount;
     }
 
     // Getters and setters

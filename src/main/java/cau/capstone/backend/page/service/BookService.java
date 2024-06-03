@@ -314,8 +314,9 @@ public class BookService {
 
         for (Category category : Category.values()){
 
-            CategoryDto categoryDto = new CategoryDto(category.getCode(), category.getName());
-            categoryDto.setBookCount(bookRepository.countAllByCategory(category));
+            int bookCount = bookRepository.countAllByCategory(category);
+            System.out.println(category + " " + bookCount);
+            CategoryDto categoryDto = new CategoryDto(category.getCode(), category.getName(), bookCount);
 
             dtoList.add(categoryDto);
         }
