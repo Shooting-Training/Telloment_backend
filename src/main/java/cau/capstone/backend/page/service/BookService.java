@@ -52,6 +52,16 @@ public class BookService {
 
 
 
+    @Transactional(readOnly = true)
+    public ResponseBookDto getBook(Long bookId) {
+        Book book = getBookById(bookId);
+        ResponseBookDto responseBookDto = ResponseBookDto.from(book);
+        responseBookDto.setTotalLikeCount(likeService.countTotalLikesForBook(bookId));
+        return responseBookDto;
+    }
+
+
+
     @Transactional
     public long createBook(CreateBookDto createBookDto, String accessToken) {
 

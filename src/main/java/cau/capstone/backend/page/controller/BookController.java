@@ -37,6 +37,12 @@ public class BookController {
     private final BookService bookService;
 
 
+    @Operation(summary = "북 조회")
+    @GetMapping("/{bookId}")
+    public ApiResponse<ResponseBookDto> getBook(@PathVariable Long bookId){
+        return ApiResponse.success(bookService.getBook(bookId), ResponseCode.BOOK_READ_SUCCESS.getMessage());
+    }
+
     @Operation(summary = "북 생성")
     @PostMapping("/create")
     public ApiResponse<Long> createBook(@RequestBody @Valid CreateBookDto createBookDto, @RequestHeader String accessToken){
