@@ -37,6 +37,7 @@ public class AuthService {
             throw new UserException(ResponseCode.USER_EMAIL_ALREADY_EXIST);
         }
         User user = createUserDto.toUser(passwordEncoder);
+
         return ResponseUserDto.of(userRepository.save(user));
 
     }

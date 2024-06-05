@@ -63,26 +63,34 @@ public class UserService {
 
     // 현재 SecurityContext 에 있는 유저 정보 가져와 유저 정보 반환
     public ResponseUserDto getMyInfo() {
-        return userRepository.findByEmail(SecurityUtil.getCurrentMemberEmail())
-                .map(ResponseUserDto::of)
-                .orElseThrow(() -> new RuntimeException("로그인 유저 정보가 없습니다."));
+        User user = userRepository.findByEmail(SecurityUtil.getCurrentMemberEmail())
+                .orElseThrow(() -> new UserException(ResponseCode.USER_NOT_FOUND));
+
+        ResponseUserDto responseUserDto = getUserDto(user);
+
+
+        return responseUserDto;
+
     }
 
     // 회원정보 조회
 
     @Transactional(readOnly = true)
     public ResponseUserDto getUserInfo(String email) {
-        return userRepository.findByEmail(email)
-                .map(ResponseUserDto::of)
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserException(ResponseCode.USER_NOT_FOUND));
+
+        ResponseUserDto responseUserDto = getUserDto(user);
+
+        return responseUserDto;
     }
 
-    @Transactional(readOnly = true)
-    public ResponseUserDto getUserInfo(Long userId) {
-        return userRepository.findById(userId)
-                .map(ResponseUserDto::of)
-                .orElseThrow(() -> new UserException(ResponseCode.USER_NOT_FOUND));
-    }
+//    @Transactional(readOnly = true)
+//    public ResponseUserDto getUserInfo(Long userId) {
+//        return userRepository.findById(userId)
+//                .map(ResponseUserDto::of)
+//                .orElseThrow(() -> new UserException(ResponseCode.USER_NOT_FOUND));
+//    }
 
 
   //   회원정보 수정
@@ -178,6 +186,17 @@ public class UserService {
     }
 
 
+    public ResponseUserDto getUserDto(User user){
+
+        ResponseUserDto responseUserDto = ResponseUserDto.of(user);
+        responseUserDto.setBookCount(user.getBooks().size());
+        responseUserDto.setTotalLikeCount(likeService.countTotalLikesForUser(user.getId()));
+        responseUserDto.setPageCount(user.getBooks().stream()
+                .mapToInt(book -> book.getPages().size())
+                .sum());
+
+        return responseUserDto;
+    }
 //
 //    //for test
 //    @Transactional

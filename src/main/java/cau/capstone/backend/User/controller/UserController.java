@@ -33,13 +33,13 @@ public class UserController {
 
     // 회원 기본정보 조회
     @GetMapping("/me")
-    public ResponseEntity<ResponseUserDto> getMyUserInfo() {
-        return ResponseEntity.ok(userService.getMyInfo());
+    public ApiResponse<ResponseUserDto> getMyUserInfo() {
+        return ApiResponse.success(userService.getMyInfo(),"User Info load success");
     }
 
     @GetMapping("/{email}")
-    public ResponseEntity<ResponseUserDto> getUserInfo(@PathVariable String email) {
-        return ResponseEntity.ok(userService.getUserInfo(email));
+    public ApiResponse<ResponseUserDto> getUserInfo(@PathVariable String email) {
+        return ApiResponse.success(userService.getUserInfo(email), "User Info load success");
     }
 
 

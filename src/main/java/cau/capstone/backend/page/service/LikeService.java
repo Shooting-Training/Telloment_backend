@@ -54,6 +54,17 @@ public class LikeService {
         return total;
     }
 
+    public int countTotalLikesForUser(Long userId) {
+        List<Book> books = bookRepository.findAllByUserId(userId);
+        int total = 0;
+
+        for (Book book : books) {
+            total += countTotalLikesForBook(book.getId());
+        }
+
+        return total;
+    }
+
     public void deleteBookLike(Book book) {
         likeRepository.deleteAllByLikeTypeAndTargetId(LikeType.BOOK, book.getId());
     }
