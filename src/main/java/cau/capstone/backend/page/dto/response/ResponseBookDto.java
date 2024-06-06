@@ -21,6 +21,7 @@ public class ResponseBookDto {
     private String categoryCode;
     private int totalLikeCount;
     private int totalViewCount;
+    private int totalPageCount;
 
 //    public static ResponseBookDto of(Long bookId, String bookName, String categoryCode) {
 //        return ResponseBookDto.builder()
@@ -36,6 +37,7 @@ public class ResponseBookDto {
                 .bookName(book.getBookName())
                 .categoryCode(book.getCategory().getCode())
                 .totalViewCount(book.getBookViewCount())
+                .totalPageCount(book.getPages().size())
                 .build();
     }
 
