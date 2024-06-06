@@ -21,6 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -38,7 +39,7 @@ public class VoiceController {
     private final VoiceService voiceService;
 
     @PostMapping("user/clone")
-    public ApiResponse<String> cloneVoice(@RequestPart FilePart file) {
+    public ApiResponse<String> cloneVoice(@RequestPart MultipartFile file) {
         Mono<String> test = fastAPIService.cloneVoice(file);
         return ApiResponse.success(test.block(), ResponseCode.VOICE_CLONE_SUCCESS.getMessage());
     }
