@@ -51,8 +51,8 @@ public class BookController {
 
     @Operation(summary = "유저의 이메일로 북 조회")
     @GetMapping("/{email}")
-    public ApiResponse<List<ResponseBookDto>> getUserBook(@PathVariable String userEmail){
-        return ApiResponse.success(bookService.getBookListByEmail(userEmail), ResponseCode.BOOK_READ_SUCCESS.getMessage());
+    public ApiResponse<List<ResponseBookDto>> getUserBook(@PathVariable String email){
+        return ApiResponse.success(bookService.getBookListByEmail(email), ResponseCode.BOOK_READ_SUCCESS.getMessage());
     }
 
 
