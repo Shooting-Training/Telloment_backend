@@ -21,6 +21,8 @@ import java.util.Set;
 public class ResponseBookDto {
 
     private Long bookId;
+    private Long userId;
+    private String userNickname;
     private String bookName;
     private String categoryCode;
     private int totalLikeCount;
@@ -41,6 +43,8 @@ public class ResponseBookDto {
     public static ResponseBookDto from(Book book) {
         return ResponseBookDto.builder()
                 .bookId(book.getId())
+                .userId(book.getUser().getId())
+                .userNickname(book.getUser().getNickname())
                 .bookName(book.getBookName())
                 .categoryCode(book.getCategory().getCode())
                 .totalViewCount(book.getBookViewCount())
