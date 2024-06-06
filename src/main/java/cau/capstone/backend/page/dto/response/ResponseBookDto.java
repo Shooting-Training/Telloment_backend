@@ -2,12 +2,14 @@ package cau.capstone.backend.page.dto.response;
 
 
 import cau.capstone.backend.page.model.Book;
+import cau.capstone.backend.page.model.Page;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import reactor.util.annotation.Nullable;
 
+import java.util.List;
 import java.util.Set;
 
 
@@ -24,6 +26,7 @@ public class ResponseBookDto {
     private int totalLikeCount;
     private int totalViewCount;
     private int totalPageCount;
+    private List<Long> pageIds;
     @Nullable
     private Set<String> hashtags;
 
@@ -42,7 +45,8 @@ public class ResponseBookDto {
                 .categoryCode(book.getCategory().getCode())
                 .totalViewCount(book.getBookViewCount())
                 .totalPageCount(book.getPages().size())
-                .hashtags(book.getHashtags())
+                .pageIds(book.getPageIds())
+                .hashtags(book.getHashtagsString())
                 .build();
     }
 

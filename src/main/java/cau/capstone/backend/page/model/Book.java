@@ -10,6 +10,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -51,12 +52,20 @@ public class Book extends BaseEntity {
     private int bookViewCount = 0;
 
 
-    public Set<String> getHashtags() {
+    public Set<String> getHashtagsString() {
         Set<String> hashtagSet = new HashSet<>();
         for (Hashtag hashtag : hashtags) {
             hashtagSet.add(hashtag.getTag());
         }
         return hashtagSet;
+    }
+
+    public List<Long> getPageIds(){
+        List<Long> pageIds = new ArrayList<>();
+        for(Page page : pages){
+            pageIds.add(page.getId());
+        }
+        return pageIds;
     }
 
 
