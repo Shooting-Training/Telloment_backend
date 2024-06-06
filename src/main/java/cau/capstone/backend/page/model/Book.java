@@ -51,6 +51,14 @@ public class Book extends BaseEntity {
     private int bookViewCount = 0;
 
 
+    public Set<String> getHashtags() {
+        Set<String> hashtagSet = new HashSet<>();
+        for (Hashtag hashtag : hashtags) {
+            hashtagSet.add(hashtag.getTag());
+        }
+        return hashtagSet;
+    }
+
 
     public static Book createBook(User user, String bookName, String categoryCode) {
         Book book = new Book();

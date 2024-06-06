@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import reactor.util.annotation.Nullable;
 
+import java.util.Set;
+
 
 //책이름, 페이지의 전체 하트의 합, 전체 페이지의 수, 유저 이름 제공
 @Getter
@@ -22,6 +24,8 @@ public class ResponseBookDto {
     private int totalLikeCount;
     private int totalViewCount;
     private int totalPageCount;
+    @Nullable
+    private Set<String> hashtags;
 
 //    public static ResponseBookDto of(Long bookId, String bookName, String categoryCode) {
 //        return ResponseBookDto.builder()
@@ -38,6 +42,7 @@ public class ResponseBookDto {
                 .categoryCode(book.getCategory().getCode())
                 .totalViewCount(book.getBookViewCount())
                 .totalPageCount(book.getPages().size())
+                .hashtags(book.getHashtags())
                 .build();
     }
 
