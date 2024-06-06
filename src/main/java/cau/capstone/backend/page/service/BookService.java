@@ -135,6 +135,28 @@ public class BookService {
         return responseBookDtoList;
     }
 
+    @Transactional
+    public List<ResponseBookDto> getBookListByEmail(String userEmail){
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new UserException(ResponseCode.USER_NOT_FOUND));
+        Long userId = user.getId();
+
+        List<Book> bookList = bookRepository.findAllByUserId(userId);
+
+        List<ResponseBookDto> responseBookDtoList = new ArrayList<>();
+
+        for (Book book : bookList) {
+            ResponseBookDto responseBookDto = ResponseBookDto.from(book);
+            responseBookDto.setTotalLikeCount(likeService.countTotalLikesForBook(book.getId()));
+
+            System.out.println(responseBookDto.getBookName() + " " + responseBookDto.getTotalLikeCount());
+            responseBookDtoList.add(responseBookDto);
+        }
+
+
+        return responseBookDtoList;
+    }
+
 
     @Transactional
     public ResponseBookDto likeBook(Long bookId, String accessToken){
