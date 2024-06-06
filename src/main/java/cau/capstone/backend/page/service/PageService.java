@@ -81,7 +81,7 @@ public class PageService {
         responsePageDto.setLikeCount(likeService.countLikesForPage(page.getId()));
 
 
-        return ResponsePageDto.from(page);
+        return responsePageDto;
     }
 
     @Transactional
