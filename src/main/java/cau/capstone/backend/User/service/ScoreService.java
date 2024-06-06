@@ -1,5 +1,6 @@
 package cau.capstone.backend.User.service;
 
+import cau.capstone.backend.User.dto.response.ResponseScoreDto;
 import cau.capstone.backend.User.model.User;
 import cau.capstone.backend.User.model.repository.UserRepository;
 import cau.capstone.backend.global.security.Entity.JwtTokenProvider;
@@ -229,7 +230,44 @@ public class ScoreService {
     }
 
 
-    public List<Map.Entry<String, Integer>> getSortedScoresByUserId(String accessToken) {
+//    public List<Map.Entry<String, Integer>> getSortedScoresByUserId(String accessToken) {
+//        User user = userRepository.findByEmail(jwtTokenProvider.getUserEmail(accessToken))
+//                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+//
+//        Long userId = user.getId();
+//
+//        List<Map<String, Object>> scores = scoreRepository.findScoresByUserId(userId);
+//
+//        if (scores.isEmpty()) {
+//            return Collections.emptyList();
+//        }
+//
+//        Map<String, Integer> scoreMap = new HashMap<>();
+//        Map<String, Object> score = scores.get(0);
+//
+//        scoreMap.put("TRIP", (Integer) score.get("tripScore"));
+//        scoreMap.put("ITNSCIENCE", (Integer) score.get("itnscienceScore"));
+//        scoreMap.put("MOVIEDRAMA", (Integer) score.get("moviedramaScore"));
+//        scoreMap.put("HUMOR", (Integer) score.get("humorScore"));
+//        scoreMap.put("MUSIC", (Integer) score.get("musicScore"));
+//        scoreMap.put("MARRIAGE", (Integer) score.get("marriageScore"));
+//        scoreMap.put("ROMANCE", (Integer) score.get("romanceScore"));
+//        scoreMap.put("COOKING", (Integer) score.get("cookingScore"));
+//        scoreMap.put("HEALTH", (Integer) score.get("healthScore"));
+//        scoreMap.put("STUDYING", (Integer) score.get("studyingScore"));
+//        scoreMap.put("ART", (Integer) score.get("artScore"));
+//        scoreMap.put("ANIMAL", (Integer) score.get("animalScore"));
+//        scoreMap.put("HUMANITY", (Integer) score.get("humanityScore"));
+//        scoreMap.put("LITERATURE", (Integer) score.get("literatureScore"));
+//        scoreMap.put("FINANCE", (Integer) score.get("financeScore"));
+//
+//        return scoreMap.entrySet().stream()
+//                .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+//                .collect(Collectors.toList());
+//    }
+
+
+    public List<ResponseScoreDto> getSortedScoresByUserId(String accessToken) {
         User user = userRepository.findByEmail(jwtTokenProvider.getUserEmail(accessToken))
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
@@ -262,6 +300,7 @@ public class ScoreService {
 
         return scoreMap.entrySet().stream()
                 .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+                .map(entry -> new ResponseScoreDto(entry.getKey(), entry.getValue()))
                 .collect(Collectors.toList());
     }
 }
