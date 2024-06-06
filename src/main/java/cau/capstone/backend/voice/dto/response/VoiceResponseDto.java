@@ -62,9 +62,9 @@ public class VoiceResponseDto {
         }
         return VoiceResponseDto.builder()
                 .id(entity.getId().getVoiceId())
-                .userEmail(entity.getUser().getEmail())
-                .userNickname(entity.getUser().getNickname())
-                .userId(entity.getUser().getId())
+                .userEmail(entity.getVoice().getUser().getEmail())
+                .userNickname(entity.getVoice().getUser().getNickname())
+                .userId(entity.getVoice().getUser().getId())
                 .status(status)
                 .build();
     }
