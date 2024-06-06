@@ -77,7 +77,11 @@ public class PageService {
         rankingService.incrementViewCountBook(page.getBook().getId(), page.getBook().getCategory());
         scoreService.plusViewScore(userId, page);
 
-        return ResponsePageDto.from(page);
+        ResponsePageDto responsePageDto = ResponsePageDto.from(page);
+        responsePageDto.setLikeCount(likeService.countLikesForPage(page.getId()));
+
+
+        return responsePageDto;
     }
 
     @Transactional
@@ -103,7 +107,10 @@ public class PageService {
         rankingService.incrementViewCountBook(page.getBook().getId(), page.getBook().getCategory());
         scoreService.plusViewScore(userId, page);
 
-        return ResponsePageDto.from(page);
+        ResponsePageDto responsePageDto = ResponsePageDto.from(page);
+        responsePageDto.setLikeCount(likeService.countLikesForPage(page.getId()));
+
+        return responsePageDto;
     }
 
     public org.springframework.data.domain.Page<ResponsePageDto> searchPagesWithKeywordAndPaging(String keyword, Pageable pageable) {
@@ -335,7 +342,10 @@ public class PageService {
             pageRepository.save(linkedPage);
         }
 
-        return ResponsePageDto.from(linkedPage);
+        ResponsePageDto responsePageDto = ResponsePageDto.from(linkedPage);
+        responsePageDto.setLikeCount(likeService.countLikesForPage(linkedPage.getId()));
+
+        return responsePageDto;
     }
 
 

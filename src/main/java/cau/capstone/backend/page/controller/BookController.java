@@ -49,6 +49,12 @@ public class BookController {
         return ApiResponse.success(bookService.createBook(createBookDto, accessToken), ResponseCode.BOOK_CREATE_SUCCESS.getMessage());
     }
 
+    @Operation(summary = "유저의 이메일로 북 조회")
+    @GetMapping("/user/{email}")
+    public ApiResponse<List<ResponseBookDto>> getUserBook(@PathVariable String email){
+        return ApiResponse.success(bookService.getBookListByEmail(email), ResponseCode.BOOK_READ_SUCCESS.getMessage());
+    }
+
 
     @Operation(summary = "유저가 생성한 북 리스트 반환")
     @GetMapping("/list")

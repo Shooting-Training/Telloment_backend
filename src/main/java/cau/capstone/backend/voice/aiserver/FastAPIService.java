@@ -11,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -43,19 +44,43 @@ public class FastAPIService {
     }
 
 
-    public Mono<String> cloneVoice(FilePart file) {
+//    public Mono<String> cloneVoice(FilePart file) {
+//        var email = jwtTokenProvider.getUserEmail();
+//        MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
+//        bodyBuilder.asyncPart("audio_file", file.content(), DataBuffer.class);
+//
+//        return this.webClient.post()
+//                .uri("/v1/voice/{user_id}", email)
+//                .contentType(MediaType.MULTIPART_FORM_DATA)
+//                .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
+//                .retrieve()
+//                .onStatus(status -> status.value() == 422, response -> Mono.error(new RuntimeException("Unprocessable Entity")))
+//                .bodyToMono(String.class)
+//                .doOnError(WebClientResponseException.class, ex -> System.err.println("Error response: " + ex.getResponseBodyAsString()));
+//    }
+
+    public Mono<String> cloneVoice(MultipartFile file) {
         var email = jwtTokenProvider.getUserEmail();
+        Long userId = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("해당 유저가 존재하지 않습니다."))
+                .getId();
         MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
-        bodyBuilder.asyncPart("audio_file", file.content(), DataBuffer.class);
+        bodyBuilder.part("audio_file", file.getResource());
 
         return this.webClient.post()
-                .uri("/v1/voice/{user_id}", email)
+                .uri("/v1/voice/{user_id}", userId)
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
                 .retrieve()
-                .onStatus(status -> status.value() == 422, response -> Mono.error(new RuntimeException("Unprocessable Entity")))
+                .onStatus(status -> status.value() == 422, response -> {
+                    // 로깅 또는 예외 처리
+                    return Mono.error(new RuntimeException("Unprocessable Entity"));
+                })
                 .bodyToMono(String.class)
-                .doOnError(WebClientResponseException.class, ex -> System.err.println("Error response: " + ex.getResponseBodyAsString()));
+                .doOnError(WebClientResponseException.class, ex -> {
+                    // 예외 로깅
+                    System.err.println("Error response: " + ex.getResponseBodyAsString());
+                });
     }
 
 
